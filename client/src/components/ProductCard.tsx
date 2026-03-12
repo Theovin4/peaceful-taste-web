@@ -52,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Price */}
         <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-primary">${product.price.toFixed(2)}</span>
+          <span className="text-2xl font-bold text-primary">₦{product.price.toLocaleString()}</span>
           <div className="flex items-center gap-1 text-accent">
             <Star className="w-4 h-4 fill-current" />
             <span className="text-xs font-medium">4.8</span>

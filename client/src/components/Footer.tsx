@@ -60,15 +60,15 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex gap-2 items-start">
                 <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>+1 (555) 123-4567</span>
+                <span>+234 902 262 1323</span>
               </li>
               <li className="flex gap-2 items-start">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>hello@peacefultaste.com</span>
+                <span>queenofpeace323@gmail.com</span>
               </li>
               <li className="flex gap-2 items-start">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>123 Flavor Street, Culinary City, CC 12345</span>
+                <span>Gasline, Magboro, Lagos-Ibadan Expressway, Lagos State</span>
               </li>
             </ul>
           </div>

@@ -104,7 +104,7 @@ export default function Services() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://wa.me/1234567890"
+                href="https://wa.me/2349022621323"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white hover:bg-white/90 text-primary font-semibold px-6 py-3 rounded-lg" style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
@@ -112,7 +112,7 @@ export default function Services() {
                 Chat on WhatsApp
               </a>
               <a
-                href="tel:+1234567890"
+                href="tel:+2349022621323"
                 className="bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-lg border border-white/50" style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
               >
                 Call Us

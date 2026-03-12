@@ -56,8 +56,8 @@ export default function Contact() {
               <p className="text-muted-foreground mb-4">
                 Call us during business hours for immediate assistance.
               </p>
-              <a href="tel:+1234567890" className="text-primary font-semibold hover:opacity-80">
-                +1 (555) 123-4567
+              <a href="tel:+2349022621323" className="text-primary font-semibold">
+                +234 902 262 1323
               </a>
             </div>
 
@@ -67,8 +67,8 @@ export default function Contact() {
               <p className="text-muted-foreground mb-4">
                 Send us an email and we'll respond within 24 hours.
               </p>
-              <a href="mailto:hello@peacefultaste.com" className="text-primary font-semibold hover:opacity-80">
-                hello@peacefultaste.com
+              <a href="mailto:queenofpeace323@gmail.com" className="text-primary font-semibold">
+                queenofpeace323@gmail.com
               </a>
             </div>
 
@@ -76,9 +76,9 @@ export default function Contact() {
               <MapPin className="w-8 h-8 text-primary mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Location</h3>
               <p className="text-muted-foreground">
-                123 Flavor Street<br />
-                Culinary City, CC 12345<br />
-                United States
+                Gasline, Magboro<br />
+                Lagos-Ibadan Expressway<br />
+                Lagos State, Nigeria
               </p>
             </div>
           </div>

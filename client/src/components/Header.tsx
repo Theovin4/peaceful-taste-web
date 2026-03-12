@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 
-const LOGO_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_9f64df1c.png';
+const LOGO_URL = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_bold-L44YHUAhEm48aZYksNhMVf.webp';
 
 export default function Header() {
   const [, setLocation] = useLocation();

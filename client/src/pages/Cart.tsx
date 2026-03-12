@@ -132,22 +132,22 @@ export default function Cart() {
                   <div className="space-y-4 mb-6 pb-6 border-b border-border">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="text-foreground font-medium">${total.toFixed(2)}</span>
+                      <span className="text-foreground font-medium">₦{total.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-foreground font-medium">$5.00</span>
+                      <span className="text-foreground font-medium">₦500</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax</span>
-                      <span className="text-foreground font-medium">${(total * 0.1).toFixed(2)}</span>
+                      <span className="text-foreground font-medium">₦{Math.round(total * 0.1).toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between mb-6">
                     <span className="font-semibold text-foreground">Total</span>
                     <span className="text-2xl font-bold text-primary">
-                      ${(total + 5 + total * 0.1).toFixed(2)}
+                      ₦{Math.round(total + 500 + total * 0.1).toLocaleString()}
                     </span>
                   </div>
 
