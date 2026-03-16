@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import PaymentCheckout from "./pages/PaymentCheckout";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -53,6 +54,7 @@ function App() {
             <Header />
             <Router />
             <Footer />
+            <WhatsAppButton />
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>
