@@ -1,7 +1,17 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { trpc } from '@/lib/trpc';
+
+const CONTACT_INFO = {
+  phone: '+234 902 262 1323',
+  whatsapp: '2349022621323',
+  email: 'queenofpeace323@gmail.com',
+  address: 'Gasline, Magboro, Lagos-Ibadan Expressway, Lagos State, Nigeria',
+};
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -10,27 +20,56 @@ export default function Contact() {
     phone: '',
     subject: '',
     message: '',
+    inquiryType: 'general' as const,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const submitInquiryMutation = trpc.inquiries.submitInquiry.useMutation();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!formData.name || !formData.email || !formData.message) {
       toast.error('Please fill in all required fields');
       return;
     }
-    toast.success('Message sent! We\'ll get back to you soon.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-    });
+
+    setIsLoading(true);
+
+    try {
+      await submitInquiryMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject || 'General Inquiry',
+        message: formData.message,
+        inquiryType: formData.inquiryType,
+      });
+
+      toast.success('Message sent! We\'ll get back to you soon.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+        inquiryType: 'general',
+      });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to send message';
+      toast.error(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWhatsApp = () => {
+    window.open(`https://wa.me/${CONTACT_INFO.whatsapp}?text=Hi%20Peaceful%20Taste`, '_blank');
   };
 
   return (
@@ -40,7 +79,7 @@ export default function Contact() {
         <div className="container">
           <h1 className="text-display text-foreground mb-4">Get in Touch</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            We'd love to hear from you. Reach out with any questions or feedback.
+            We'd love to hear from you. Reach out with any questions, feedback, or catering inquiries.
           </p>
         </div>
       </section>
@@ -50,185 +89,218 @@ export default function Contact() {
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
             {/* Contact Info Cards */}
-            <div className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
+            <div className="bg-white rounded-lg p-6 border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
               <Phone className="w-8 h-8 text-primary mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Phone</h3>
-              <p className="text-muted-foreground mb-4">
-                Call us during business hours for immediate assistance.
-              </p>
-              <a href="tel:+2349022621323" className="text-primary font-semibold">
-                +234 902 262 1323
+              <p className="text-muted-foreground mb-4">{CONTACT_INFO.phone}</p>
+              <a
+                href={`tel:${CONTACT_INFO.phone}`}
+                className="inline-block text-primary hover:text-primary/80 font-semibold"
+              >
+                Call Now →
               </a>
             </div>
 
-            <div className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
+            <div className="bg-white rounded-lg p-6 border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
+              <MessageCircle className="w-8 h-8 text-green-600 mb-4" />
+              <h3 className="font-semibold text-foreground mb-2">WhatsApp</h3>
+              <p className="text-muted-foreground mb-4">Chat with us instantly</p>
+              <button
+                onClick={handleWhatsApp}
+                className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                💬 WhatsApp Chat
+              </button>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
               <Mail className="w-8 h-8 text-primary mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Email</h3>
-              <p className="text-muted-foreground mb-4">
-                Send us an email and we'll respond within 24 hours.
-              </p>
-              <a href="mailto:queenofpeace323@gmail.com" className="text-primary font-semibold">
-                queenofpeace323@gmail.com
+              <p className="text-muted-foreground mb-4">{CONTACT_INFO.email}</p>
+              <a
+                href={`mailto:${CONTACT_INFO.email}`}
+                className="inline-block text-primary hover:text-primary/80 font-semibold"
+              >
+                Email Us →
               </a>
-            </div>
-
-            <div className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-              <MapPin className="w-8 h-8 text-primary mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Location</h3>
-              <p className="text-muted-foreground">
-                Gasline, Magboro<br />
-                Lagos-Ibadan Expressway<br />
-                Lagos State, Nigeria
-              </p>
             </div>
           </div>
 
-          {/* Hours */}
-          <div className="bg-secondary p-8 rounded-lg mb-16 border border-border">
-            <div className="flex items-start gap-4">
-              <Clock className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+          {/* Address */}
+          <div className="bg-secondary rounded-lg p-6 mb-16 border border-border">
+            <div className="flex gap-4">
+              <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-foreground mb-4">Business Hours</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="font-medium text-foreground">Monday - Friday</p>
-                    <p className="text-muted-foreground">8:00 AM - 8:00 PM</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">Saturday</p>
-                    <p className="text-muted-foreground">9:00 AM - 9:00 PM</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">Sunday</p>
-                    <p className="text-muted-foreground">10:00 AM - 6:00 PM</p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">Holidays</p>
-                    <p className="text-muted-foreground">Call for availability</p>
+                <h3 className="font-semibold text-foreground mb-2">Location</h3>
+                <p className="text-muted-foreground">{CONTACT_INFO.address}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+              <h2 className="text-3xl font-bold text-foreground mb-6">Send us a Message</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="text-foreground font-semibold">
+                    Full Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Your name"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="text-foreground font-semibold">
+                    Email Address *
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="your@email.com"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone" className="text-foreground font-semibold">
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+234 901 234 5678"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="inquiryType" className="text-foreground font-semibold">
+                    Inquiry Type
+                  </Label>
+                  <select
+                    id="inquiryType"
+                    name="inquiryType"
+                    value={formData.inquiryType}
+                    onChange={handleInputChange}
+                    className="mt-2 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  >
+                    <option value="general">General Inquiry</option>
+                    <option value="catering">Catering Request</option>
+                    <option value="bulk_order">Bulk Order</option>
+                    <option value="complaint">Complaint</option>
+                    <option value="feedback">Feedback</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="subject" className="text-foreground font-semibold">
+                    Subject
+                  </Label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    placeholder="What is this about?"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="message" className="text-foreground font-semibold">
+                    Message *
+                  </Label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Tell us more..."
+                    required
+                    rows={5}
+                    className="mt-2 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </form>
+            </div>
+
+            {/* Quick Contact */}
+            <div>
+              <h2 className="text-3xl font-bold text-foreground mb-6">Quick Contact</h2>
+              
+              <div className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <h3 className="font-bold text-green-900 mb-2">💬 Fastest Response</h3>
+                  <p className="text-sm text-green-800 mb-4">
+                    For urgent inquiries or quick responses, reach out via WhatsApp. We typically respond within minutes!
+                  </p>
+                  <button
+                    onClick={handleWhatsApp}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Open WhatsApp
+                  </button>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <h3 className="font-bold text-blue-900 mb-2">📧 Email</h3>
+                  <p className="text-sm text-blue-800 mb-4">
+                    For detailed inquiries or documentation, email us at:
+                  </p>
+                  <a
+                    href={`mailto:${CONTACT_INFO.email}`}
+                    className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    {CONTACT_INFO.email}
+                  </a>
+                </div>
+
+                <div className="bg-secondary rounded-lg p-6 border border-border">
+                  <h3 className="font-bold text-foreground mb-3">Business Hours</h3>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p><strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM</p>
+                    <p><strong>Saturday:</strong> 10:00 AM - 4:00 PM</p>
+                    <p><strong>Sunday:</strong> Closed</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Quick Contact */}
-          <div className="bg-primary text-white p-8 rounded-lg mb-16 text-center">
-            <h2 className="text-heading mb-4">Quick Contact Options</h2>
-            <p className="mb-6 opacity-90">
-              For urgent matters or special requests, reach out via WhatsApp or call us directly.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://wa.me/1234567890"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white hover:bg-white/90 text-primary font-semibold px-6 py-3 rounded-lg transition-all"
-              >
-                Chat on WhatsApp
-              </a>
-              <a
-                href="tel:+1234567890"
-                className="bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-lg transition-all border border-white/50"
-              >
-                Call Now
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Form */}
-      <section className="py-16 md:py-24 bg-secondary">
-        <div className="container max-w-2xl">
-          <div className="text-center mb-12">
-            <h2 className="text-heading mb-4 text-foreground">Send us a Message</h2>
-            <p className="text-lg text-muted-foreground">
-              Fill out the form below and we'll get back to you as soon as possible.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                  placeholder="Your name"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Subject
-              </label>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                placeholder="What is this about?"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Message *
-              </label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                placeholder="Your message here..."
-                rows={5}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
-            >
-              Send Message
-            </Button>
-          </form>
         </div>
       </section>
     </div>

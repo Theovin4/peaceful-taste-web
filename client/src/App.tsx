@@ -13,9 +13,11 @@ import Services from "./pages/Services";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
-
+import PaymentCheckout from "./pages/PaymentCheckout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -24,6 +26,8 @@ function Router() {
       <Route path={"/about"} component={About} />
       <Route path={"/contact"} component={Contact} />
       <Route path={"/cart"} component={Cart} />
+      <Route path={"/checkout"} component={PaymentCheckout} />
+      <Route path={"/payment-success"} component={PaymentSuccess} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -13,8 +13,7 @@ export default function Cart() {
       toast.error('Your cart is empty');
       return;
     }
-    toast.success('Proceeding to checkout! This is a demo.');
-    // In a real app, this would redirect to a payment processor
+    setLocation('/checkout');
   };
 
   return (
@@ -155,7 +154,7 @@ export default function Cart() {
                     onClick={handleCheckout}
                     className="w-full bg-primary hover:bg-primary/90 text-white font-semibold mb-3"
                   >
-                    Proceed to Checkout
+                    Proceed to Payment <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
 
                   <Button

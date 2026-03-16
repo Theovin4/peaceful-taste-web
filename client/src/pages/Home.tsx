@@ -3,10 +3,15 @@ import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { getBestSellers } from '@/lib/products';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait_hero_e6744559.jpg';
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const [, setLocation] = useLocation();
   const bestSellers = getBestSellers();
 
