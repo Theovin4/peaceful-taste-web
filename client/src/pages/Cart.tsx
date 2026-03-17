@@ -8,6 +8,13 @@ export default function Cart() {
   const [, setLocation] = useLocation();
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
 
+  // Calculate total quantity
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Calculate bulk discount (10% off for 6+ items)
+  const bulkDiscount = totalQuantity >= 6 ? Math.round(total * 0.1) : 0;
+  const discountedTotal = total - bulkDiscount;
+
   const handleCheckout = () => {
     if (items.length === 0) {
       toast.error('Your cart is empty');
@@ -130,23 +137,34 @@ export default function Cart() {
 
                   <div className="space-y-4 mb-6 pb-6 border-b border-border">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-muted-foreground">Subtotal ({totalQuantity} items)</span>
                       <span className="text-foreground font-medium">₦{total.toLocaleString()}</span>
                     </div>
+                    {bulkDiscount > 0 && (
+                      <div className="flex justify-between text-sm bg-green-50 p-2 rounded">
+                        <span className="text-green-700 font-semibold">Bulk Discount (10%)</span>
+                        <span className="text-green-700 font-semibold">-₦{bulkDiscount.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {bulkDiscount === 0 && totalQuantity > 0 && (
+                      <div className="flex justify-between text-xs bg-blue-50 p-2 rounded">
+                        <span className="text-blue-700">Add {6 - totalQuantity} more item(s) for 10% discount</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Shipping</span>
                       <span className="text-foreground font-medium">₦500</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax</span>
-                      <span className="text-foreground font-medium">₦{Math.round(total * 0.1).toLocaleString()}</span>
+                      <span className="text-foreground font-medium">₦{Math.round(discountedTotal * 0.1).toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between mb-6">
                     <span className="font-semibold text-foreground">Total</span>
                     <span className="text-2xl font-bold text-primary">
-                      ₦{Math.round(total + 500 + total * 0.1).toLocaleString()}
+                      ₦{Math.round(discountedTotal + 500 + discountedTotal * 0.1).toLocaleString()}
                     </span>
                   </div>
 
@@ -171,7 +189,7 @@ export default function Cart() {
                   {/* Trust Badges */}
                   <div className="mt-6 pt-6 border-t border-border">
                     <p className="text-xs text-muted-foreground text-center mb-3">
-                      We accept all major payment methods
+                      Manual Bank Transfer Payment
                     </p>
                     <div className="flex justify-center gap-2">
                       <span className="text-xs bg-secondary px-2 py-1 rounded">Secure</span>

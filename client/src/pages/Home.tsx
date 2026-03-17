@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { getBestSellers } from '@/lib/products';
 import { useAuth } from '@/_core/hooks/useAuth';
+import LimitedTimeOffers from '@/components/LimitedTimeOffers';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
-const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait_hero_e6744559.jpg';
+const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
 
 export default function Home() {
   // The userAuth hooks provides authentication state
@@ -63,6 +65,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Limited Time Offers */}
+      <LimitedTimeOffers />
 
       {/* Trust Signals */}
       <section className="py-12 bg-white border-y border-border">
@@ -141,18 +146,21 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                name: 'Sarah M.',
-                text: 'The parfaits are absolutely delicious! Fresh, beautifully presented, and delivered right on time. Highly recommend!',
+                name: 'Chioma Okafor',
+                location: 'Lagos',
+                text: 'The Berry Bliss Parfait is absolutely delicious! Fresh ingredients and perfect portions. I order every week now!',
                 rating: 5,
               },
               {
-                name: 'James K.',
-                text: 'Best pastries I\'ve ever had. The croissants are flaky and buttery perfection. My go-to for breakfast now.',
+                name: 'Tunde Adeyemi',
+                location: 'Ibadan',
+                text: 'Best puff-puff I\'ve ever had! Fluffy, fresh, and delivered quickly. Highly recommended for parties.',
                 rating: 5,
               },
               {
-                name: 'Amara O.',
-                text: 'The chin-chin brings back memories! Authentic taste, perfect crunch, and exactly as I remember. Thank you!',
+                name: 'Zainab Hassan',
+                location: 'Abuja',
+                text: 'The croissants are so buttery and flaky. Perfect for my morning breakfast. Quality is top-notch!',
                 rating: 5,
               },
             ].map((testimonial, index) => (
@@ -170,6 +178,7 @@ export default function Home() {
                 </div>
                 <p className="text-foreground mb-4 leading-relaxed">{testimonial.text}</p>
                 <p className="font-semibold text-foreground">{testimonial.name}</p>
+                <p className="text-sm text-muted-foreground">{testimonial.location}</p>
               </div>
             ))}
           </div>
@@ -217,12 +226,15 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Newsletter Signup */}
+      <NewsletterSignup />
+
       {/* CTA Banner */}
       <section className="py-12 bg-primary text-white">
         <div className="container text-center">
           <h2 className="text-heading mb-4">Ready to Order?</h2>
           <p className="text-lg mb-6 opacity-90">
-            Browse our full collection and place your order today. Fresh treats delivered to your door.
+            Browse our full collection and place your order today. Fresh treats delivered to your door. Get 10% discount on orders of 6+ items!
           </p>
           <Button
             onClick={() => setLocation('/shop')}
