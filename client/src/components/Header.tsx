@@ -17,6 +17,8 @@ export default function Header() {
     { label: 'Services', href: '/services' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
+    { label: 'Referral', href: '/referral' },
+    { label: 'Social', href: '/social' },
   ];
 
   const handleNavClick = (href: string) => {

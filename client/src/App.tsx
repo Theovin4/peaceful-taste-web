@@ -16,6 +16,8 @@ import Cart from "./pages/Cart";
 import PaymentCheckout from "./pages/PaymentCheckout";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import WhatsAppButton from "./components/WhatsAppButton";
+import SocialShowcase from "./pages/SocialShowcase";
+import ReferralPage from "./pages/ReferralPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +31,8 @@ function Router() {
       <Route path={"/cart"} component={Cart} />
       <Route path={"/checkout"} component={PaymentCheckout} />
       <Route path={"/payment-success"} component={PaymentSuccess} />
+      <Route path={"/social"} component={SocialShowcase} />
+      <Route path={"/referral"} component={ReferralPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
