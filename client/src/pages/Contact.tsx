@@ -24,7 +24,7 @@ export default function Contact() {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const submitInquiryMutation = trpc.inquiries.submitInquiry.useMutation();
+  const submitInquiryMutation = trpc.inquiries.createInquiry.useMutation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
