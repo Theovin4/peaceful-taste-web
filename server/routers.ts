@@ -6,6 +6,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "./_core/notification";
 import { addOrderToExcel, addInquiryToExcel, initializeAllWorkbooks } from "./excel-storage";
+import { sendOrderConfirmationSMS } from "./termii-sms";
 
 // Initialize Excel workbooks on startup
 initializeAllWorkbooks().catch(err => console.error('[Excel] Initialization error:', err));
@@ -70,6 +71,13 @@ export const appRouter = router({
             title: `New Order: ${orderNumber}`,
             content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nTotal: ₦${totalAmount.toLocaleString()}\n\nItems:\n${input.items.map(i => `- ${i.name} x${i.quantity} @ ₦${i.price}`).join('\n')}`,
           });
+
+          // Send SMS confirmation to customer (if phone provided)
+          if (input.customerPhone) {
+            sendOrderConfirmationSMS(input.customerPhone, orderNumber, totalAmount).catch(err => 
+              console.error('[SMS] Failed to send order confirmation:', err)
+            );
+          }
 
           return {
             success: true,

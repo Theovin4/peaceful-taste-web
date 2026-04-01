@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, CheckCircle, Copy } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
+import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
 
 const BANK_ACCOUNT = {
   name: 'Vincent Theophilus',
@@ -22,6 +23,7 @@ export default function PaymentCheckout() {
     customerName: '',
     customerEmail: '',
     customerPhone: '',
+    deliveryLocation: 'lagos',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
@@ -30,11 +32,11 @@ export default function PaymentCheckout() {
   const createOrderMutation = trpc.orders.createOrder.useMutation();
 
   const subtotal = total;
-  const shippingCost = 500;
+  const shippingCost = getDeliveryCost(formData.deliveryLocation);
   const tax = Math.round(subtotal * 0.1);
   const totalAmount = subtotal + shippingCost + tax;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -214,7 +216,7 @@ export default function PaymentCheckout() {
                     <span className="font-medium">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">Delivery</span>
                     <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
@@ -273,30 +275,30 @@ export default function PaymentCheckout() {
               <div className="space-y-3 mb-6 pb-6 border-b border-border">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="text-foreground font-medium">₦{subtotal.toLocaleString()}</span>
+                  <span className="font-medium">₦{subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-foreground font-medium">₦{shippingCost.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax (10%)</span>
-                  <span className="text-foreground font-medium">₦{tax.toLocaleString()}</span>
+                  <span className="font-medium">₦{tax.toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-lg font-bold text-foreground">Total</span>
-                <span className="text-3xl font-bold text-primary">₦{totalAmount.toLocaleString()}</span>
+              <div className="mb-8">
+                <p className="text-sm font-semibold text-foreground mb-2">Total Amount</p>
+                <p className="text-3xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
               </div>
             </Card>
 
             <Card className="p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Delivery Information</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-6">Delivery & Contact Information</h2>
               
-              <form onSubmit={handleCreateOrder} className="space-y-4">
+              <form onSubmit={handleCreateOrder} className="space-y-6">
                 <div>
-                  <Label htmlFor="customerName" className="text-foreground">
+                  <Label htmlFor="customerName" className="text-foreground font-semibold">
                     Full Name *
                   </Label>
                   <Input
@@ -312,7 +314,7 @@ export default function PaymentCheckout() {
                 </div>
 
                 <div>
-                  <Label htmlFor="customerEmail" className="text-foreground">
+                  <Label htmlFor="customerEmail" className="text-foreground font-semibold">
                     Email Address *
                   </Label>
                   <Input
@@ -328,7 +330,7 @@ export default function PaymentCheckout() {
                 </div>
 
                 <div>
-                  <Label htmlFor="customerPhone" className="text-foreground">
+                  <Label htmlFor="customerPhone" className="text-foreground font-semibold">
                     Phone Number
                   </Label>
                   <Input
@@ -342,10 +344,32 @@ export default function PaymentCheckout() {
                   />
                 </div>
 
+                <div>
+                  <Label htmlFor="deliveryLocation" className="text-foreground font-semibold">
+                    Delivery Location *
+                  </Label>
+                  <select
+                    id="deliveryLocation"
+                    name="deliveryLocation"
+                    value={formData.deliveryLocation}
+                    onChange={handleInputChange}
+                    className="mt-2 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  >
+                    {DELIVERY_LOCATIONS.map(location => (
+                      <option key={location.id} value={location.id}>
+                        {location.name} - ₦{location.cost.toLocaleString()}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {DELIVERY_LOCATIONS.find(l => l.id === formData.deliveryLocation)?.description}
+                  </p>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 mt-6"
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
                 >
                   {isLoading ? (
                     <>
@@ -353,34 +377,34 @@ export default function PaymentCheckout() {
                       Creating Order...
                     </>
                   ) : (
-                    'Proceed to Payment'
+                    'Create Order & Proceed to Payment'
                   )}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation('/shop')}
-                  className="w-full"
-                >
-                  Continue Shopping
                 </Button>
               </form>
             </Card>
           </div>
 
           <div>
-            <Card className="p-6 bg-secondary">
-              <h3 className="font-bold text-foreground mb-4">Payment Method</h3>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground mb-1">Method</p>
-                  <p className="font-semibold text-foreground">Bank Transfer</p>
+            <Card className="p-6 bg-secondary sticky top-4">
+              <h3 className="font-bold text-foreground mb-4">Order Total</h3>
+              <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-medium">₦{subtotal.toLocaleString()}</span>
                 </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Currency</p>
-                  <p className="font-semibold text-foreground">Nigerian Naira (₦)</p>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Delivery</span>
+                  <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax (10%)</span>
+                  <span className="font-medium">₦{tax.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground text-xs mb-2">Total Amount</p>
+                <p className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
               </div>
             </Card>
           </div>
