@@ -17,8 +17,6 @@ import PaymentCheckout from "./pages/PaymentCheckout";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import WhatsAppButton from "./components/WhatsAppButton";
 import SocialShowcase from "./pages/SocialShowcase";
-import ReferralPage from "./pages/ReferralPage";
-import LoyaltyPage from "./pages/LoyaltyPage";
 import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
@@ -34,8 +32,6 @@ function Router() {
       <Route path={"/checkout"} component={PaymentCheckout} />
       <Route path={"/payment-success"} component={PaymentSuccess} />
       <Route path={"/social"} component={SocialShowcase} />
-      <Route path={"/referral"} component={ReferralPage} />
-       <Route path={"/loyalty"} component={LoyaltyPage} />
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

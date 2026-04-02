@@ -134,11 +134,11 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 md:py-24 bg-secondary">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-heading mb-4 text-foreground">What Customers Say</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
               Real reviews from real customers who love Peaceful Taste
             </p>
           </div>
@@ -166,19 +166,19 @@ export default function Home() {
             ].map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-lg border border-border"
-                style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)', animationDelay: `${index * 0.1}s` }}
+                className="bg-card p-6 rounded-lg border border-border hover:shadow-lg transition-shadow"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <span key={i} className="text-accent text-lg">
+                    <span key={i} className="text-primary text-lg">
                       ★
                     </span>
                   ))}
                 </div>
-                <p className="text-foreground mb-4 leading-relaxed">{testimonial.text}</p>
-                <p className="font-semibold text-foreground">{testimonial.name}</p>
-                <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                <p className="text-card-foreground mb-4 leading-relaxed font-medium">{testimonial.text}</p>
+                <p className="font-semibold text-card-foreground">{testimonial.name}</p>
+                <p className="text-sm text-card-foreground/60">{testimonial.location}</p>
               </div>
             ))}
           </div>

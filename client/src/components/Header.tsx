@@ -17,8 +17,6 @@ export default function Header() {
     { label: 'Services', href: '/services' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
-    { label: 'Loyalty', href: '/loyalty' },
-    { label: 'Referral', href: '/referral' },
     { label: 'Social', href: '/social' },
   ];
 

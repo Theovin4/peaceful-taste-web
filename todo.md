@@ -51,3 +51,11 @@
 - [x] Ensure WCAG AA contrast compliance (4.5:1 for normal text)
 - [x] Fix any low-contrast text issues
 - [x] Verify color consistency across all pages
+
+## UI/UX Fixes Required
+
+- [x] Balance customer testimonials colors and text on home page
+- [x] Fix invisible left panel names on shop page
+- [x] Remove Loyalty and Referral pages from navigation
+- [x] Replace receipt upload with progress circle on payment page
+- [x] Link progress circle completion to WhatsApp for proof of payment

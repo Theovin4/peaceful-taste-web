@@ -49,12 +49,11 @@ export default function Shop() {
                     <button
                       key={cat.value}
                       onClick={() => setSelectedCategory(cat.value)}
-                      className={`w-full text-left px-4 py-2 rounded-lg ${
+                      className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-all ${
                         selectedCategory === cat.value
                         ? 'bg-primary text-white font-semibold'
-                        : 'text-foreground hover:bg-secondary'
+                        : 'text-foreground hover:bg-primary/10 hover:text-primary'
                       }`}
-                      style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                     >
                       {cat.label}
                     </button>

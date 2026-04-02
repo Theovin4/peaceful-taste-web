@@ -29,6 +29,8 @@ export default function PaymentCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [paymentProgress, setPaymentProgress] = useState(0);
+  const [paymentComplete, setPaymentComplete] = useState(false);
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
 
@@ -93,6 +95,27 @@ export default function PaymentCheckout() {
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  const handlePaymentConfirm = () => {
+    // Simulate payment progress
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += Math.random() * 30;
+      if (currentProgress >= 100) {
+        currentProgress = 100;
+        setPaymentProgress(100);
+        setPaymentComplete(true);
+        clearInterval(interval);
+      } else {
+        setPaymentProgress(currentProgress);
+      }
+    }, 500);
+  };
+
+  const handleSendProofViaWhatsApp = () => {
+    const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ₦${totalAmount.toLocaleString()}. Please confirm receipt.`;
+    window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -118,7 +141,7 @@ export default function PaymentCheckout() {
   if (orderCreated) {
     return (
       <div className="min-h-screen bg-background">
-        <CheckoutProgress currentStep="payment" />
+        <CheckoutProgress currentStep={paymentComplete ? "confirmation" : "payment"} />
         <div className="py-12">
           <div className="container max-w-4xl">
           <h1 className="text-4xl font-bold text-foreground mb-8">Payment Instructions</h1>
@@ -203,12 +226,73 @@ export default function PaymentCheckout() {
                   >
                     💬 Contact via WhatsApp
                   </Button>
-                  <Button
-                    onClick={() => setLocation('/payment-success')}
-                    className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
-                  >
-                    I've Made Payment - Upload Receipt
-                  </Button>
+                </div>
+              </Card>
+
+              {/* Payment Progress Circle */}
+              <Card className="p-8 mb-6">
+                <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Payment Status</h2>
+                
+                <div className="flex flex-col items-center justify-center">
+                  {/* Circular Progress */}
+                  <div className="relative w-32 h-32 mb-6">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      {/* Background circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        className="text-muted"
+                      />
+                      {/* Progress circle */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        strokeDasharray={`${2 * Math.PI * 45}`}
+                        strokeDashoffset={`${2 * Math.PI * 45 * (1 - paymentProgress / 100)}`}
+                        className="text-primary transition-all duration-300"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    {/* Center text */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-primary">{Math.round(paymentProgress)}%</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {paymentComplete ? 'Complete' : 'Processing'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-center text-muted-foreground mb-6">
+                    {paymentComplete 
+                      ? 'Payment received! Send proof via WhatsApp for confirmation.'
+                      : 'Click the button below after making payment to update progress.'}
+                  </p>
+
+                  {!paymentComplete ? (
+                    <Button
+                      onClick={handlePaymentConfirm}
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
+                    >
+                      I've Made Payment
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleSendProofViaWhatsApp}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
+                    >
+                      📱 Send Proof via WhatsApp
+                    </Button>
+                  )}
                 </div>
               </Card>
             </div>
@@ -302,77 +386,64 @@ export default function PaymentCheckout() {
               </div>
             </Card>
 
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Delivery & Contact Information</h2>
+            <Card className="p-6 mb-6">
+              <h2 className="text-2xl font-bold text-foreground mb-6">Delivery Information</h2>
               
-              <form onSubmit={handleCreateOrder} className="space-y-6">
+              <form onSubmit={handleCreateOrder} className="space-y-4">
                 <div>
-                  <Label htmlFor="customerName" className="text-foreground font-semibold">
-                    Full Name *
-                  </Label>
+                  <Label htmlFor="customerName" className="text-foreground font-semibold mb-2 block">Full Name *</Label>
                   <Input
                     id="customerName"
                     name="customerName"
-                    type="text"
+                    placeholder="Your full name"
                     value={formData.customerName}
                     onChange={handleInputChange}
-                    placeholder="Your full name"
                     required
-                    className="mt-2"
+                    className="bg-secondary text-foreground border-border"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="customerEmail" className="text-foreground font-semibold">
-                    Email Address *
-                  </Label>
+                  <Label htmlFor="customerEmail" className="text-foreground font-semibold mb-2 block">Email Address *</Label>
                   <Input
                     id="customerEmail"
                     name="customerEmail"
                     type="email"
+                    placeholder="your@email.com"
                     value={formData.customerEmail}
                     onChange={handleInputChange}
-                    placeholder="your@email.com"
                     required
-                    className="mt-2"
+                    className="bg-secondary text-foreground border-border"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="customerPhone" className="text-foreground font-semibold">
-                    Phone Number
-                  </Label>
+                  <Label htmlFor="customerPhone" className="text-foreground font-semibold mb-2 block">Phone Number</Label>
                   <Input
                     id="customerPhone"
                     name="customerPhone"
-                    type="tel"
+                    placeholder="+234 901 234 5678"
                     value={formData.customerPhone}
                     onChange={handleInputChange}
-                    placeholder="+234 901 234 5678"
-                    className="mt-2"
+                    className="bg-secondary text-foreground border-border"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="deliveryLocation" className="text-foreground font-semibold">
-                    Delivery Location *
-                  </Label>
+                  <Label htmlFor="deliveryLocation" className="text-foreground font-semibold mb-2 block">Delivery Location *</Label>
                   <select
                     id="deliveryLocation"
                     name="deliveryLocation"
                     value={formData.deliveryLocation}
                     onChange={handleInputChange}
-                    className="mt-2 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                    className="w-full px-4 py-2 rounded-lg bg-secondary text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     {DELIVERY_LOCATIONS.map(location => (
-                      <option key={location.id} value={location.id}>
+                      <option key={location.id} value={location.id} className="bg-background text-foreground">
                         {location.name} - ₦{location.cost.toLocaleString()}
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {DELIVERY_LOCATIONS.find(l => l.id === formData.deliveryLocation)?.description}
-                  </p>
                 </div>
 
                 <Button
@@ -383,42 +454,42 @@ export default function PaymentCheckout() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Order...
+                      Processing...
                     </>
                   ) : (
-                    'Create Order & Proceed to Payment'
+                    'Proceed to Payment'
                   )}
                 </Button>
               </form>
             </Card>
-          </div>
-
-          <div>
-            <Card className="p-6 bg-secondary sticky top-4">
-              <h3 className="font-bold text-foreground mb-4">Order Total</h3>
-              <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">₦{subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery</span>
-                  <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tax (10%)</span>
-                  <span className="font-medium">₦{tax.toLocaleString()}</span>
-                </div>
               </div>
 
               <div>
-                <p className="text-muted-foreground text-xs mb-2">Total Amount</p>
-                <p className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                <Card className="p-6 bg-secondary sticky top-24">
+                  <h3 className="font-bold text-foreground mb-4">Order Summary</h3>
+                  <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium text-foreground">₦{subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Delivery</span>
+                      <span className="font-medium text-foreground">₦{shippingCost.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tax (10%)</span>
+                      <span className="font-medium text-foreground">₦{tax.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">Total Amount</p>
+                    <p className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
+            </div>
         </div>
-      </div>
       </div>
     </div>
   );
