@@ -44,3 +44,10 @@
 
 - [x] Implement breadcrumb navigation on product pages
 - [x] Implement checkout progress indicator (Cart → Delivery → Payment → Confirmation)
+
+## Color & Contrast Audit
+
+- [x] Audit all pages for font and background color balance
+- [x] Ensure WCAG AA contrast compliance (4.5:1 for normal text)
+- [x] Fix any low-contrast text issues
+- [x] Verify color consistency across all pages
