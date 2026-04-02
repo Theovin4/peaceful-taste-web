@@ -59,3 +59,7 @@
 - [x] Remove Loyalty and Referral pages from navigation
 - [x] Replace receipt upload with progress circle on payment page
 - [x] Link progress circle completion to WhatsApp for proof of payment
+
+## Current Refinements
+
+- [x] Update Shop left panel background to black

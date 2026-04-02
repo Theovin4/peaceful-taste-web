@@ -42,7 +42,7 @@ export default function Shop() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar - Categories */}
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-lg border border-border sticky top-24" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
+              <div className="bg-black p-6 rounded-lg border border-border sticky top-24" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}>
                 <h3 className="font-semibold text-foreground mb-4">Categories</h3>
                 <div className="space-y-2">
                   {categories.map((cat) => (
