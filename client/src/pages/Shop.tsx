@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { products } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
+import Breadcrumb from '@/components/Breadcrumb';
 
 type Category = 'all' | 'parfait' | 'pastries' | 'chin-chin' | 'puff-puff';
 
@@ -22,6 +23,9 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb items={[{ label: 'Shop', href: '/shop' }]} />
+
       {/* Header */}
       <section className="py-12 bg-secondary border-b border-border">
         <div className="container">

@@ -9,6 +9,7 @@ import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
+import CheckoutProgress from '@/components/CheckoutProgress';
 
 const BANK_ACCOUNT = {
   name: 'Vincent Theophilus',
@@ -94,17 +95,20 @@ export default function PaymentCheckout() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background py-12">
-        <div className="container max-w-2xl">
-          <div className="text-center py-12">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Your Cart is Empty</h1>
-            <p className="text-muted-foreground mb-6">Add some delicious treats before checking out!</p>
-            <Button
-              onClick={() => setLocation('/shop')}
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              Continue Shopping
-            </Button>
+      <div className="min-h-screen bg-background">
+        <CheckoutProgress currentStep="cart" />
+        <div className="py-12">
+          <div className="container max-w-2xl">
+            <div className="text-center py-12">
+              <h1 className="text-3xl font-bold text-foreground mb-4">Your Cart is Empty</h1>
+              <p className="text-muted-foreground mb-6">Add some delicious treats before checking out!</p>
+              <Button
+                onClick={() => setLocation('/shop')}
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                Continue Shopping
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -113,8 +117,10 @@ export default function PaymentCheckout() {
 
   if (orderCreated) {
     return (
-      <div className="min-h-screen bg-background py-12">
-        <div className="container max-w-4xl">
+      <div className="min-h-screen bg-background">
+        <CheckoutProgress currentStep="payment" />
+        <div className="py-12">
+          <div className="container max-w-4xl">
           <h1 className="text-4xl font-bold text-foreground mb-8">Payment Instructions</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -245,16 +251,19 @@ export default function PaymentCheckout() {
           </div>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="container max-w-4xl">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Checkout</h1>
+    <div className="min-h-screen bg-background">
+      <CheckoutProgress currentStep="delivery" />
+      <div className="py-12">
+        <div className="container max-w-4xl">
+            <h1 className="text-4xl font-bold text-foreground mb-8">Checkout</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
             <Card className="p-6 mb-6">
               <h2 className="text-2xl font-bold text-foreground mb-6">Order Summary</h2>
               
@@ -409,6 +418,7 @@ export default function PaymentCheckout() {
             </Card>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

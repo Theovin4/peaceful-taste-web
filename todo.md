@@ -39,3 +39,8 @@
 ## Current Tasks
 
 - [x] Optimize navigation button colors for better clarity
+
+## New Features In Progress
+
+- [x] Implement breadcrumb navigation on product pages
+- [x] Implement checkout progress indicator (Cart → Delivery → Payment → Confirmation)
