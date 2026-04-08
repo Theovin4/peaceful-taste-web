@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { getBestSellers } from '@/lib/products';
+import { products } from '@/lib/products';
 import { useAuth } from '@/_core/hooks/useAuth';
 import LimitedTimeOffers from '@/components/LimitedTimeOffers';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -15,7 +15,7 @@ export default function Home() {
   let { user, loading, error, isAuthenticated, logout } = useAuth();
 
   const [, setLocation] = useLocation();
-  const bestSellers = getBestSellers();
+  const bestSellers = products.filter(p => p.isBestSeller).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background">

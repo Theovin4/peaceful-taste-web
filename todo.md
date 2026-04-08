@@ -63,3 +63,12 @@
 ## Current Refinements
 
 - [x] Update Shop left panel background to black
+
+## Product Catalog Restructuring
+
+- [ ] Update logo to new Peaceful Taste branding
+- [ ] Generate optimized product images with sticker overlay
+- [ ] Update product database with new categories and items
+- [ ] Update shop page UI with new product structure
+- [ ] Add MOQ 3 and next-day delivery messaging
+- [ ] Test all product categories and pricing

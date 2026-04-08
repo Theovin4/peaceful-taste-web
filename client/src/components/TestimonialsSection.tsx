@@ -1,5 +1,31 @@
 import { Star } from 'lucide-react';
-import { testimonials } from '@/lib/products';
+
+const testimonials = [
+  {
+    id: 1,
+    name: 'Chioma Okafor',
+    location: 'Lagos',
+    product: 'Strawberry Parfait',
+    text: 'Absolutely delicious! The parfaits are so fresh and beautifully presented. I order every week!',
+    rating: 5,
+  },
+  {
+    id: 2,
+    name: 'Tunde Adeyemi',
+    location: 'Magboro',
+    product: 'Jollof Rice',
+    text: 'The Only Food items are incredible. Tastes just like homemade! Fast delivery too.',
+    rating: 5,
+  },
+  {
+    id: 3,
+    name: 'Zainab Hassan',
+    location: 'Ibafo',
+    product: 'Vanilla Cake',
+    text: 'Premium quality cakes! Perfect for my daughter\'s birthday party. Highly recommended!',
+    rating: 5,
+  },
+];
 
 export default function TestimonialsSection() {
   return (
@@ -15,7 +41,7 @@ export default function TestimonialsSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((testimonial) => (
+          {testimonials.map((testimonial: any) => (
             <div
               key={testimonial.id}
               className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300"

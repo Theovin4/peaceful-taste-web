@@ -3,17 +3,20 @@ import { products } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import Breadcrumb from '@/components/Breadcrumb';
 
-type Category = 'all' | 'parfait' | 'pastries' | 'chin-chin' | 'puff-puff';
+type Category = 'all' | 'parfait' | 'yoghurt' | 'pastries' | 'cakes' | 'zobo' | 'tiger-nut' | 'only-food';
 
 export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
 
   const categories: { value: Category; label: string }[] = [
     { value: 'all', label: 'All Products' },
-    { value: 'parfait', label: 'Parfaits' },
+    { value: 'parfait', label: 'Parfait 330ml' },
+    { value: 'yoghurt', label: 'Yoghurt 35cl & 30cl' },
     { value: 'pastries', label: 'Pastries' },
-    { value: 'chin-chin', label: 'Chin-chin' },
-    { value: 'puff-puff', label: 'Puff-puff' },
+    { value: 'cakes', label: 'Cakes' },
+    { value: 'zobo', label: 'Zobo 35cl & 30cl' },
+    { value: 'tiger-nut', label: 'Tiger Nut Drink' },
+    { value: 'only-food', label: 'Only Food' },
   ];
 
   const filteredProducts =
@@ -31,7 +34,7 @@ export default function Shop() {
         <div className="container">
           <h1 className="text-display text-foreground mb-4">Our Collection</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Browse our complete selection of handcrafted treats. Each product is made fresh with premium ingredients.
+            Browse our premium selection of Nigerian treats and delicacies. MOQ: 3 items | Next-day delivery available
           </p>
         </div>
       </section>
