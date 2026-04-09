@@ -29,18 +29,18 @@ export const appRouter = router({
     // Create order with manual payment
     createOrder: publicProcedure
       .input(z.object({
-        customerEmail: z.string().email(),
-        customerName: z.string().min(1),
-        customerPhone: z.string().optional(),
+        customerEmail: z.string().email().max(255),
+        customerName: z.string().min(1).max(100),
+        customerPhone: z.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
         items: z.array(z.object({
-          productId: z.number(),
-          name: z.string(),
-          quantity: z.number(),
-          price: z.number(),
-        })),
-        subtotal: z.number(),
-        tax: z.number(),
-        shippingCost: z.number().default(500),
+          productId: z.number().positive(),
+          name: z.string().min(1).max(200),
+          quantity: z.number().int().positive().max(1000),
+          price: z.number().positive().max(1000000),
+        })).min(1).max(100),
+        subtotal: z.number().positive(),
+        tax: z.number().nonnegative(),
+        shippingCost: z.number().nonnegative().default(500),
       }))
       .mutation(async ({ input }) => {
         try {
@@ -96,8 +96,8 @@ export const appRouter = router({
     // Upload payment receipt
     uploadReceipt: publicProcedure
       .input(z.object({
-        orderNumber: z.string(),
-        receiptUrl: z.string().url(),
+        orderNumber: z.string().regex(/^ORD-\d+-[a-z0-9]{5}$/).max(50),
+        receiptUrl: z.string().url().max(2048),
       }))
       .mutation(async ({ input }) => {
         try {
@@ -126,11 +126,11 @@ export const appRouter = router({
     // Create inquiry
     createInquiry: publicProcedure
       .input(z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-        phone: z.string().optional(),
-        subject: z.string().min(1),
-        message: z.string().min(1),
+        name: z.string().min(1).max(100),
+        email: z.string().email().max(255),
+        phone: z.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
+        subject: z.string().min(1).max(200),
+        message: z.string().min(1).max(5000),
         inquiryType: z.enum(['general', 'catering', 'bulk_order', 'complaint', 'feedback']).default('general'),
       }))
       .mutation(async ({ input }) => {

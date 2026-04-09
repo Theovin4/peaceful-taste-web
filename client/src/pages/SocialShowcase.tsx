@@ -82,14 +82,14 @@ export default function SocialShowcase() {
       </section>
 
       {/* Social Links */}
-      <section className="py-12 bg-white border-b border-border">
+      <section className="py-12 bg-black border-b border-border">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <a
-              href="https://instagram.com"
+              href="https://instagram.com/peacefultaste"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg p-8 text-white text-center hover:shadow-lg transition-all"
+              className="bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg p-8 text-white text-center hover:shadow-lg transition-all transform hover:scale-105"
             >
               <Instagram className="w-12 h-12 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-2">Instagram</h3>
@@ -100,15 +100,15 @@ export default function SocialShowcase() {
             </a>
 
             <a
-              href="https://tiktok.com"
+              href="https://facebook.com/peacefultaste"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gradient-to-br from-gray-900 to-black rounded-lg p-8 text-white text-center hover:shadow-lg transition-all"
+              className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg p-8 text-white text-center hover:shadow-lg transition-all transform hover:scale-105"
             >
-              <Music className="w-12 h-12 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-2">TikTok</h3>
-              <p className="text-sm mb-4">@peacefultaste</p>
-              <Button className="bg-white text-black hover:bg-white/90 font-semibold w-full">
+              <MessageCircle className="w-12 h-12 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Facebook</h3>
+              <p className="text-sm mb-4">Peaceful Taste</p>
+              <Button className="bg-white text-blue-600 hover:bg-white/90 font-semibold w-full">
                 Follow Us
               </Button>
             </a>
@@ -117,7 +117,7 @@ export default function SocialShowcase() {
               href="https://wa.me/2349022621323"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-8 text-white text-center hover:shadow-lg transition-all"
+              className="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-8 text-white text-center hover:shadow-lg transition-all transform hover:scale-105"
             >
               <MessageCircle className="w-12 h-12 mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-2">WhatsApp</h3>

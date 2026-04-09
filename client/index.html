@@ -10,8 +10,9 @@
     <meta name="description" content="Order fresh handcrafted parfaits, pastries, chin-chin, and puff-puff online in Lagos, Magboro, Ibafo & Mowe. Same-day delivery available. Premium Nigerian food treats with WhatsApp support." />
     <meta name="keywords" content="Nigerian food, parfaits Lagos, pastries delivery, chin-chin online, puff-puff, food delivery Lagos, desserts Nigeria, handcrafted treats" />
     <meta name="author" content="Peaceful Taste" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1, noodp" />
+    <meta name="googlebot" content="index, follow, noodp" />
+    <meta name="bingbot" content="index, follow" />
     <meta property="og:title" content="Peaceful Taste - Fresh Nigerian Treats Delivered" />
     <meta property="og:description" content="Discover handcrafted parfaits, pastries, chin-chin, and puff-puff. Order online with same-day delivery in Lagos and surrounding areas." />
     <meta property="og:type" content="website" />
@@ -38,6 +39,7 @@
     <!-- Alternate URLs for different pages -->
     <link rel="alternate" hreflang="en-NG" href="https://peacefultaste-ftugacum.manus.space" />
     <link rel="alternate" hreflang="en" href="https://peacefultaste-ftugacum.manus.space" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -45,6 +47,39 @@
     <link rel="icon" type="image/png" href="https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png" />
     <!-- Preload critical resources -->
     <link rel="preload" as="font" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" type="font/woff2" />
+    <!-- Additional SEO Meta Tags for Google Crawler -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-title" content="Peaceful Taste" />
+    <meta name="application-name" content="Peaceful Taste" />
+    <meta name="msapplication-TileColor" content="#2D5016" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <!-- Structured Data for Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Peaceful Taste",
+      "description": "Premium handcrafted Nigerian food and desserts",
+      "url": "https://peacefultaste-ftugacum.manus.space",
+      "telephone": "+2349022621323",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Lagos-Ibadan Expressway",
+        "addressLocality": "Lagos",
+        "addressRegion": "LA",
+        "postalCode": "100001",
+        "addressCountry": "NG"
+      },
+      "areaServed": ["Lagos", "Magboro", "Ibafo", "Mowe"],
+      "priceRange": "₦₦",
+      "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
+      "sameAs": [
+        "https://instagram.com/peacefultaste",
+        "https://facebook.com/peacefultaste",
+        "https://wa.me/2349022621323"
+      ]
+    }
+    </script>
   </head>
 
   <body>
@@ -56,7 +91,7 @@
       defer
       src="%VITE_ANALYTICS_ENDPOINT%/umami"
       data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
-    <!-- Google Analytics (optional) -->
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -64,6 +99,9 @@
       gtag('js', new Date());
       // gtag('config', 'G-XXXXXXXXXX'); // Replace with your GA ID
     </script>
+    <!-- Mobile Optimization -->
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
   </body>
 
 </html>

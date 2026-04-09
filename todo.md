@@ -80,3 +80,14 @@
 - [x] Optimize website performance and speed
 - [x] Set up GitHub Actions for auto-deployment
 - [x] Implement performance monitoring
+
+## Final Optimization & Testing
+
+- [ ] Enhance price visibility on shop page with bold, larger text
+- [ ] Fix text readability on Services, About, Contact pages (white backgrounds)
+- [ ] Optimize social section - keep only 3 socials (Instagram, Facebook, WhatsApp)
+- [ ] Darken social section background for better blend
+- [ ] Optimize for Google crawler and SEO
+- [ ] Security hardening and input validation
+- [ ] Run end-to-end order testing (add to cart → checkout → payment)
+- [ ] Bug fixes and final verification

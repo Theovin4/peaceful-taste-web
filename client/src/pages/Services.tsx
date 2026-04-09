@@ -83,14 +83,14 @@ export default function Services() {
               return (
                 <div
                   key={index}
-                  className="bg-white p-8 rounded-lg border border-border"
+                  className="bg-card p-8 rounded-lg border border-border"
                   style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)', transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)', animationDelay: `${index * 0.1}s` }}
                   onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(44, 44, 44, 0.12)'}
                   onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(44, 44, 44, 0.08)'}
                 >
                   <Icon className="w-12 h-12 text-primary mb-4" />
-                  <h3 className="text-xl font-semibold text-foreground mb-3">{service.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{service.description}</p>
+                  <h3 className="text-xl font-semibold text-card-foreground mb-3">{service.title}</h3>
+                  <p className="text-card-foreground/80 leading-relaxed">{service.description}</p>
                 </div>
               );
             })}
@@ -132,10 +132,10 @@ export default function Services() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
+          <form onSubmit={handleSubmit} className="bg-card p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Full Name *
                 </label>
                 <input
@@ -149,7 +149,7 @@ export default function Services() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Email *
                 </label>
                 <input
@@ -166,7 +166,7 @@ export default function Services() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Phone *
                 </label>
                 <input
@@ -180,7 +180,7 @@ export default function Services() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Event Type *
                 </label>
                 <select
@@ -202,7 +202,7 @@ export default function Services() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Number of Guests
                 </label>
                 <input
@@ -215,7 +215,7 @@ export default function Services() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-card-foreground mb-2">
                   Preferred Date
                 </label>
                 <input
