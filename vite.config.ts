@@ -168,20 +168,16 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     minify: 'terser',
-    terserOptions: {
-      compress: true,
-    } as any,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-popover'],
+          vendor: ['react', 'react-dom'],
         },
       },
     },
     sourcemap: false,
     reportCompressedSize: false,
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     host: true,
