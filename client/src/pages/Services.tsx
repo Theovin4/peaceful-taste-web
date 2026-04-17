@@ -3,9 +3,11 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Users, Gift, Utensils, Zap } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
 
 export default function Services() {
   const [, setLocation] = useLocation();
+  const submitInquiryMutation = trpc.inquiries.createInquiry.useMutation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,22 +46,44 @@ export default function Services() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.phone || !formData.eventType) {
       toast.error('Please fill in all required fields');
       return;
     }
-    toast.success('Quote request submitted! We\'ll contact you within 24 hours.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      eventType: '',
-      guestCount: '',
-      date: '',
-      message: '',
-    });
+
+    try {
+      await submitInquiryMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: `Quote request: ${formData.eventType}`,
+        message: [
+          `Event type: ${formData.eventType}`,
+          formData.guestCount ? `Guest count: ${formData.guestCount}` : null,
+          formData.date ? `Preferred date: ${formData.date}` : null,
+          formData.message ? `Notes: ${formData.message}` : null,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+        inquiryType: formData.eventType === 'bulk' ? 'bulk_order' : 'catering',
+      });
+
+      toast.success('Quote request submitted! We\'ll contact you within 24 hours.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        eventType: '',
+        guestCount: '',
+        date: '',
+        message: '',
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'We could not submit your quote request right now.';
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -244,9 +268,10 @@ export default function Services() {
 
             <Button
               type="submit"
+              disabled={submitInquiryMutation.isPending}
               className="w-full bg-primary hover:bg-primary/90 text-white font-semibold btn-primary"
             >
-              Submit Quote Request
+              {submitInquiryMutation.isPending ? 'Sending Request...' : 'Submit Quote Request'}
             </Button>
           </form>
         </div>

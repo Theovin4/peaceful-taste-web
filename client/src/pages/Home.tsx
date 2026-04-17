@@ -3,17 +3,12 @@ import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { products } from '@/lib/products';
-import { useAuth } from '@/_core/hooks/useAuth';
 import LimitedTimeOffers from '@/components/LimitedTimeOffers';
 import NewsletterSignup from '@/components/NewsletterSignup';
 
 const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
 
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
   const [, setLocation] = useLocation();
   const bestSellers = products.filter(p => p.isBestSeller).slice(0, 3);
 
@@ -172,7 +167,7 @@ export default function Home() {
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <span key={i} className="text-primary text-lg">
-                      ★
+                      ?
                     </span>
                   ))}
                 </div>
@@ -247,3 +242,4 @@ export default function Home() {
     </div>
   );
 }
+

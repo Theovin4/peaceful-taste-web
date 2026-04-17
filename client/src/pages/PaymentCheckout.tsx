@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle, CheckCircle, Copy } from 'lucide-react';
+import { Loader2, CheckCircle, Copy } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
 import CheckoutProgress from '@/components/CheckoutProgress';
+import { formatNaira } from '@/lib/format';
 
 const BANK_ACCOUNT = {
   name: 'Vincent Theophilus',
@@ -91,7 +92,7 @@ export default function PaymentCheckout() {
   };
 
   const handleWhatsApp = () => {
-    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ₦${totalAmount.toLocaleString()}. I'm ready to make payment.`;
+    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(totalAmount)}. I'm ready to make payment.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -112,7 +113,7 @@ export default function PaymentCheckout() {
   };
 
   const handleSendProofViaWhatsApp = () => {
-    const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ₦${totalAmount.toLocaleString()}. Please confirm receipt.`;
+    const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ${formatNaira(totalAmount)}. Please confirm receipt.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -209,7 +210,7 @@ export default function PaymentCheckout() {
 
                   <div className="pt-4 border-t border-border">
                     <p className="text-sm text-muted-foreground mb-1">Amount to Transfer</p>
-                    <p className="text-3xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
                   </div>
                 </div>
 
@@ -303,21 +304,21 @@ export default function PaymentCheckout() {
                 <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">₦{subtotal.toLocaleString()}</span>
+                    <span className="font-medium">{formatNaira(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery</span>
-                    <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
+                    <span className="font-medium">{formatNaira(shippingCost)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (10%)</span>
-                    <span className="font-medium">₦{tax.toLocaleString()}</span>
+                    <span className="font-medium">{formatNaira(tax)}</span>
                   </div>
                 </div>
 
                 <div className="mb-6">
                   <p className="text-muted-foreground text-xs mb-2">Total Amount</p>
-                  <p className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -359,7 +360,7 @@ export default function PaymentCheckout() {
                       <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-foreground">
-                      ₦{Math.round(item.product.price * item.quantity).toLocaleString()}
+                      {formatNaira(Math.round(item.product.price * item.quantity))}
                     </p>
                   </div>
                 ))}
@@ -368,21 +369,21 @@ export default function PaymentCheckout() {
               <div className="space-y-3 mb-6 pb-6 border-b border-border">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">₦{subtotal.toLocaleString()}</span>
+                  <span className="font-medium">{formatNaira(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Delivery Fee</span>
-                  <span className="font-medium">₦{shippingCost.toLocaleString()}</span>
+                  <span className="font-medium">{formatNaira(shippingCost)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax (10%)</span>
-                  <span className="font-medium">₦{tax.toLocaleString()}</span>
+                  <span className="font-medium">{formatNaira(tax)}</span>
                 </div>
               </div>
 
               <div className="mb-8">
                 <p className="text-sm font-semibold text-foreground mb-2">Total Amount</p>
-                <p className="text-3xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
               </div>
             </Card>
 
@@ -440,7 +441,7 @@ export default function PaymentCheckout() {
                   >
                     {DELIVERY_LOCATIONS.map(location => (
                       <option key={location.id} value={location.id} className="bg-background text-foreground">
-                        {location.name} - ₦{location.cost.toLocaleString()}
+                        {location.name} - {formatNaira(location.cost)}
                       </option>
                     ))}
                   </select>
@@ -470,21 +471,21 @@ export default function PaymentCheckout() {
                   <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium text-foreground">₦{subtotal.toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatNaira(subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery</span>
-                      <span className="font-medium text-foreground">₦{shippingCost.toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatNaira(shippingCost)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tax (10%)</span>
-                      <span className="font-medium text-foreground">₦{tax.toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatNaira(tax)}</span>
                     </div>
                   </div>
 
                   <div>
                     <p className="text-xs text-muted-foreground mb-2">Total Amount</p>
-                    <p className="text-2xl font-bold text-primary">₦{totalAmount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
                   </div>
                 </Card>
               </div>

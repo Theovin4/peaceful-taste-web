@@ -1,9 +1,11 @@
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://peacefultaste.vercel.app';
+
 export function OrganizationSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Peaceful Taste",
-    "url": "https://peacefultaste-ftugacum.manus.space",
+    "url": SITE_URL,
     "logo": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
     "description": "Fresh handcrafted Nigerian treats - parfaits, pastries, chin-chin, and puff-puff with same-day delivery in Lagos",
     "sameAs": [
@@ -41,7 +43,7 @@ export function LocalBusinessSchema() {
     "name": "Peaceful Taste",
     "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
     "description": "Premium Nigerian food delivery service offering handcrafted parfaits, pastries, chin-chin, and puff-puff",
-    "url": "https://peacefultaste-ftugacum.manus.space",
+    "url": SITE_URL,
     "telephone": "+234-902-262-1323",
     "email": "queenofpeace323@gmail.com",
     "address": {
@@ -52,7 +54,7 @@ export function LocalBusinessSchema() {
       "addressCountry": "NG"
     },
     "areaServed": ["Lagos", "Magboro", "Ibafo", "Mowe"],
-    "priceRange": "₦1500-₦6000",
+    "priceRange": "NGN 1500-6000",
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -82,7 +84,7 @@ export function ProductSchema({ name, price, image, description }: { name: strin
     },
     "offers": {
       "@type": "Offer",
-      "url": "https://peacefultaste-ftugacum.manus.space/shop",
+      "url": `${SITE_URL}/shop`,
       "priceCurrency": "NGN",
       "price": price.toString(),
       "availability": "https://schema.org/InStock"
@@ -132,7 +134,7 @@ export function FAQSchema() {
         "name": "What delivery areas do you serve?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We deliver to Lagos (₦5,000), Magboro (₦3,500), Ibafo (₦3,500), and Mowe (₦3,500). Same-day delivery available for orders before 2 PM."
+          "text": "We deliver to Lagos (NGN 5,000), Magboro (NGN 3,500), Ibafo (NGN 3,500), and Mowe (NGN 3,500). Same-day delivery is available for orders placed before 2 PM."
         }
       },
       {
@@ -148,7 +150,7 @@ export function FAQSchema() {
         "name": "What payment methods do you accept?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We accept bank transfers to Monie Point Bank (8139171125). Payment receipt upload required for order confirmation."
+          "text": "We accept bank transfers to Monie Point Bank (8139171125). Payment receipt upload is required for order confirmation."
         }
       },
       {
@@ -156,7 +158,7 @@ export function FAQSchema() {
         "name": "Do you offer bulk orders?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes! We offer 10% discount on orders of 6+ items. Contact us via WhatsApp for custom catering packages."
+          "text": "Yes. We offer 10% discount on orders of 6 or more items. Contact us via WhatsApp for custom catering packages."
         }
       }
     ]
