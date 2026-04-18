@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { getInquiriesFilePath, getOrdersFilePath, initializeAllWorkbooks } from "../excel-storage";
+import { hydrateWorkbookFromBlob } from "../blob-storage";
 import fs from "node:fs";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -37,8 +38,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   await initializeAllWorkbooks();
 
-  app.get("/api/admin/export/orders", (_req, res) => {
+  app.get("/api/admin/export/orders", async (_req, res) => {
     const ordersFile = getOrdersFilePath();
+    await hydrateWorkbookFromBlob(ordersFile, "orders");
 
     if (!fs.existsSync(ordersFile)) {
       res.status(404).json({ error: "Orders workbook not found" });
@@ -48,8 +50,9 @@ async function startServer() {
     res.download(ordersFile, "peaceful-taste-orders.xlsx");
   });
 
-  app.get("/api/admin/export/inquiries", (_req, res) => {
+  app.get("/api/admin/export/inquiries", async (_req, res) => {
     const inquiriesFile = getInquiriesFilePath();
+    await hydrateWorkbookFromBlob(inquiriesFile, "inquiries");
 
     if (!fs.existsSync(inquiriesFile)) {
       res.status(404).json({ error: "Inquiries workbook not found" });

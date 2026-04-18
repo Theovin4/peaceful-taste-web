@@ -18,6 +18,7 @@ import {
 } from '@shared/orderReceipt';
 import fs from 'node:fs';
 import path from 'node:path';
+import { uploadPrivateBlob } from './blob-storage';
 
 initializeAllWorkbooks().catch((err) => console.error('[Excel] Initialization error:', err));
 
@@ -49,6 +50,20 @@ function saveDataUrlToFile(orderNumber: string, receiptName: string, receiptData
 
   fs.writeFileSync(outputPath, Buffer.from(base64Content, 'base64'));
   return outputPath;
+}
+
+async function persistReceipt(orderNumber: string, receiptName: string, receiptDataUrl: string) {
+  const localPath = saveDataUrlToFile(orderNumber, receiptName, receiptDataUrl);
+  const fileBuffer = fs.readFileSync(localPath);
+  const mimeType = receiptDataUrl.match(/^data:(.+?);base64,/)?.[1] || 'application/octet-stream';
+  const blobPathname = `receipts/${orderNumber}/${Date.now()}-${receiptName.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
+  const blob = await uploadPrivateBlob(blobPathname, fileBuffer, mimeType);
+
+  return {
+    localPath,
+    storedLocation: blob?.pathname || localPath,
+    storedUrl: blob?.url || null,
+  };
 }
 
 export const appRouter = router({
@@ -164,18 +179,19 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         try {
-          const savedReceiptPath = saveDataUrlToFile(input.orderNumber, input.receiptName, input.receiptDataUrl);
-          const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, savedReceiptPath);
+          const persistedReceipt = await persistReceipt(input.orderNumber, input.receiptName, input.receiptDataUrl);
+          const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, persistedReceipt.storedLocation);
 
           await notifyOwner({
             title: `Payment Receipt: ${input.orderNumber}`,
-            content: `Order ${input.orderNumber} receipt uploaded.\nStored at: ${savedReceiptPath}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
+            content: `Order ${input.orderNumber} receipt uploaded.\nStored at: ${persistedReceipt.storedLocation}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
           });
 
           return {
             success: true,
             message: 'Receipt uploaded successfully',
-            savedReceiptPath,
+            savedReceiptPath: persistedReceipt.storedLocation,
+            savedReceiptUrl: persistedReceipt.storedUrl,
             workbookUpdated,
           };
         } catch (error) {

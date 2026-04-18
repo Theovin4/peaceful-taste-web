@@ -7,6 +7,7 @@ import ExcelJS from 'exceljs';
 const { Workbook } = ExcelJS;
 import * as fs from 'fs';
 import * as path from 'path';
+import { hydrateWorkbookFromBlob, syncWorkbookToBlob } from './blob-storage';
 
 const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.xlsx');
 const INQUIRIES_FILE = path.join(process.cwd(), 'data', 'inquiries.xlsx');
@@ -52,6 +53,8 @@ function ensureDataDir() {
  */
 async function initializeOrdersWorkbook() {
   ensureDataDir();
+
+  await hydrateWorkbookFromBlob(ORDERS_FILE, 'orders');
   
   if (fs.existsSync(ORDERS_FILE)) {
     return;
@@ -83,6 +86,7 @@ async function initializeOrdersWorkbook() {
   worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B4513' } };
 
   await workbook.xlsx.writeFile(ORDERS_FILE);
+  await syncWorkbookToBlob(ORDERS_FILE, 'orders');
   console.log('[Excel] Orders workbook initialized');
 }
 
@@ -91,6 +95,8 @@ async function initializeOrdersWorkbook() {
  */
 async function initializeInquiriesWorkbook() {
   ensureDataDir();
+
+  await hydrateWorkbookFromBlob(INQUIRIES_FILE, 'inquiries');
   
   if (fs.existsSync(INQUIRIES_FILE)) {
     return;
@@ -116,6 +122,7 @@ async function initializeInquiriesWorkbook() {
   worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B4513' } };
 
   await workbook.xlsx.writeFile(INQUIRIES_FILE);
+  await syncWorkbookToBlob(INQUIRIES_FILE, 'inquiries');
   console.log('[Excel] Inquiries workbook initialized');
 }
 
@@ -170,6 +177,7 @@ export async function addOrderToExcel(orderData: {
     });
 
     await workbook.xlsx.writeFile(ORDERS_FILE);
+    await syncWorkbookToBlob(ORDERS_FILE, 'orders');
     console.log(`[Excel] Order ${orderData.orderNumber} added to workbook`);
     return true;
   } catch (error) {
@@ -201,6 +209,7 @@ export async function updateOrderReceiptInExcel(orderNumber: string, receiptUrl:
     });
 
     await workbook.xlsx.writeFile(ORDERS_FILE);
+    await syncWorkbookToBlob(ORDERS_FILE, 'orders');
     return updated;
   } catch (error) {
     console.error('[Excel] Error updating order receipt:', error);
@@ -323,6 +332,7 @@ export async function addInquiryToExcel(inquiryData: {
     });
 
     await workbook.xlsx.writeFile(INQUIRIES_FILE);
+    await syncWorkbookToBlob(INQUIRIES_FILE, 'inquiries');
     console.log(`[Excel] Inquiry from ${inquiryData.name} added to workbook`);
     return true;
   } catch (error) {

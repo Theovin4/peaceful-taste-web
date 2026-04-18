@@ -5,6 +5,7 @@ import { registerOAuthRoutes } from "../server/_core/oauth";
 import { createContext } from "../server/_core/context";
 import { appRouter } from "../server/routers";
 import { getInquiriesFilePath, getOrdersFilePath, initializeAllWorkbooks } from "../server/excel-storage";
+import { hydrateWorkbookFromBlob } from "../server/blob-storage";
 import fs from "node:fs";
 
 const app = express();
@@ -28,8 +29,9 @@ app.get("/api/health", (_req, res) => {
   res.status(200).json({ ok: true });
 });
 
-app.get("/api/admin/export/orders", (_req, res) => {
+app.get("/api/admin/export/orders", async (_req, res) => {
   const ordersFile = getOrdersFilePath();
+  await hydrateWorkbookFromBlob(ordersFile, "orders");
 
   if (!fs.existsSync(ordersFile)) {
     res.status(404).json({ error: "Orders workbook not found" });
@@ -39,8 +41,9 @@ app.get("/api/admin/export/orders", (_req, res) => {
   res.download(ordersFile, "peaceful-taste-orders.xlsx");
 });
 
-app.get("/api/admin/export/inquiries", (_req, res) => {
+app.get("/api/admin/export/inquiries", async (_req, res) => {
   const inquiriesFile = getInquiriesFilePath();
+  await hydrateWorkbookFromBlob(inquiriesFile, "inquiries");
 
   if (!fs.existsSync(inquiriesFile)) {
     res.status(404).json({ error: "Inquiries workbook not found" });
