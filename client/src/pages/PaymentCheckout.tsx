@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, Copy, MessageCircle } from 'lucide-react';
+import { Loader2, CheckCircle, Copy, MessageCircle, ShieldCheck, ArrowRight } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -30,8 +30,6 @@ export default function PaymentCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [paymentProgress, setPaymentProgress] = useState(0);
-  const [paymentComplete, setPaymentComplete] = useState(false);
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
 
@@ -96,21 +94,6 @@ export default function PaymentCheckout() {
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const handlePaymentConfirm = () => {
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += Math.random() * 30;
-      if (currentProgress >= 100) {
-        currentProgress = 100;
-        setPaymentProgress(100);
-        setPaymentComplete(true);
-        clearInterval(interval);
-      } else {
-        setPaymentProgress(currentProgress);
-      }
-    }, 500);
-  };
-
   const handleSendProofViaWhatsApp = () => {
     const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ${formatNaira(totalAmount)}. Please confirm receipt.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
@@ -138,7 +121,7 @@ export default function PaymentCheckout() {
   if (orderCreated) {
     return (
       <div className="min-h-screen bg-background">
-        <CheckoutProgress currentStep={paymentComplete ? 'confirmation' : 'payment'} />
+        <CheckoutProgress currentStep="payment" />
         <div className="py-12">
           <div className="container max-w-6xl">
             <div className="mb-8">
@@ -204,55 +187,57 @@ export default function PaymentCheckout() {
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Contact via WhatsApp
                     </Button>
-                    <Button onClick={() => setLocation('/payment-success')} variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                    <Button
+                      onClick={() => setLocation('/payment-success')}
+                      variant="outline"
+                      className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
+                    >
                       Upload proof of payment instead
                     </Button>
                   </div>
                 </Card>
 
                 <Card className="glass-panel border-0 p-8">
-                  <h2 className="mb-8 text-center text-2xl font-bold text-foreground">Payment Status</h2>
+                  <div className="mb-8 flex items-center gap-3">
+                    <ShieldCheck className="h-6 w-6 text-accent" />
+                    <h2 className="text-2xl font-bold text-foreground">How to complete payment</h2>
+                  </div>
 
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="relative mb-6 h-32 w-32">
-                      <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="45"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="8"
-                          strokeDasharray={`${2 * Math.PI * 45}`}
-                          strokeDashoffset={`${2 * Math.PI * 45 * (1 - paymentProgress / 100)}`}
-                          className="text-primary transition-all duration-300"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <p className="text-3xl font-bold text-primary">{Math.round(paymentProgress)}%</p>
-                          <p className="mt-1 text-xs text-muted-foreground">{paymentComplete ? 'Complete' : 'Processing'}</p>
-                        </div>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        title: '1. Transfer the exact amount',
+                        body: `Send ${formatNaira(totalAmount)} to the account details above and use ${orderCreated.orderNumber} as your reference if your bank allows it.`,
+                      },
+                      {
+                        title: '2. Save your transfer receipt',
+                        body: 'A screenshot from your banking app or a clear photo of the transfer confirmation works perfectly.',
+                      },
+                      {
+                        title: '3. Send your proof for confirmation',
+                        body: 'Upload your receipt on the next page or send it directly through WhatsApp so we can confirm and start processing your order.',
+                      },
+                    ].map((step) => (
+                      <div key={step.title} className="rounded-3xl border border-border bg-background/60 p-5">
+                        <h3 className="mb-2 text-base font-semibold text-foreground">{step.title}</h3>
+                        <p className="text-sm leading-6 text-muted-foreground">{step.body}</p>
                       </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    <p className="mb-6 text-center text-muted-foreground">
-                      {paymentComplete
-                        ? 'Payment marked as complete. Send proof on WhatsApp or upload your receipt so we can confirm.'
-                        : 'After transferring the funds, update the progress here and then send your proof of payment.'}
-                    </p>
+                  <div className="mt-6 rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+                    We only mark payments as confirmed after we verify the transfer receipt. This keeps the checkout honest, secure, and easy to trust.
+                  </div>
 
-                    {!paymentComplete ? (
-                      <Button onClick={handlePaymentConfirm} className="btn-primary w-full text-white">
-                        I’ve Made Payment
-                      </Button>
-                    ) : (
-                      <Button onClick={handleSendProofViaWhatsApp} className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
-                        Send Proof via WhatsApp
-                      </Button>
-                    )}
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    <Button onClick={() => setLocation('/payment-success')} className="btn-primary text-white">
+                      Upload Receipt
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <Button onClick={handleSendProofViaWhatsApp} className="bg-emerald-500 text-white hover:bg-emerald-400">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Send via WhatsApp
+                    </Button>
                   </div>
                 </Card>
               </div>
