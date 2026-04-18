@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, Copy, MessageCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle, Copy, MessageCircle, ShieldCheck, ArrowRight, Mail, Download } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, type CartItem } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
 import CheckoutProgress from '@/components/CheckoutProgress';
 import { formatNaira } from '@/lib/format';
+import { copyTextToClipboard, downloadPdfReceipt, saveLatestReceipt, type OrderReceiptClientPackage } from '@/lib/orderReceipt';
 
 const BANK_ACCOUNT = {
   name: 'Vincent Theophilus',
@@ -30,6 +31,7 @@ export default function PaymentCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [receiptCopied, setReceiptCopied] = useState(false);
 
   const createOrderMutation = trpc.orders.createOrder.useMutation();
 
@@ -37,6 +39,17 @@ export default function PaymentCheckout() {
   const shippingCost = getDeliveryCost(formData.deliveryLocation);
   const tax = Math.round(subtotal * 0.1);
   const totalAmount = subtotal + shippingCost + tax;
+
+  const orderItems = useMemo<Array<{ name: string; quantity: number; price: number }>>(() => {
+    if (orderCreated?.receipt?.payload?.items) {
+      return orderCreated.receipt.payload.items;
+    }
+    return items.map((item: CartItem) => ({
+      name: item.product.name,
+      quantity: item.quantity,
+      price: item.product.price,
+    }));
+  }, [items, orderCreated]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,6 +74,7 @@ export default function PaymentCheckout() {
         customerEmail: formData.customerEmail,
         customerName: formData.customerName,
         customerPhone: formData.customerPhone,
+        deliveryLocation: DELIVERY_LOCATIONS.find((location) => location.id === formData.deliveryLocation)?.name || 'Lagos',
         items: items.map((item) => ({
           productId: parseInt(item.product.id.split('-')[1] || '0'),
           name: item.product.name,
@@ -74,32 +88,43 @@ export default function PaymentCheckout() {
 
       if (response.success) {
         setOrderCreated(response);
-        toast.success('Order created. Proceed with payment.');
+        saveLatestReceipt(response.receipt as OrderReceiptClientPackage);
+        downloadPdfReceipt(response.receipt.fileName, response.receipt.pdfBase64);
+        toast.success('Order created and customer receipt downloaded. Proceed with payment.');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create order';
       toast.error(errorMsg);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
+  const copyFieldValue = async (text: string, field: string) => {
+    await copyTextToClipboard(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 1800);
   };
 
+  const copyReceiptSummary = async () => {
+    if (!orderCreated?.receipt?.receiptText) return;
+    await copyTextToClipboard(orderCreated.receipt.receiptText);
+    setReceiptCopied(true);
+    toast.success('Receipt summary copied.');
+    setTimeout(() => setReceiptCopied(false), 1800);
+  };
+
   const handleWhatsApp = () => {
-    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(totalAmount)}. I am ready to make payment.`;
+    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(orderCreated?.totalAmount ?? totalAmount)}. I am ready to make payment.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleSendProofViaWhatsApp = () => {
-    const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ${formatNaira(totalAmount)}. Please confirm receipt.`;
+    const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ${formatNaira(orderCreated?.totalAmount ?? totalAmount)}. Please confirm receipt.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !orderCreated) {
     return (
       <div className="min-h-screen bg-background">
         <CheckoutProgress currentStep="cart" />
@@ -141,8 +166,41 @@ export default function PaymentCheckout() {
                       <p className="text-sm text-muted-foreground">
                         Order Number: <span className="font-mono font-bold text-accent">{orderCreated.orderNumber}</span>
                       </p>
+                      <p className="mt-2 text-sm text-muted-foreground">A PDF receipt has already been downloaded for the customer.</p>
                     </div>
                   </div>
+                </Card>
+
+                <Card className="glass-panel border-0 p-6">
+                  <div className="mb-6 flex items-center justify-between gap-4">
+                    <h2 className="text-2xl font-bold text-foreground">Customer Receipt Copy</h2>
+                    <Button onClick={() => downloadPdfReceipt(orderCreated.receipt.fileName, orderCreated.receipt.pdfBase64)} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Again
+                    </Button>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Button onClick={copyReceiptSummary} className="btn-primary text-white">
+                      <Copy className="mr-2 h-4 w-4" />
+                      {receiptCopied ? 'Receipt Copied' : 'Copy Receipt Summary'}
+                    </Button>
+                    <a href={orderCreated.receipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Send Copy to WhatsApp
+                      </Button>
+                    </a>
+                    <a href={orderCreated.receipt.businessEmailUrl}>
+                      <Button variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                        <Mail className="mr-2 h-4 w-4" />
+                        Send Copy to Email
+                      </Button>
+                    </a>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    These actions open prefilled WhatsApp and email drafts to Peaceful Taste using the order receipt details.
+                  </p>
                 </Card>
 
                 <Card className="glass-panel border-0 p-6">
@@ -163,7 +221,7 @@ export default function PaymentCheckout() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => copyToClipboard(field.value, field.key)}
+                            onClick={() => copyFieldValue(field.value, field.key)}
                             className="h-9 rounded-xl text-accent hover:bg-accent/10 hover:text-accent"
                           >
                             <Copy className={`h-4 w-4 ${copiedField === field.key ? 'text-emerald-400' : ''}`} />
@@ -174,7 +232,7 @@ export default function PaymentCheckout() {
 
                     <div className="border-t border-border pt-4">
                       <p className="mb-1 text-sm text-muted-foreground">Amount to Transfer</p>
-                      <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                      <p className="text-3xl font-bold text-primary">{formatNaira(orderCreated.totalAmount)}</p>
                     </div>
                   </div>
 
@@ -188,7 +246,7 @@ export default function PaymentCheckout() {
                       Contact via WhatsApp
                     </Button>
                     <Button
-                      onClick={() => setLocation('/payment-success')}
+                      onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)}
                       variant="outline"
                       className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
                     >
@@ -207,7 +265,7 @@ export default function PaymentCheckout() {
                     {[
                       {
                         title: '1. Transfer the exact amount',
-                        body: `Send ${formatNaira(totalAmount)} to the account details above and use ${orderCreated.orderNumber} as your reference if your bank allows it.`,
+                        body: `Send ${formatNaira(orderCreated.totalAmount)} to the account details above and use ${orderCreated.orderNumber} as your reference if your bank allows it.`,
                       },
                       {
                         title: '2. Save your transfer receipt',
@@ -230,7 +288,7 @@ export default function PaymentCheckout() {
                   </div>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <Button onClick={() => setLocation('/payment-success')} className="btn-primary text-white">
+                    <Button onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)} className="btn-primary text-white">
                       Upload Receipt
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -248,30 +306,30 @@ export default function PaymentCheckout() {
                   <div className="space-y-3 border-b border-border pb-6 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium text-foreground">{formatNaira(subtotal)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery</span>
-                      <span className="font-medium text-foreground">{formatNaira(shippingCost)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.shippingCost)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tax (10%)</span>
-                      <span className="font-medium text-foreground">{formatNaira(tax)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.tax)}</span>
                     </div>
                   </div>
 
                   <div className="my-6">
                     <p className="mb-2 text-xs text-muted-foreground">Total Amount</p>
-                    <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                    <p className="text-2xl font-bold text-primary">{formatNaira(orderCreated.totalAmount)}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Items ({items.length})</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Items ({orderItems.length})</p>
                     <div className="space-y-2">
-                      {items.map((item) => (
-                        <div key={item.product.id} className="flex items-start justify-between gap-3 text-sm">
-                          <span className="text-muted-foreground">{item.product.name} x{item.quantity}</span>
-                          <span className="text-foreground">{formatNaira(item.product.price * item.quantity)}</span>
+                      {orderItems.map((item) => (
+                        <div key={`${item.name}-${item.quantity}`} className="flex items-start justify-between gap-3 text-sm">
+                          <span className="text-muted-foreground">{item.name} x{item.quantity}</span>
+                          <span className="text-foreground">{formatNaira(item.price * item.quantity)}</span>
                         </div>
                       ))}
                     </div>
@@ -340,22 +398,22 @@ export default function PaymentCheckout() {
 
                 <form onSubmit={handleCreateOrder} className="space-y-4">
                   <div>
-                    <Label htmlFor="customerName" className="mb-2 block text-foreground font-semibold">Full Name *</Label>
+                    <Label htmlFor="customerName" className="mb-2 block font-semibold text-foreground">Full Name *</Label>
                     <Input id="customerName" name="customerName" placeholder="Your full name" value={formData.customerName} onChange={handleInputChange} required className="bg-background" />
                   </div>
 
                   <div>
-                    <Label htmlFor="customerEmail" className="mb-2 block text-foreground font-semibold">Email Address *</Label>
+                    <Label htmlFor="customerEmail" className="mb-2 block font-semibold text-foreground">Email Address *</Label>
                     <Input id="customerEmail" name="customerEmail" type="email" placeholder="your@email.com" value={formData.customerEmail} onChange={handleInputChange} required className="bg-background" />
                   </div>
 
                   <div>
-                    <Label htmlFor="customerPhone" className="mb-2 block text-foreground font-semibold">Phone Number</Label>
+                    <Label htmlFor="customerPhone" className="mb-2 block font-semibold text-foreground">Phone Number</Label>
                     <Input id="customerPhone" name="customerPhone" placeholder="+234 901 234 5678" value={formData.customerPhone} onChange={handleInputChange} className="bg-background" />
                   </div>
 
                   <div>
-                    <Label htmlFor="deliveryLocation" className="mb-2 block text-foreground font-semibold">Delivery Location *</Label>
+                    <Label htmlFor="deliveryLocation" className="mb-2 block font-semibold text-foreground">Delivery Location *</Label>
                     <select
                       id="deliveryLocation"
                       name="deliveryLocation"
@@ -378,7 +436,7 @@ export default function PaymentCheckout() {
                         Processing...
                       </>
                     ) : (
-                      'Proceed to Payment'
+                      'Create Order and Receipt'
                     )}
                   </Button>
                 </form>

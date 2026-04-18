@@ -1,21 +1,60 @@
 // @ts-nocheck
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
-import { notifyOwner } from "./_core/notification";
-import { addOrderToExcel, addInquiryToExcel, initializeAllWorkbooks } from "./excel-storage";
-import { sendOrderConfirmationSMS } from "./termii-sms";
+import { COOKIE_NAME } from '@shared/const';
+import { getSessionCookieOptions } from './_core/cookies';
+import { systemRouter } from './_core/systemRouter';
+import { publicProcedure, router } from './_core/trpc';
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { notifyOwner } from './_core/notification';
+import { addOrderToExcel, addInquiryToExcel, initializeAllWorkbooks, updateOrderReceiptInExcel } from './excel-storage';
+import { sendOrderConfirmationSMS } from './termii-sms';
+import { generateOrderReceipt } from './pdf-receipt';
+import {
+  buildBusinessEmailUrl,
+  buildBusinessWhatsAppUrl,
+  buildReceiptText,
+  formatNairaAmount,
+  type OrderReceiptPayload,
+} from '@shared/orderReceipt';
+import fs from 'node:fs';
+import path from 'node:path';
 
-// Initialize Excel workbooks on startup
-initializeAllWorkbooks().catch(err => console.error('[Excel] Initialization error:', err));
+initializeAllWorkbooks().catch((err) => console.error('[Excel] Initialization error:', err));
+
+function ensureReceiptDir() {
+  const receiptDir = path.join(process.cwd(), 'data', 'receipts');
+  if (!fs.existsSync(receiptDir)) {
+    fs.mkdirSync(receiptDir, { recursive: true });
+  }
+  return receiptDir;
+}
+
+function saveDataUrlToFile(orderNumber: string, receiptName: string, receiptDataUrl: string) {
+  const dataUrlMatch = receiptDataUrl.match(/^data:(.+?);base64,(.+)$/);
+
+  if (!dataUrlMatch) {
+    throw new Error('Receipt file must be uploaded as a valid data URL.');
+  }
+
+  const [, mimeType, base64Content] = dataUrlMatch;
+  const extension = mimeType.includes('pdf')
+    ? 'pdf'
+    : mimeType.includes('png')
+      ? 'png'
+      : mimeType.includes('jpeg') || mimeType.includes('jpg')
+        ? 'jpg'
+        : 'bin';
+  const safeName = receiptName.replace(/[^a-zA-Z0-9._-]/g, '-');
+  const outputPath = path.join(ensureReceiptDir(), `${orderNumber}-${Date.now()}-${safeName}.${extension}`);
+
+  fs.writeFileSync(outputPath, Buffer.from(base64Content, 'base64'));
+  return outputPath;
+}
 
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -25,14 +64,13 @@ export const appRouter = router({
     }),
   }),
 
-  // Orders and Payments routers
   orders: router({
-    // Create order with manual payment
     createOrder: publicProcedure
       .input(z.object({
         customerEmail: z.string().email().max(255),
         customerName: z.string().min(1).max(100),
         customerPhone: z.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
+        deliveryLocation: z.string().min(1).max(100).default('Lagos'),
         items: z.array(z.object({
           productId: z.number().positive(),
           name: z.string().min(1).max(200),
@@ -46,15 +84,33 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         try {
           const totalAmount = input.subtotal + input.tax + input.shippingCost;
-          const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+          const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+          const createdAt = new Date().toISOString();
+          const receiptPayload: OrderReceiptPayload = {
+            orderNumber,
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            customerPhone: input.customerPhone,
+            deliveryLocation: input.deliveryLocation,
+            createdAt,
+            items: input.items,
+            subtotal: input.subtotal,
+            tax: input.tax,
+            shippingCost: input.shippingCost,
+            totalAmount,
+          };
 
-          // Initialize Excel workbooks
+          const receiptBuffer = await generateOrderReceipt(receiptPayload);
+          const receiptBase64 = receiptBuffer.toString('base64');
+          const receiptText = buildReceiptText(receiptPayload);
+          const businessWhatsAppUrl = buildBusinessWhatsAppUrl(receiptPayload);
+          const businessEmailUrl = buildBusinessEmailUrl(receiptPayload);
+
           await initializeAllWorkbooks();
 
-          // Add order to Excel
           await addOrderToExcel({
             orderNumber,
-            createdAt: new Date().toISOString(),
+            createdAt,
             customerName: input.customerName,
             customerEmail: input.customerEmail,
             customerPhone: input.customerPhone,
@@ -62,20 +118,18 @@ export const appRouter = router({
             subtotal: input.subtotal,
             tax: input.tax,
             shippingCost: input.shippingCost,
-            totalAmount: totalAmount,
+            totalAmount,
             paymentMethod: 'bank_transfer',
             status: 'pending',
           });
 
-          // Send email notification to owner
           await notifyOwner({
             title: `New Order: ${orderNumber}`,
-            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nTotal: ₦${totalAmount.toLocaleString()}\n\nItems:\n${input.items.map(i => `- ${i.name} x${i.quantity} @ ₦${i.price}`).join('\n')}`,
+            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nTotal: ${formatNairaAmount(totalAmount)}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
           });
 
-          // Send SMS confirmation to customer (if phone provided)
           if (input.customerPhone) {
-            sendOrderConfirmationSMS(input.customerPhone, orderNumber, totalAmount).catch(err => 
+            sendOrderConfirmationSMS(input.customerPhone, orderNumber, totalAmount).catch((err) =>
               console.error('[SMS] Failed to send order confirmation:', err)
             );
           }
@@ -84,6 +138,14 @@ export const appRouter = router({
             success: true,
             orderNumber,
             totalAmount,
+            receipt: {
+              fileName: `receipt-${orderNumber}.pdf`,
+              pdfBase64: receiptBase64,
+              receiptText,
+              businessWhatsAppUrl,
+              businessEmailUrl,
+              payload: receiptPayload,
+            },
           };
         } catch (error) {
           console.error('Order creation error:', error);
@@ -94,23 +156,27 @@ export const appRouter = router({
         }
       }),
 
-    // Upload payment receipt
     uploadReceipt: publicProcedure
       .input(z.object({
         orderNumber: z.string().regex(/^ORD-\d+-[a-z0-9]{5}$/).max(50),
-        receiptUrl: z.string().url().max(2048),
+        receiptName: z.string().min(1).max(255),
+        receiptDataUrl: z.string().min(32).max(8_000_000),
       }))
       .mutation(async ({ input }) => {
         try {
-          // Send email notification
+          const savedReceiptPath = saveDataUrlToFile(input.orderNumber, input.receiptName, input.receiptDataUrl);
+          const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, savedReceiptPath);
+
           await notifyOwner({
             title: `Payment Receipt: ${input.orderNumber}`,
-            content: `Order ${input.orderNumber} receipt uploaded.\nReceipt URL: ${input.receiptUrl}`,
+            content: `Order ${input.orderNumber} receipt uploaded.\nStored at: ${savedReceiptPath}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
           });
 
           return {
             success: true,
             message: 'Receipt uploaded successfully',
+            savedReceiptPath,
+            workbookUpdated,
           };
         } catch (error) {
           console.error('Receipt upload error:', error);
@@ -122,9 +188,7 @@ export const appRouter = router({
       }),
   }),
 
-  // Contact and Inquiries routers
   inquiries: router({
-    // Create inquiry
     createInquiry: publicProcedure
       .input(z.object({
         name: z.string().min(1).max(100),
@@ -136,10 +200,8 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         try {
-          // Initialize Excel workbooks
           await initializeAllWorkbooks();
 
-          // Add inquiry to Excel
           await addInquiryToExcel({
             name: input.name,
             email: input.email,
@@ -150,7 +212,6 @@ export const appRouter = router({
             status: 'new',
           });
 
-          // Send email notification
           await notifyOwner({
             title: `New Inquiry: ${input.subject}`,
             content: `From: ${input.name} (${input.email})\nPhone: ${input.phone || 'N/A'}\nType: ${input.inquiryType}\n\nMessage:\n${input.message}`,
@@ -169,19 +230,17 @@ export const appRouter = router({
         }
       }),
 
-    // Get all inquiries
-    getAllInquiries: publicProcedure
-      .query(async () => {
-        try {
-          return { success: true, message: 'Check Excel file for inquiries' };
-        } catch (error) {
-          console.error('Get inquiries error:', error);
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Failed to get inquiries',
-          });
-        }
-      }),
+    getAllInquiries: publicProcedure.query(async () => {
+      try {
+        return { success: true, message: 'Check Excel file for inquiries' };
+      } catch (error) {
+        console.error('Get inquiries error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to get inquiries',
+        });
+      }
+    }),
   }),
 });
 

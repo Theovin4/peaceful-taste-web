@@ -150,6 +150,36 @@ export async function addOrderToExcel(orderData: {
   }
 }
 
+export async function updateOrderReceiptInExcel(orderNumber: string, receiptUrl: string, status: string = 'receipt_uploaded') {
+  try {
+    await initializeOrdersWorkbook();
+
+    const workbook = new Workbook();
+    await workbook.xlsx.readFile(ORDERS_FILE);
+    const worksheet = workbook.getWorksheet('Orders');
+    if (!worksheet) throw new Error('Orders worksheet not found');
+
+    let updated = false;
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+
+      const currentOrderNumber = row.getCell(1).text?.trim() || row.getCell(1).value?.toString().trim();
+      if (currentOrderNumber === orderNumber) {
+        row.getCell(11).value = status;
+        row.getCell(13).value = receiptUrl;
+        updated = true;
+      }
+    });
+
+    await workbook.xlsx.writeFile(ORDERS_FILE);
+    return updated;
+  } catch (error) {
+    console.error('[Excel] Error updating order receipt:', error);
+    throw error;
+  }
+}
+
 /**
  * Add inquiry to Excel
  */

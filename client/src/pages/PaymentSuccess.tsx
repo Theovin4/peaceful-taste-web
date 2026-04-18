@@ -1,21 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Loader2, Upload, MessageCircle } from 'lucide-react';
+import { CheckCircle, Loader2, Upload, MessageCircle, Download, Mail, Copy } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
+import { copyTextToClipboard, downloadPdfReceipt, fileToDataUrl, loadLatestReceipt } from '@/lib/orderReceipt';
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
+  const latestReceipt = useMemo(() => loadLatestReceipt(), []);
   const [orderNumber, setOrderNumber] = useState('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [summaryCopied, setSummaryCopied] = useState(false);
 
   const uploadReceiptMutation = trpc.orders.uploadReceipt.useMutation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderFromQuery = params.get('order');
+    if (orderFromQuery) {
+      setOrderNumber(orderFromQuery);
+      return;
+    }
+
+    if (latestReceipt?.payload.orderNumber) {
+      setOrderNumber(latestReceipt.payload.orderNumber);
+    }
+  }, [latestReceipt]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,22 +60,29 @@ export default function PaymentSuccess() {
     setIsLoading(true);
 
     try {
+      const receiptDataUrl = await fileToDataUrl(receiptFile);
       await uploadReceiptMutation.mutateAsync({
         orderNumber,
-        receiptUrl: `receipt-${orderNumber}-${Date.now()}`,
+        receiptName: receiptFile.name,
+        receiptDataUrl,
       });
 
       setUploadSuccess(true);
       toast.success('Receipt uploaded successfully. We will verify and process your payment soon.');
-
-      setTimeout(() => {
-        setLocation('/shop');
-      }, 3000);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to upload receipt';
       toast.error(errorMsg);
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  const copyReceiptSummary = async () => {
+    if (!latestReceipt?.receiptText) return;
+    await copyTextToClipboard(latestReceipt.receiptText);
+    setSummaryCopied(true);
+    toast.success('Receipt summary copied.');
+    setTimeout(() => setSummaryCopied(false), 1800);
   };
 
   if (uploadSuccess) {
@@ -75,11 +98,28 @@ export default function PaymentSuccess() {
 
             <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
               <p className="text-sm text-emerald-300">
-                You will receive a confirmation once your payment is verified. If you need help, contact us via WhatsApp.
+                Your uploaded proof is now saved with the order record. If you need help, contact us via WhatsApp.
               </p>
             </div>
 
-            <Button onClick={() => setLocation('/shop')} className="btn-primary w-full text-white">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {latestReceipt && (
+                <>
+                  <Button onClick={() => downloadPdfReceipt(latestReceipt.fileName, latestReceipt.pdfBase64)} className="btn-primary text-white">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Receipt Again
+                  </Button>
+                  <a href={latestReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Send Copy to WhatsApp
+                    </Button>
+                  </a>
+                </>
+              )}
+            </div>
+
+            <Button onClick={() => setLocation('/shop')} className="mt-6 btn-primary w-full text-white">
               Continue Shopping
             </Button>
           </Card>
@@ -105,15 +145,46 @@ export default function PaymentSuccess() {
             </p>
           </div>
 
+          {latestReceipt && (
+            <div className="mb-6 rounded-3xl border border-border bg-background/60 p-5">
+              <h2 className="mb-2 text-lg font-semibold text-foreground">Your order receipt is ready</h2>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Order <span className="font-mono text-accent">{latestReceipt.payload.orderNumber}</span> already has a downloadable customer receipt and prefilled business copy links.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button onClick={() => downloadPdfReceipt(latestReceipt.fileName, latestReceipt.pdfBase64)} className="btn-primary text-white">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Customer Receipt
+                </Button>
+                <Button onClick={copyReceiptSummary} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                  <Copy className="mr-2 h-4 w-4" />
+                  {summaryCopied ? 'Receipt Copied' : 'Copy Receipt Summary'}
+                </Button>
+                <a href={latestReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Send Copy to WhatsApp
+                  </Button>
+                </a>
+                <a href={latestReceipt.businessEmailUrl}>
+                  <Button variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Copy to Email
+                  </Button>
+                </a>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleUploadReceipt} className="space-y-6">
             <div>
-              <Label htmlFor="orderNumber" className="text-foreground font-semibold">Order Number *</Label>
+              <Label htmlFor="orderNumber" className="font-semibold text-foreground">Order Number *</Label>
               <Input
                 id="orderNumber"
                 type="text"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
-                placeholder="e.g., ORD-1234567890-ABC"
+                placeholder="e.g., ORD-1234567890-abcde"
                 required
                 className="mt-2 bg-background"
               />
@@ -121,7 +192,7 @@ export default function PaymentSuccess() {
             </div>
 
             <div>
-              <Label htmlFor="receipt" className="text-foreground font-semibold">Payment Receipt *</Label>
+              <Label htmlFor="receipt" className="font-semibold text-foreground">Payment Receipt *</Label>
               <div className="mt-2 rounded-3xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-accent">
                 <input id="receipt" type="file" accept="image/*,.pdf" onChange={handleFileChange} required className="hidden" />
                 <label htmlFor="receipt" className="cursor-pointer">
