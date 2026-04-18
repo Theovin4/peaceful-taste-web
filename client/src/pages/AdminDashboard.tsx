@@ -1,16 +1,41 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Download, Eye, EyeOff, Lock } from 'lucide-react';
+import { Download, Eye, EyeOff, Lock, BarChart3, FileSpreadsheet, Mail, MessageCircle, Package, Receipt, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { trpc } from '@/lib/trpc';
+import { formatNaira } from '@/lib/format';
 
-const ADMIN_PASSWORD = 'peaceful123'; // Simple password for demo
+const ADMIN_PASSWORD = 'peaceful123';
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const summaryQuery = trpc.orders.dashboardSummary.useQuery(undefined, {
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: false,
+  });
+
+  const summary = summaryQuery.data;
+  const stats = useMemo(() => {
+    if (!summary) {
+      return [
+        { label: 'Orders', value: '-', icon: Package },
+        { label: 'Revenue', value: '-', icon: BarChart3 },
+        { label: 'Customers', value: '-', icon: Users },
+        { label: 'Receipts', value: '-', icon: Receipt },
+      ];
+    }
+
+    return [
+      { label: 'Orders', value: summary.ordersCount.toString(), icon: Package },
+      { label: 'Revenue', value: formatNaira(summary.totalRevenue), icon: BarChart3 },
+      { label: 'Customers', value: summary.uniqueCustomers.toString(), icon: Users },
+      { label: 'Receipts', value: summary.receiptUploadedOrders.toString(), icon: Receipt },
+    ];
+  }, [summary]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,50 +49,44 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDownloadOrders = () => {
-    toast.info('Download orders.xlsx from the data folder on the server');
-  };
-
-  const handleDownloadInquiries = () => {
-    toast.info('Download inquiries.xlsx from the data folder on the server');
+  const openDownload = (type: 'orders' | 'inquiries') => {
+    const url = type === 'orders' ? '/api/admin/export/orders' : '/api/admin/export/inquiries';
+    window.open(url, '_blank');
   };
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background py-12">
         <div className="container max-w-md">
-          <Card className="p-8">
-            <div className="flex justify-center mb-6">
-              <Lock className="w-12 h-12 text-primary" />
+          <Card className="glass-panel border-0 p-8">
+            <div className="mb-6 flex justify-center">
+              <Lock className="h-12 w-12 text-accent" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2 text-center">Admin Access</h1>
-            <p className="text-muted-foreground text-center mb-6">Enter password to access the dashboard</p>
+            <h1 className="mb-2 text-center text-3xl font-bold text-foreground">Admin Access</h1>
+            <p className="mb-6 text-center text-muted-foreground">Enter password to access workbook downloads and analysis.</p>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-foreground font-semibold mb-2 block">Password</label>
+                <label className="mb-2 block font-semibold text-foreground">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter admin password"
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground pr-10"
+                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 pr-12 text-foreground"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2"
-              >
+              <Button type="submit" className="btn-primary w-full text-white">
                 Access Dashboard
               </Button>
             </form>
@@ -79,115 +98,127 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background py-12">
-      <div className="container">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Admin Dashboard</h1>
+      <div className="container space-y-8">
+        <div>
+          <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+            Workbook control
+          </p>
+          <h1 className="text-4xl font-bold text-foreground">Orders, receipts, and inquiry analysis</h1>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Orders Card */}
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold text-foreground mb-4">📋 Orders</h2>
-            <p className="text-muted-foreground mb-6">
-              All customer orders are automatically saved to <code className="bg-secondary px-2 py-1 rounded">data/orders.xlsx</code>
-            </p>
-            <div className="space-y-3 mb-6 pb-6 border-b border-border">
-              <div className="text-sm">
-                <p className="font-semibold text-foreground mb-1">Columns:</p>
-                <ul className="text-muted-foreground space-y-1 text-xs">
-                  <li>• Order Number</li>
-                  <li>• Date Created</li>
-                  <li>• Customer Name, Email, Phone</li>
-                  <li>• Items (JSON format)</li>
-                  <li>• Subtotal, Tax, Shipping, Total</li>
-                  <li>• Payment Method & Status</li>
-                  <li>• Receipt URL</li>
-                </ul>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {stats.map(({ label, value, icon: Icon }) => (
+            <Card key={label} className="glass-panel border-0 p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                <Icon className="h-5 w-5 text-accent" />
               </div>
+              <p className="text-2xl font-bold text-foreground">{value}</p>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <Card className="glass-panel border-0 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <FileSpreadsheet className="h-6 w-6 text-accent" />
+              <h2 className="text-2xl font-bold text-foreground">Excel downloads</h2>
             </div>
-            <Button
-              onClick={handleDownloadOrders}
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download Orders
-            </Button>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Download the latest workbook files for offline review, filtering, charting, and analysis in Excel or Google Sheets.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button onClick={() => openDownload('orders')} className="btn-primary text-white">
+                <Download className="mr-2 h-4 w-4" />
+                Download Orders Workbook
+              </Button>
+              <Button onClick={() => openDownload('inquiries')} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                <Download className="mr-2 h-4 w-4" />
+                Download Inquiries Workbook
+              </Button>
+            </div>
+            <div className="mt-6 rounded-3xl border border-border bg-background/60 p-4 text-sm text-muted-foreground">
+              Orders workbook columns include customer details, totals, payment status, and receipt storage path for auditing.
+            </div>
           </Card>
 
-          {/* Inquiries Card */}
-          <Card className="p-6">
-            <h2 className="text-2xl font-bold text-foreground mb-4">💬 Inquiries</h2>
-            <p className="text-muted-foreground mb-6">
-              All customer inquiries are automatically saved to <code className="bg-secondary px-2 py-1 rounded">data/inquiries.xlsx</code>
-            </p>
-            <div className="space-y-3 mb-6 pb-6 border-b border-border">
-              <div className="text-sm">
-                <p className="font-semibold text-foreground mb-1">Columns:</p>
-                <ul className="text-muted-foreground space-y-1 text-xs">
-                  <li>• Date Received</li>
-                  <li>• Name, Email, Phone</li>
-                  <li>• Subject & Message</li>
-                  <li>• Inquiry Type</li>
-                  <li>• Status (new/replied)</li>
-                </ul>
+          <Card className="glass-panel border-0 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <Mail className="h-6 w-6 text-accent" />
+              <h2 className="text-2xl font-bold text-foreground">Notification status</h2>
+            </div>
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <div className="rounded-3xl border border-border bg-background/60 p-4">
+                <p className="font-semibold text-foreground">Customer receipt copy</p>
+                <p className="mt-1">Enabled. Each order now generates a downloadable PDF receipt immediately.</p>
+              </div>
+              <div className="rounded-3xl border border-border bg-background/60 p-4">
+                <p className="flex items-center gap-2 font-semibold text-foreground"><MessageCircle className="h-4 w-4 text-emerald-400" /> WhatsApp business copy</p>
+                <p className="mt-1">Enabled through prefilled business-share links. Fully automatic sending still requires a real provider account.</p>
+              </div>
+              <div className="rounded-3xl border border-border bg-background/60 p-4">
+                <p className="font-semibold text-foreground">Email business copy</p>
+                <p className="mt-1">Enabled through prefilled email drafts. Fully automatic sending still requires a real email delivery provider.</p>
               </div>
             </div>
-            <Button
-              onClick={handleDownloadInquiries}
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download Inquiries
-            </Button>
           </Card>
         </div>
 
-        {/* Instructions Card */}
-        <Card className="p-6 bg-secondary">
-          <h2 className="text-2xl font-bold text-foreground mb-4">📖 How to Use</h2>
-          <div className="space-y-4 text-sm text-muted-foreground">
-            <div>
-              <p className="font-semibold text-foreground mb-1">1. Access Excel Files</p>
-              <p>The Excel files are stored in the <code className="bg-background px-2 py-1 rounded text-xs">data/</code> folder on the server. Download them directly from your server file manager.</p>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-1">2. View & Edit Data</p>
-              <p>Open the Excel files with Microsoft Excel, Google Sheets, or any spreadsheet application to view and manage your orders and inquiries.</p>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-1">3. Email Notifications</p>
-              <p>You also receive email notifications at <strong>queenofpeace323@gmail.com</strong> for every new order and inquiry.</p>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-1">4. Export & Share</p>
-              <p>Export the Excel files to PDF or CSV format for sharing with team members or for record-keeping.</p>
-            </div>
-          </div>
-        </Card>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <Card className="glass-panel border-0 p-6">
+            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent orders</h2>
+            {summaryQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading workbook summary...</p>
+            ) : summary?.recentOrders?.length ? (
+              <div className="space-y-3">
+                {summary.recentOrders.map((order) => (
+                  <div key={order.orderNumber} className="rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-foreground">{order.customerName}</p>
+                        <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-primary">{formatNaira(order.totalAmount)}</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-accent">{order.status || 'pending'}</p>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{order.items}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No orders stored yet.</p>
+            )}
+          </Card>
 
-        {/* Stats Card */}
-        <Card className="p-6 mt-8">
-          <h2 className="text-2xl font-bold text-foreground mb-4">📊 Quick Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-secondary rounded-lg p-4">
-              <p className="text-muted-foreground text-sm mb-1">Orders File</p>
-              <p className="text-2xl font-bold text-primary">data/orders.xlsx</p>
-            </div>
-            <div className="bg-secondary rounded-lg p-4">
-              <p className="text-muted-foreground text-sm mb-1">Inquiries File</p>
-              <p className="text-2xl font-bold text-primary">data/inquiries.xlsx</p>
-            </div>
-            <div className="bg-secondary rounded-lg p-4">
-              <p className="text-muted-foreground text-sm mb-1">Email Notifications</p>
-              <p className="text-2xl font-bold text-primary">Enabled</p>
-            </div>
-          </div>
-        </Card>
+          <Card className="glass-panel border-0 p-6">
+            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent inquiries</h2>
+            {summaryQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading workbook summary...</p>
+            ) : summary?.recentInquiries?.length ? (
+              <div className="space-y-3">
+                {summary.recentInquiries.map((inquiry, index) => (
+                  <div key={`${inquiry.email}-${index}`} className="rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-foreground">{inquiry.name}</p>
+                        <p className="text-xs text-muted-foreground">{inquiry.email}</p>
+                      </div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-accent">{inquiry.inquiryType}</p>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{inquiry.subject}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No inquiries stored yet.</p>
+            )}
+          </Card>
+        </div>
 
-        <div className="mt-8">
-          <Button
-            onClick={() => setIsAuthenticated(false)}
-            variant="outline"
-            className="border-border text-foreground hover:bg-secondary"
-          >
+        <div>
+          <Button onClick={() => setIsAuthenticated(false)} variant="outline" className="border-border text-foreground hover:bg-secondary">
             Logout
           </Button>
         </div>

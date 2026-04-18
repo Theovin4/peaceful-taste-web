@@ -11,6 +11,34 @@ import * as path from 'path';
 const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.xlsx');
 const INQUIRIES_FILE = path.join(process.cwd(), 'data', 'inquiries.xlsx');
 
+export interface OrderWorkbookRow {
+  orderNumber: string;
+  createdAt: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  items: string;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  totalAmount: number;
+  status: string;
+  paymentMethod: string;
+  receiptUrl: string;
+  notes: string;
+}
+
+export interface InquiryWorkbookRow {
+  createdAt: string;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  inquiryType: string;
+  status: string;
+}
+
 // Ensure data directory exists
 function ensureDataDir() {
   const dataDir = path.join(process.cwd(), 'data');
@@ -178,6 +206,88 @@ export async function updateOrderReceiptInExcel(orderNumber: string, receiptUrl:
     console.error('[Excel] Error updating order receipt:', error);
     throw error;
   }
+}
+
+export async function getOrdersFromExcel(): Promise<OrderWorkbookRow[]> {
+  await initializeOrdersWorkbook();
+
+  const workbook = new Workbook();
+  await workbook.xlsx.readFile(ORDERS_FILE);
+  const worksheet = workbook.getWorksheet('Orders');
+  if (!worksheet) throw new Error('Orders worksheet not found');
+
+  const orders: OrderWorkbookRow[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return;
+
+    orders.push({
+      orderNumber: row.getCell(1).text || '',
+      createdAt: row.getCell(2).text || '',
+      customerName: row.getCell(3).text || '',
+      customerEmail: row.getCell(4).text || '',
+      customerPhone: row.getCell(5).text || '',
+      items: row.getCell(6).text || '',
+      subtotal: Number(row.getCell(7).value || 0),
+      shippingCost: Number(row.getCell(8).value || 0),
+      tax: Number(row.getCell(9).value || 0),
+      totalAmount: Number(row.getCell(10).value || 0),
+      status: row.getCell(11).text || '',
+      paymentMethod: row.getCell(12).text || '',
+      receiptUrl: row.getCell(13).text || '',
+      notes: row.getCell(14).text || '',
+    });
+  });
+
+  return orders.filter((order) => order.orderNumber);
+}
+
+export async function getInquiriesFromExcel(): Promise<InquiryWorkbookRow[]> {
+  await initializeInquiriesWorkbook();
+
+  const workbook = new Workbook();
+  await workbook.xlsx.readFile(INQUIRIES_FILE);
+  const worksheet = workbook.getWorksheet('Inquiries');
+  if (!worksheet) throw new Error('Inquiries worksheet not found');
+
+  const inquiries: InquiryWorkbookRow[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return;
+
+    inquiries.push({
+      createdAt: row.getCell(1).text || '',
+      name: row.getCell(2).text || '',
+      email: row.getCell(3).text || '',
+      phone: row.getCell(4).text || '',
+      subject: row.getCell(5).text || '',
+      message: row.getCell(6).text || '',
+      inquiryType: row.getCell(7).text || '',
+      status: row.getCell(8).text || '',
+    });
+  });
+
+  return inquiries.filter((inquiry) => inquiry.email || inquiry.subject);
+}
+
+export async function getWorkbookSummary() {
+  const [orders, inquiries] = await Promise.all([getOrdersFromExcel(), getInquiriesFromExcel()]);
+
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+  const pendingOrders = orders.filter((order) => order.status === 'pending').length;
+  const receiptUploadedOrders = orders.filter((order) => order.status === 'receipt_uploaded').length;
+  const uniqueCustomers = new Set(orders.map((order) => order.customerEmail).filter(Boolean)).size;
+
+  return {
+    ordersCount: orders.length,
+    inquiriesCount: inquiries.length,
+    totalRevenue,
+    pendingOrders,
+    receiptUploadedOrders,
+    uniqueCustomers,
+    recentOrders: orders.slice(-10).reverse(),
+    recentInquiries: inquiries.slice(-10).reverse(),
+  };
 }
 
 /**

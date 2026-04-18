@@ -6,7 +6,7 @@ import { publicProcedure, router } from './_core/trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { notifyOwner } from './_core/notification';
-import { addOrderToExcel, addInquiryToExcel, initializeAllWorkbooks, updateOrderReceiptInExcel } from './excel-storage';
+import { addOrderToExcel, addInquiryToExcel, getWorkbookSummary, initializeAllWorkbooks, updateOrderReceiptInExcel } from './excel-storage';
 import { sendOrderConfirmationSMS } from './termii-sms';
 import { generateOrderReceipt } from './pdf-receipt';
 import {
@@ -186,6 +186,18 @@ export const appRouter = router({
           });
         }
       }),
+
+    dashboardSummary: publicProcedure.query(async () => {
+      try {
+        return await getWorkbookSummary();
+      } catch (error) {
+        console.error('Dashboard summary error:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to load dashboard summary',
+        });
+      }
+    }),
   }),
 
   inquiries: router({
