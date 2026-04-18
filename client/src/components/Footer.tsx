@@ -1,106 +1,84 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const transitionStyle = { transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' };
 
   return (
-    <footer className="bg-foreground text-background mt-20">
+    <footer className="mt-20 border-t border-border bg-[#0b1014] text-foreground">
       <div className="container py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          {/* Brand */}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
-            <h3 className="text-lg font-bold mb-4">Peaceful Taste</h3>
-            <p className="text-sm text-background/80 mb-4">
-              Handcrafted treats made with love and the finest ingredients.
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-accent">Peaceful Taste</p>
+            <h3 className="mb-4 text-lg font-bold">Handcrafted treats, darker premium feel.</h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Fresh parfaits, pastries, drinks, and custom orders prepared with care and delivered across key Lagos routes.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="hover:text-primary" style={transitionStyle}>
-                <Facebook className="w-5 h-5" />
+              <a href="https://facebook.com/peacefultaste" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
+                <Facebook className="h-4 w-4" />
               </a>
-              <a href="#" className="hover:text-primary" style={transitionStyle}>
-                <Instagram className="w-5 h-5" />
+              <a href="https://instagram.com/peacefultaste" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
+                <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" className="hover:text-primary" style={transitionStyle}>
-                <Twitter className="w-5 h-5" />
+              <a href="https://wa.me/2349022621323" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
+                <MessageCircle className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <h4 className="mb-4 font-semibold text-foreground">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <a href="/" className="hover:text-primary" style={transitionStyle}>
-                  Home
-                </a>
-              </li>
-              <li>
-                <a href="/shop" className="hover:text-primary" style={transitionStyle}>
-                  Shop
-                </a>
-              </li>
-              <li>
-                <a href="/services" className="hover:text-primary" style={transitionStyle}>
-                  Services
-                </a>
-              </li>
-              <li>
-                <a href="/about" className="hover:text-primary" style={transitionStyle}>
-                  About
-                </a>
-              </li>
+              {[
+                ['Home', '/'],
+                ['Shop', '/shop'],
+                ['Services', '/services'],
+                ['About', '/about'],
+              ].map(([label, href]) => (
+                <li key={href}>
+                  <a href={href} className="text-muted-foreground hover:text-accent" style={transitionStyle}>
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
+            <h4 className="mb-4 font-semibold text-foreground">Contact</h4>
             <ul className="space-y-3 text-sm">
-              <li className="flex gap-2 items-start">
-                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <li className="flex items-start gap-2 text-muted-foreground">
+                <Phone className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
                 <span>+234 902 262 1323</span>
               </li>
-              <li className="flex gap-2 items-start">
-                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <li className="flex items-start gap-2 text-muted-foreground">
+                <Mail className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
                 <span>queenofpeace323@gmail.com</span>
               </li>
-              <li className="flex gap-2 items-start">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <li className="flex items-start gap-2 text-muted-foreground">
+                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
                 <span>Gasline, Magboro, Lagos-Ibadan Expressway, Lagos State</span>
               </li>
             </ul>
           </div>
 
-          {/* Hours */}
           <div>
-            <h4 className="font-semibold mb-4">Hours</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <span className="font-medium">Mon - Fri:</span> 8am - 8pm
-              </li>
-              <li>
-                <span className="font-medium">Sat:</span> 9am - 9pm
-              </li>
-              <li>
-                <span className="font-medium">Sun:</span> 10am - 6pm
-              </li>
+            <h4 className="mb-4 font-semibold text-foreground">Hours</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><span className="font-medium text-foreground">Mon - Fri:</span> 8am - 8pm</li>
+              <li><span className="font-medium text-foreground">Sat:</span> 9am - 9pm</li>
+              <li><span className="font-medium text-foreground">Sun:</span> 10am - 6pm</li>
             </ul>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-background/20 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p>&copy; {currentYear} Peaceful Taste. All rights reserved.</p>
+        <div className="mt-12 border-t border-border/60 pt-8">
+          <div className="flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
+            <p className="text-muted-foreground">&copy; {currentYear} Peaceful Taste. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-primary" style={transitionStyle}>
-                Privacy Policy
-              </a>
-              <a href="#" className="hover:text-primary" style={transitionStyle}>
-                Terms of Service
-              </a>
+              <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Privacy Policy</a>
+              <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Terms of Service</a>
             </div>
           </div>
         </div>

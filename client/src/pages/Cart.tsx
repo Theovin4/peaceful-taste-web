@@ -1,59 +1,60 @@
 import { useLocation } from 'wouter';
-import { Trash2, ArrowRight } from 'lucide-react';
+import { Trash2, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { formatNaira } from '@/lib/format';
 
 export default function Cart() {
   const [, setLocation] = useLocation();
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
 
-  // Calculate total quantity
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Calculate bulk discount (10% off for 6+ items)
   const bulkDiscount = totalQuantity >= 6 ? Math.round(total * 0.1) : 0;
   const discountedTotal = total - bulkDiscount;
+  const shipping = 500;
+  const tax = Math.round(discountedTotal * 0.1);
+  const grandTotal = discountedTotal + shipping + tax;
 
   const handleCheckout = () => {
     if (items.length === 0) {
       toast.error('Your cart is empty');
       return;
     }
+
     setLocation('/checkout');
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <section className="py-12 bg-secondary border-b border-border">
-        <div className="container">
-          <h1 className="text-display text-foreground mb-4">Shopping Cart</h1>
+      <section className="relative overflow-hidden border-b border-border py-14">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.1),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
+        <div className="container relative">
+          <p className="mb-4 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+            Cart review
+          </p>
+          <h1 className="text-display mb-4 text-foreground">Shopping Cart</h1>
           <p className="text-lg text-muted-foreground">
-            Review your items and proceed to checkout
+            Review your order, refine quantities, and move smoothly into payment.
           </p>
         </div>
       </section>
 
-      {/* Cart Section */}
       <section className="py-16 md:py-24">
         <div className="container">
           {items.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground mb-6">Your cart is empty</p>
-              <Button
-                onClick={() => setLocation('/shop')}
-                className="bg-primary hover:bg-primary/90 text-white gap-2"
-              >
-                Continue Shopping <ArrowRight className="w-4 h-4" />
+            <div className="glass-panel mx-auto max-w-3xl rounded-3xl p-10 text-center">
+              <h2 className="text-2xl font-semibold text-foreground">Your cart is empty</h2>
+              <p className="mt-3 text-muted-foreground">Add a few treats to continue with delivery and payment.</p>
+              <Button onClick={() => setLocation('/shop')} className="btn-primary mt-6 gap-2 text-white">
+                Continue Shopping <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-lg border border-border overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-                  <div className="p-6 border-b border-border">
+                <div className="glass-panel overflow-hidden rounded-3xl">
+                  <div className="border-b border-border px-6 py-5">
                     <h2 className="font-semibold text-foreground">
                       {items.length} item{items.length !== 1 ? 's' : ''} in cart
                     </h2>
@@ -61,118 +62,106 @@ export default function Cart() {
 
                   <div className="divide-y divide-border">
                     {items.map((item) => (
-                      <div key={item.product.id} className="p-6 flex gap-4">
-                        {/* Product Image */}
-                        <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-secondary">
+                      <div key={item.product.id} className="flex gap-4 px-6 py-6">
+                        <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-secondary">
                           <img
                             src={item.product.image}
                             alt={item.product.name}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
 
-                        {/* Product Details */}
                         <div className="flex-1">
-                          <h3 className="font-semibold text-foreground mb-1">
-                            {item.product.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            ${item.product.price.toFixed(2)} each
-                          </p>
+                          <h3 className="mb-1 font-semibold text-foreground">{item.product.name}</h3>
+                          <p className="mb-3 text-sm text-muted-foreground">{formatNaira(item.product.price)} each</p>
 
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className="mb-3 flex items-center gap-2">
                             <button
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="px-2 py-1 border border-border rounded hover:bg-secondary transition-all"
+                              className="rounded-xl border border-border bg-background/60 px-3 py-1 text-foreground hover:bg-secondary"
                             >
-                              −
+                              -
                             </button>
-                            <span className="px-4 py-1 min-w-12 text-center">{item.quantity}</span>
+                            <span className="min-w-12 px-4 py-1 text-center text-foreground">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="px-2 py-1 border border-border rounded hover:bg-secondary transition-all"
+                              className="rounded-xl border border-border bg-background/60 px-3 py-1 text-foreground hover:bg-secondary"
                             >
                               +
                             </button>
                           </div>
 
-                          {/* Price */}
-                          <p className="font-semibold text-primary">
-                            ${(item.product.price * item.quantity).toFixed(2)}
-                          </p>
+                          <p className="font-semibold text-accent">{formatNaira(item.product.price * item.quantity)}</p>
                         </div>
 
-                        {/* Remove Button */}
                         <button
                           onClick={() => {
                             removeItem(item.product.id);
                             toast.success('Item removed from cart');
                           }}
-                          className="text-muted-foreground hover:text-destructive transition-all"
+                          className="self-start text-muted-foreground transition-all hover:text-destructive"
+                          aria-label={`Remove ${item.product.name}`}
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Continue Shopping */}
                 <div className="mt-6">
                   <Button
                     onClick={() => setLocation('/shop')}
                     variant="outline"
-                    className="border-primary text-primary hover:bg-primary/5"
+                    className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
                   >
                     Continue Shopping
                   </Button>
                 </div>
               </div>
 
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg border border-border p-6 sticky top-24" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-                  <h3 className="font-semibold text-foreground mb-6">Order Summary</h3>
+              <div>
+                <div className="glass-panel sticky top-24 rounded-3xl p-6">
+                  <h3 className="mb-6 font-semibold text-foreground">Order Summary</h3>
 
-                  <div className="space-y-4 mb-6 pb-6 border-b border-border">
+                  <div className="space-y-4 border-b border-border pb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal ({totalQuantity} items)</span>
-                      <span className="text-foreground font-medium">₦{total.toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatNaira(total)}</span>
                     </div>
-                    {bulkDiscount > 0 && (
-                      <div className="flex justify-between text-sm bg-green-50 p-2 rounded">
-                        <span className="text-green-700 font-semibold">Bulk Discount (10%)</span>
-                        <span className="text-green-700 font-semibold">-₦{bulkDiscount.toLocaleString()}</span>
+
+                    {bulkDiscount > 0 ? (
+                      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="font-semibold text-emerald-300">Bulk discount (10%)</span>
+                          <span className="font-semibold text-emerald-300">-{formatNaira(bulkDiscount)}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-accent/20 bg-accent/10 p-3 text-sm text-accent">
+                        Add {Math.max(0, 6 - totalQuantity)} more item(s) to unlock a 10% bundle discount.
                       </div>
                     )}
-                    {bulkDiscount === 0 && totalQuantity > 0 && (
-                      <div className="flex justify-between text-xs bg-blue-50 p-2 rounded">
-                        <span className="text-blue-700">Add {6 - totalQuantity} more item(s) for 10% discount</span>
-                      </div>
-                    )}
+
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-foreground font-medium">₦500</span>
+                      <span className="font-medium text-foreground">{formatNaira(shipping)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax</span>
-                      <span className="text-foreground font-medium">₦{Math.round(discountedTotal * 0.1).toLocaleString()}</span>
+                      <span className="font-medium text-foreground">{formatNaira(tax)}</span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between mb-6">
+                  <div className="my-6 flex justify-between">
                     <span className="font-semibold text-foreground">Total</span>
-                    <span className="text-2xl font-bold text-primary">
-                      ₦{Math.round(discountedTotal + 500 + discountedTotal * 0.1).toLocaleString()}
-                    </span>
+                    <span className="text-2xl font-bold text-primary">{formatNaira(grandTotal)}</span>
                   </div>
 
-                  <Button
-                    onClick={handleCheckout}
-                    className="w-full bg-primary hover:bg-primary/90 text-white font-semibold mb-3"
-                  >
-                    Proceed to Payment <ArrowRight className="w-4 h-4 ml-2" />
+                  <Button onClick={handleCheckout} className="btn-primary mb-3 w-full gap-2 text-white">
+                    Proceed to Payment <ArrowRight className="h-4 w-4" />
                   </Button>
 
                   <Button
@@ -181,20 +170,20 @@ export default function Cart() {
                       toast.success('Cart cleared');
                     }}
                     variant="outline"
-                    className="w-full border-destructive text-destructive hover:bg-destructive/5"
+                    className="w-full border-destructive/50 bg-transparent text-destructive hover:bg-destructive/10"
                   >
                     Clear Cart
                   </Button>
 
-                  {/* Trust Badges */}
-                  <div className="mt-6 pt-6 border-t border-border">
-                    <p className="text-xs text-muted-foreground text-center mb-3">
-                      Manual Bank Transfer Payment
-                    </p>
-                    <div className="flex justify-center gap-2">
-                      <span className="text-xs bg-secondary px-2 py-1 rounded">Secure</span>
-                      <span className="text-xs bg-secondary px-2 py-1 rounded">Fast</span>
-                      <span className="text-xs bg-secondary px-2 py-1 rounded">Fresh</span>
+                  <div className="mt-6 border-t border-border pt-6">
+                    <div className="mb-3 flex items-center justify-center gap-2 text-accent">
+                      <ShieldCheck className="h-4 w-4" />
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em]">Manual bank transfer</p>
+                    </div>
+                    <div className="flex justify-center gap-2 text-xs">
+                      <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">Secure</span>
+                      <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">Fast</span>
+                      <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">Fresh</span>
                     </div>
                   </div>
                 </div>

@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Users, Gift, Utensils, Zap } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 
 export default function Services() {
-  const [, setLocation] = useLocation();
   const submitInquiryMutation = trpc.inquiries.createInquiry.useMutation();
   const [formData, setFormData] = useState({
     name: '',
@@ -22,22 +20,22 @@ export default function Services() {
     {
       icon: Users,
       title: 'Event Catering',
-      description: 'Perfect for birthdays, weddings, corporate events, and celebrations. We customize platters to match your theme.',
+      description: 'Birthday spreads, weddings, office trays, and celebration menus designed around your guest count and budget.',
     },
     {
       icon: Gift,
       title: 'Bulk Orders',
-      description: 'Wholesale pricing for businesses, schools, and organizations. Minimum order quantities apply.',
+      description: 'Structured pricing for businesses, schools, and community orders that need dependable volume and timing.',
     },
     {
       icon: Utensils,
       title: 'Custom Dessert Packages',
-      description: 'Create your own assortment. Mix and match our products to create the perfect package for your needs.',
+      description: 'Mix parfaits, pastries, cakes, and drinks into a custom package that feels made for the occasion.',
     },
     {
       icon: Zap,
       title: 'Rush Orders',
-      description: 'Need treats fast? We offer same-day and next-day delivery for qualified orders. Contact us for availability.',
+      description: 'Fast-turnaround requests for urgent delivery windows, subject to kitchen schedule and product availability.',
     },
   ];
 
@@ -70,7 +68,7 @@ export default function Services() {
         inquiryType: formData.eventType === 'bulk' ? 'bulk_order' : 'catering',
       });
 
-      toast.success('Quote request submitted! We\'ll contact you within 24 hours.');
+      toast.success("Quote request submitted. We'll contact you within 24 hours.");
       setFormData({
         name: '',
         email: '',
@@ -88,56 +86,56 @@ export default function Services() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <section className="py-12 bg-secondary border-b border-border">
-        <div className="container">
-          <h1 className="text-display text-foreground mb-4">Special Services</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            Beyond our regular menu, we offer custom catering, bulk orders, and special packages for your unique needs.
+      <section className="relative overflow-hidden border-b border-border py-14">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.12),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
+        <div className="container relative">
+          <p className="mb-4 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+            Special services
+          </p>
+          <h1 className="text-display mb-4 text-foreground">Orders beyond the regular menu</h1>
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            Catering, bulk trays, custom dessert packages, and faster turnaround requests tailored to your event.
           </p>
         </div>
       </section>
 
-      {/* Services Grid */}
       <section className="py-16 md:py-24">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+          <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-2">
             {services.map((service, index) => {
               const Icon = service.icon;
+
               return (
                 <div
-                  key={index}
-                  className="bg-card p-8 rounded-lg border border-border"
-                  style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)', transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)', animationDelay: `${index * 0.1}s` }}
-                  onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 12px 24px rgba(44, 44, 44, 0.12)'}
-                  onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(44, 44, 44, 0.08)'}
+                  key={service.title}
+                  className="glass-panel rounded-3xl p-8"
+                  style={{ animationDelay: `${index * 0.08}s` }}
                 >
-                  <Icon className="w-12 h-12 text-primary mb-4" />
-                  <h3 className="text-xl font-semibold text-card-foreground mb-3">{service.title}</h3>
-                  <p className="text-card-foreground/80 leading-relaxed">{service.description}</p>
+                  <Icon className="mb-4 h-12 w-12 text-accent" />
+                  <h2 className="mb-3 text-xl font-semibold text-card-foreground">{service.title}</h2>
+                  <p className="leading-relaxed text-muted-foreground">{service.description}</p>
                 </div>
               );
             })}
           </div>
 
-          {/* Quick Contact */}
-          <div className="bg-primary text-white p-8 rounded-lg mb-16 text-center">
-            <h2 className="text-heading mb-4">Quick Contact</h2>
-            <p className="mb-6 opacity-90">
-              For immediate inquiries, reach out to us directly via WhatsApp or phone.
+          <div className="glass-panel mb-16 rounded-3xl px-8 py-10 text-center">
+            <h2 className="text-heading mb-4 text-foreground">Need a quick answer?</h2>
+            <p className="mx-auto mb-6 max-w-2xl text-muted-foreground">
+              For immediate quotes or custom requests, contact Peaceful Taste directly through WhatsApp or phone and we will guide you fast.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <a
                 href="https://wa.me/2349022621323"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white hover:bg-white/90 text-primary font-semibold px-6 py-3 rounded-lg" style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                className="rounded-2xl bg-accent px-6 py-3 font-semibold text-accent-foreground transition-all hover:opacity-90"
               >
                 Chat on WhatsApp
               </a>
               <a
                 href="tel:+2349022621323"
-                className="bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-lg border border-white/50" style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                className="rounded-2xl border border-accent/40 bg-card/40 px-6 py-3 font-semibold text-accent transition-all hover:bg-accent/10"
               >
                 Call Us
               </a>
@@ -146,72 +144,63 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Quote Request Form */}
-      <section className="py-16 md:py-24 bg-secondary">
-        <div className="container max-w-2xl">
-          <div className="text-center mb-12">
+      <section className="border-t border-border py-16 md:py-24">
+        <div className="container max-w-3xl">
+          <div className="mb-12 text-center">
             <h2 className="text-heading mb-4 text-foreground">Request a Quote</h2>
             <p className="text-lg text-muted-foreground">
-              Tell us about your event or order, and we'll get back to you with a custom quote within 24 hours.
+              Share the basics and we will respond with options, pricing, and the next step.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-card p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <form onSubmit={handleSubmit} className="glass-panel rounded-3xl p-8">
+            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Full Name *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Full Name *</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Your name"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Email *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Email *</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="your@email.com"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Phone *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Phone *</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                  placeholder="+1 (555) 123-4567"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="+234 901 234 5678"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Event Type *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Event Type *</label>
                 <select
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   required
                 >
                   <option value="">Select an option</option>
@@ -224,53 +213,43 @@ export default function Services() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Number of Guests
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Number of Guests</label>
                 <input
                   type="number"
                   name="guestCount"
                   value={formData.guestCount}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="50"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-card-foreground mb-2">
-                  Preferred Date
-                </label>
+                <label className="mb-2 block text-sm font-medium text-card-foreground">Preferred Date</label>
                 <input
                   type="date"
                   name="date"
                   value={formData.date}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Additional Details
-              </label>
+              <label className="mb-2 block text-sm font-medium text-card-foreground">Additional Details</label>
               <textarea
                 name="message"
                 value={formData.message}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                placeholder="Tell us more about your needs, preferences, or any special requests..."
+                className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Tell us more about your needs, quantities, flavors, or delivery window."
                 rows={5}
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={submitInquiryMutation.isPending}
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold btn-primary"
-            >
+            <Button type="submit" disabled={submitInquiryMutation.isPending} className="btn-primary w-full text-white">
               {submitInquiryMutation.isPending ? 'Sending Request...' : 'Submit Quote Request'}
             </Button>
           </form>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, Copy } from 'lucide-react';
+import { Loader2, CheckCircle, Copy, MessageCircle } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -20,7 +20,7 @@ const BANK_ACCOUNT = {
 
 export default function PaymentCheckout() {
   const [, setLocation] = useLocation();
-  const { items, total, clearCart } = useCart();
+  const { items, total } = useCart();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -29,7 +29,7 @@ export default function PaymentCheckout() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [paymentComplete, setPaymentComplete] = useState(false);
 
@@ -42,7 +42,7 @@ export default function PaymentCheckout() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -50,7 +50,7 @@ export default function PaymentCheckout() {
 
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.customerName || !formData.customerEmail) {
       toast.error('Please fill in all required fields');
       return;
@@ -63,7 +63,7 @@ export default function PaymentCheckout() {
         customerEmail: formData.customerEmail,
         customerName: formData.customerName,
         customerPhone: formData.customerPhone,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           productId: parseInt(item.product.id.split('-')[1] || '0'),
           name: item.product.name,
           quantity: item.quantity,
@@ -76,7 +76,7 @@ export default function PaymentCheckout() {
 
       if (response.success) {
         setOrderCreated(response);
-        toast.success('Order created! Proceed with payment.');
+        toast.success('Order created. Proceed with payment.');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create order';
@@ -85,19 +85,18 @@ export default function PaymentCheckout() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 1800);
   };
 
   const handleWhatsApp = () => {
-    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(totalAmount)}. I'm ready to make payment.`;
+    const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(totalAmount)}. I am ready to make payment.`;
     window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handlePaymentConfirm = () => {
-    // Simulate payment progress
     let currentProgress = 0;
     const interval = setInterval(() => {
       currentProgress += Math.random() * 30;
@@ -123,13 +122,10 @@ export default function PaymentCheckout() {
         <CheckoutProgress currentStep="cart" />
         <div className="py-12">
           <div className="container max-w-2xl">
-            <div className="text-center py-12">
-              <h1 className="text-3xl font-bold text-foreground mb-4">Your Cart is Empty</h1>
-              <p className="text-muted-foreground mb-6">Add some delicious treats before checking out!</p>
-              <Button
-                onClick={() => setLocation('/shop')}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
+            <div className="glass-panel rounded-3xl p-10 text-center">
+              <h1 className="mb-4 text-3xl font-bold text-foreground">Your cart is empty</h1>
+              <p className="mb-6 text-muted-foreground">Add some delicious treats before checking out.</p>
+              <Button onClick={() => setLocation('/shop')} className="btn-primary text-white">
                 Continue Shopping
               </Button>
             </div>
@@ -142,333 +138,129 @@ export default function PaymentCheckout() {
   if (orderCreated) {
     return (
       <div className="min-h-screen bg-background">
-        <CheckoutProgress currentStep={paymentComplete ? "confirmation" : "payment"} />
+        <CheckoutProgress currentStep={paymentComplete ? 'confirmation' : 'payment'} />
         <div className="py-12">
-          <div className="container max-w-4xl">
-          <h1 className="text-4xl font-bold text-foreground mb-8">Payment Instructions</h1>
+          <div className="container max-w-6xl">
+            <div className="mb-8">
+              <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+                Payment Instructions
+              </p>
+              <h1 className="text-4xl font-bold text-foreground">Complete your transfer securely</h1>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Card className="p-6 mb-6 border-green-200 bg-green-50">
-                <div className="flex gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
-                  <div>
-                    <h2 className="font-bold text-green-900 mb-1">Order Created Successfully!</h2>
-                    <p className="text-sm text-green-800">Order Number: <span className="font-mono font-bold">{orderCreated.orderNumber}</span></p>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                <Card className="glass-panel border-0 p-6">
+                  <div className="flex gap-3">
+                    <CheckCircle className="mt-0.5 h-6 w-6 flex-shrink-0 text-emerald-400" />
+                    <div>
+                      <h2 className="mb-1 font-bold text-foreground">Order created successfully</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Order Number: <span className="font-mono font-bold text-accent">{orderCreated.orderNumber}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
 
-              <Card className="p-6 mb-6">
-                <h2 className="text-2xl font-bold text-foreground mb-6">Bank Transfer Details</h2>
-                
-                <div className="bg-secondary rounded-lg p-6 mb-6 space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Account Holder</p>
-                    <div className="flex justify-between items-center">
-                      <p className="font-semibold text-foreground">{BANK_ACCOUNT.name}</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyToClipboard(BANK_ACCOUNT.name)}
-                        className="h-8"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
+                <Card className="glass-panel border-0 p-6">
+                  <h2 className="mb-6 text-2xl font-bold text-foreground">Bank Transfer Details</h2>
+
+                  <div className="space-y-4 rounded-3xl bg-background/60 p-6">
+                    {[
+                      { label: 'Account Holder', value: BANK_ACCOUNT.name, key: 'name' },
+                      { label: 'Bank Name', value: BANK_ACCOUNT.bank, key: 'bank' },
+                      { label: 'Account Number', value: BANK_ACCOUNT.accountNumber, key: 'account' },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <p className="mb-1 text-sm text-muted-foreground">{field.label}</p>
+                        <div className="flex items-center justify-between gap-3">
+                          <p className={`font-semibold text-foreground ${field.key === 'account' ? 'text-lg tracking-[0.18em]' : ''}`}>
+                            {field.value}
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyToClipboard(field.value, field.key)}
+                            className="h-9 rounded-xl text-accent hover:bg-accent/10 hover:text-accent"
+                          >
+                            <Copy className={`h-4 w-4 ${copiedField === field.key ? 'text-emerald-400' : ''}`} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="border-t border-border pt-4">
+                      <p className="mb-1 text-sm text-muted-foreground">Amount to Transfer</p>
+                      <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Bank Name</p>
-                    <div className="flex justify-between items-center">
-                      <p className="font-semibold text-foreground">{BANK_ACCOUNT.bank}</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyToClipboard(BANK_ACCOUNT.bank)}
-                        className="h-8"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
+                  <div className="mt-6 rounded-3xl border border-accent/20 bg-accent/10 p-4 text-sm text-muted-foreground">
+                    Transfer the exact amount and use your order number as the payment reference where possible.
                   </div>
 
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Account Number</p>
-                    <div className="flex justify-between items-center">
-                      <p className="font-mono font-bold text-foreground text-lg">{BANK_ACCOUNT.accountNumber}</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyToClipboard(BANK_ACCOUNT.accountNumber)}
-                        className="h-8"
-                      >
-                        <Copy className={`w-4 h-4 ${copied ? 'text-green-600' : ''}`} />
-                      </Button>
-                    </div>
+                  <div className="mt-6 space-y-3">
+                    <Button onClick={handleWhatsApp} className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Contact via WhatsApp
+                    </Button>
+                    <Button onClick={() => setLocation('/payment-success')} variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                      Upload proof of payment instead
+                    </Button>
                   </div>
+                </Card>
 
-                  <div className="pt-4 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-1">Amount to Transfer</p>
-                    <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
-                  </div>
-                </div>
+                <Card className="glass-panel border-0 p-8">
+                  <h2 className="mb-8 text-center text-2xl font-bold text-foreground">Payment Status</h2>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-blue-700">
-                    <strong>Important:</strong> Please transfer the exact amount shown above. Use your order number as the payment reference if possible.
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleWhatsApp}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
-                  >
-                    💬 Contact via WhatsApp
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Payment Progress Circle */}
-              <Card className="p-8 mb-6">
-                <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Payment Status</h2>
-                
-                <div className="flex flex-col items-center justify-center">
-                  {/* Circular Progress */}
-                  <div className="relative w-32 h-32 mb-6">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                      {/* Background circle */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        className="text-muted"
-                      />
-                      {/* Progress circle */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        strokeDasharray={`${2 * Math.PI * 45}`}
-                        strokeDashoffset={`${2 * Math.PI * 45 * (1 - paymentProgress / 100)}`}
-                        className="text-primary transition-all duration-300"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    {/* Center text */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <p className="text-3xl font-bold text-primary">{Math.round(paymentProgress)}%</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {paymentComplete ? 'Complete' : 'Processing'}
-                        </p>
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="relative mb-6 h-32 w-32">
+                      <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          strokeDasharray={`${2 * Math.PI * 45}`}
+                          strokeDashoffset={`${2 * Math.PI * 45 * (1 - paymentProgress / 100)}`}
+                          className="text-primary transition-all duration-300"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold text-primary">{Math.round(paymentProgress)}%</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{paymentComplete ? 'Complete' : 'Processing'}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <p className="text-center text-muted-foreground mb-6">
-                    {paymentComplete 
-                      ? 'Payment received! Send proof via WhatsApp for confirmation.'
-                      : 'Click the button below after making payment to update progress.'}
-                  </p>
-
-                  {!paymentComplete ? (
-                    <Button
-                      onClick={handlePaymentConfirm}
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
-                    >
-                      I've Made Payment
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleSendProofViaWhatsApp}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
-                    >
-                      📱 Send Proof via WhatsApp
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            </div>
-
-            <div>
-              <Card className="p-6 bg-secondary">
-                <h3 className="font-bold text-foreground mb-4">Order Summary</h3>
-                <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">{formatNaira(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Delivery</span>
-                    <span className="font-medium">{formatNaira(shippingCost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax (10%)</span>
-                    <span className="font-medium">{formatNaira(tax)}</span>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <p className="text-muted-foreground text-xs mb-2">Total Amount</p>
-                  <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold text-foreground">Items ({items.length})</p>
-                  <div className="space-y-1">
-                    {items.map(item => (
-                      <p key={item.product.id} className="text-xs text-muted-foreground">
-                        {item.product.name} x{item.quantity}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <CheckoutProgress currentStep="delivery" />
-      <div className="py-12">
-        <div className="container max-w-4xl">
-            <h1 className="text-4xl font-bold text-foreground mb-8">Checkout</h1>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-            <Card className="p-6 mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Order Summary</h2>
-              
-              <div className="space-y-4 mb-6 pb-6 border-b border-border">
-                {items.map(item => (
-                  <div key={item.product.id} className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-foreground">{item.product.name}</p>
-                      <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="font-semibold text-foreground">
-                      {formatNaira(Math.round(item.product.price * item.quantity))}
+                    <p className="mb-6 text-center text-muted-foreground">
+                      {paymentComplete
+                        ? 'Payment marked as complete. Send proof on WhatsApp or upload your receipt so we can confirm.'
+                        : 'After transferring the funds, update the progress here and then send your proof of payment.'}
                     </p>
+
+                    {!paymentComplete ? (
+                      <Button onClick={handlePaymentConfirm} className="btn-primary w-full text-white">
+                        I’ve Made Payment
+                      </Button>
+                    ) : (
+                      <Button onClick={handleSendProofViaWhatsApp} className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                        Send Proof via WhatsApp
+                      </Button>
+                    )}
                   </div>
-                ))}
-              </div>
-
-              <div className="space-y-3 mb-6 pb-6 border-b border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">{formatNaira(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Delivery Fee</span>
-                  <span className="font-medium">{formatNaira(shippingCost)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax (10%)</span>
-                  <span className="font-medium">{formatNaira(tax)}</span>
-                </div>
-              </div>
-
-              <div className="mb-8">
-                <p className="text-sm font-semibold text-foreground mb-2">Total Amount</p>
-                <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
-              </div>
-            </Card>
-
-            <Card className="p-6 mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Delivery Information</h2>
-              
-              <form onSubmit={handleCreateOrder} className="space-y-4">
-                <div>
-                  <Label htmlFor="customerName" className="text-foreground font-semibold mb-2 block">Full Name *</Label>
-                  <Input
-                    id="customerName"
-                    name="customerName"
-                    placeholder="Your full name"
-                    value={formData.customerName}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-secondary text-foreground border-border"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="customerEmail" className="text-foreground font-semibold mb-2 block">Email Address *</Label>
-                  <Input
-                    id="customerEmail"
-                    name="customerEmail"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={formData.customerEmail}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-secondary text-foreground border-border"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="customerPhone" className="text-foreground font-semibold mb-2 block">Phone Number</Label>
-                  <Input
-                    id="customerPhone"
-                    name="customerPhone"
-                    placeholder="+234 901 234 5678"
-                    value={formData.customerPhone}
-                    onChange={handleInputChange}
-                    className="bg-secondary text-foreground border-border"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="deliveryLocation" className="text-foreground font-semibold mb-2 block">Delivery Location *</Label>
-                  <select
-                    id="deliveryLocation"
-                    name="deliveryLocation"
-                    value={formData.deliveryLocation}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-lg bg-secondary text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {DELIVERY_LOCATIONS.map(location => (
-                      <option key={location.id} value={location.id} className="bg-background text-foreground">
-                        {location.name} - {formatNaira(location.cost)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    'Proceed to Payment'
-                  )}
-                </Button>
-              </form>
-            </Card>
+                </Card>
               </div>
 
               <div>
-                <Card className="p-6 bg-secondary sticky top-24">
-                  <h3 className="font-bold text-foreground mb-4">Order Summary</h3>
-                  <div className="space-y-3 text-sm mb-6 pb-6 border-b border-border">
+                <Card className="glass-panel sticky top-24 border-0 p-6">
+                  <h3 className="mb-4 font-bold text-foreground">Order Summary</h3>
+                  <div className="space-y-3 border-b border-border pb-6 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-medium text-foreground">{formatNaira(subtotal)}</span>
@@ -483,13 +275,156 @@ export default function PaymentCheckout() {
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-2">Total Amount</p>
+                  <div className="my-6">
+                    <p className="mb-2 text-xs text-muted-foreground">Total Amount</p>
                     <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Items ({items.length})</p>
+                    <div className="space-y-2">
+                      {items.map((item) => (
+                        <div key={item.product.id} className="flex items-start justify-between gap-3 text-sm">
+                          <span className="text-muted-foreground">{item.product.name} x{item.quantity}</span>
+                          <span className="text-foreground">{formatNaira(item.product.price * item.quantity)}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </Card>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <CheckoutProgress currentStep="delivery" />
+      <div className="py-12">
+        <div className="container max-w-6xl">
+          <div className="mb-8">
+            <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+              Checkout
+            </p>
+            <h1 className="text-4xl font-bold text-foreground">Delivery details and order review</h1>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <Card className="glass-panel border-0 p-6">
+                <h2 className="mb-6 text-2xl font-bold text-foreground">Order Summary</h2>
+
+                <div className="space-y-4 border-b border-border pb-6">
+                  {items.map((item) => (
+                    <div key={item.product.id} className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-foreground">{item.product.name}</p>
+                        <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                      </div>
+                      <p className="font-semibold text-foreground">{formatNaira(Math.round(item.product.price * item.quantity))}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 space-y-3 border-b border-border pb-6 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium text-foreground">{formatNaira(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Delivery Fee</span>
+                    <span className="font-medium text-foreground">{formatNaira(shippingCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tax (10%)</span>
+                    <span className="font-medium text-foreground">{formatNaira(tax)}</span>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="mb-2 text-sm font-semibold text-foreground">Total Amount</p>
+                  <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                </div>
+              </Card>
+
+              <Card className="glass-panel border-0 p-6">
+                <h2 className="mb-6 text-2xl font-bold text-foreground">Delivery Information</h2>
+
+                <form onSubmit={handleCreateOrder} className="space-y-4">
+                  <div>
+                    <Label htmlFor="customerName" className="mb-2 block text-foreground font-semibold">Full Name *</Label>
+                    <Input id="customerName" name="customerName" placeholder="Your full name" value={formData.customerName} onChange={handleInputChange} required className="bg-background" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="customerEmail" className="mb-2 block text-foreground font-semibold">Email Address *</Label>
+                    <Input id="customerEmail" name="customerEmail" type="email" placeholder="your@email.com" value={formData.customerEmail} onChange={handleInputChange} required className="bg-background" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="customerPhone" className="mb-2 block text-foreground font-semibold">Phone Number</Label>
+                    <Input id="customerPhone" name="customerPhone" placeholder="+234 901 234 5678" value={formData.customerPhone} onChange={handleInputChange} className="bg-background" />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="deliveryLocation" className="mb-2 block text-foreground font-semibold">Delivery Location *</Label>
+                    <select
+                      id="deliveryLocation"
+                      name="deliveryLocation"
+                      value={formData.deliveryLocation}
+                      onChange={handleInputChange}
+                      className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      {DELIVERY_LOCATIONS.map((location) => (
+                        <option key={location.id} value={location.id} className="bg-background text-foreground">
+                          {location.name} - {formatNaira(location.cost)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <Button type="submit" disabled={isLoading} className="btn-primary w-full text-white">
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Proceed to Payment'
+                    )}
+                  </Button>
+                </form>
+              </Card>
+            </div>
+
+            <div>
+              <Card className="glass-panel sticky top-24 border-0 p-6">
+                <h3 className="mb-4 font-bold text-foreground">At a Glance</h3>
+                <div className="space-y-3 border-b border-border pb-6 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium text-foreground">{formatNaira(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Delivery</span>
+                    <span className="font-medium text-foreground">{formatNaira(shippingCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tax (10%)</span>
+                    <span className="font-medium text-foreground">{formatNaira(tax)}</span>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="mb-2 text-xs text-muted-foreground">Total Amount</p>
+                  <p className="text-2xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                </div>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

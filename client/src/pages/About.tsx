@@ -3,141 +3,75 @@ import { Check } from 'lucide-react';
 export default function About() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <section className="py-12 bg-secondary border-b border-border">
-        <div className="container">
-          <h1 className="text-display text-foreground mb-4">About Peaceful Taste</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            Our story, mission, and commitment to quality
+      <section className="relative overflow-hidden border-b border-border py-14">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.1),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
+        <div className="container relative">
+          <p className="mb-4 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+            About Peaceful Taste
+          </p>
+          <h1 className="text-display mb-4 text-foreground">Built around comfort, quality, and trust</h1>
+          <p className="max-w-2xl text-lg text-muted-foreground">
+            Our story, our standards, and why customers keep returning for fresh handcrafted treats.
           </p>
         </div>
       </section>
 
-      {/* Story Section */}
       <section className="py-16 md:py-24">
-        <div className="container max-w-3xl">
-          <div className="mb-12">
+        <div className="container max-w-5xl">
+          <div className="glass-panel mb-12 rounded-3xl p-8">
             <h2 className="text-heading mb-6 text-foreground">Our Story</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-              Peaceful Taste began with a simple passion: creating handcrafted treats that bring joy to every moment. What started as a small kitchen experiment has grown into a beloved brand trusted by thousands of customers.
+            <p className="mb-4 text-lg leading-relaxed text-muted-foreground">
+              Peaceful Taste began with a simple passion: creating handcrafted treats that bring joy to everyday moments. What started as a small kitchen experiment has grown into a trusted brand for parfaits, pastries, drinks, and special-event orders.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-              We believe that food is more than just sustenance—it's an experience, a memory, and a celebration. Every parfait, pastry, chin-chin, and puff-puff we create is made with love, care, and the finest ingredients we can source.
+            <p className="mb-4 text-lg leading-relaxed text-muted-foreground">
+              We believe food is more than sustenance. It is memory, comfort, celebration, and care. Every parfait, pastry, chin-chin, and puff-puff is prepared with intention and made to leave a strong impression.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Our mission is simple: to bring authentic, delicious, and peaceful moments into your life through our treats. Whether you're celebrating a special occasion or treating yourself to something sweet, Peaceful Taste is here to make it memorable.
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              Whether you are ordering for yourself, your family, or a full event, Peaceful Taste is built to make the experience feel warm, premium, and dependable.
             </p>
           </div>
 
-          {/* Mission & Values */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-              <h3 className="text-xl font-semibold text-foreground mb-4">Our Mission</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                To create exceptional, handcrafted treats that bring joy, comfort, and peaceful moments to our customers' lives through premium quality and authentic flavors.
+          <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="glass-panel rounded-3xl p-8">
+              <h3 className="mb-4 text-xl font-semibold text-foreground">Our Mission</h3>
+              <p className="leading-relaxed text-muted-foreground">
+                To create exceptional handcrafted treats that bring joy, comfort, and peaceful moments through premium ingredients, careful preparation, and thoughtful service.
               </p>
             </div>
-            <div className="bg-white p-8 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-              <h3 className="text-xl font-semibold text-foreground mb-4">Our Vision</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                To be the trusted choice for artisanal treats, known for our commitment to quality, sustainability, and creating memorable experiences for every customer.
+            <div className="glass-panel rounded-3xl p-8">
+              <h3 className="mb-4 text-xl font-semibold text-foreground">Our Vision</h3>
+              <p className="leading-relaxed text-muted-foreground">
+                To become the trusted choice for artisanal treats and event-ready food experiences, known for consistency, taste, and customer care.
               </p>
             </div>
           </div>
 
-          {/* Core Values */}
-          <div>
+          <div className="mb-12">
             <h2 className="text-heading mb-8 text-foreground">Our Core Values</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {[
-                {
-                  title: 'Quality First',
-                  description: 'We never compromise on ingredient quality or preparation standards. Every product meets our rigorous quality checks.',
-                },
-                {
-                  title: 'Authenticity',
-                  description: 'We honor traditional recipes while bringing modern innovation. Our treats are genuine and made with integrity.',
-                },
-                {
-                  title: 'Customer Care',
-                  description: 'Your satisfaction is our priority. We listen to feedback and continuously improve our products and services.',
-                },
-                {
-                  title: 'Sustainability',
-                  description: 'We care about our environment and use eco-friendly packaging and sustainable sourcing practices where possible.',
-                },
-                {
-                  title: 'Transparency',
-                  description: 'We believe in being open about our ingredients, processes, and business practices. No hidden secrets.',
-                },
-                {
-                  title: 'Community',
-                  description: 'We support local suppliers and give back to our community. Together, we create positive change.',
-                },
-              ].map((value, index) => (
-                <div key={index} className="flex gap-4 items-start">
-                  <Check className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                ['Quality First', 'We do not compromise on ingredients, handling, or presentation.'],
+                ['Authenticity', 'We respect familiar flavors while improving the overall experience.'],
+                ['Customer Care', 'Clear communication and dependable delivery matter as much as taste.'],
+                ['Consistency', 'We aim for every returning order to feel just as good as the last one.'],
+                ['Transparency', 'We keep pricing, preparation, and communication straightforward.'],
+                ['Community', 'We serve people, celebrations, and everyday family moments with heart.'],
+              ].map(([title, description]) => (
+                <div key={title} className="flex items-start gap-4">
+                  <Check className="mt-1 h-6 w-6 flex-shrink-0 text-accent" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">{value.title}</h4>
-                    <p className="text-sm text-muted-foreground">{value.description}</p>
+                    <h3 className="mb-2 font-semibold text-foreground">{title}</h3>
+                    <p className="text-sm text-muted-foreground">{description}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Why Choose Us */}
-      <section className="py-16 md:py-24 bg-secondary">
-        <div className="container max-w-3xl">
-          <h2 className="text-heading mb-8 text-foreground text-center">Why Choose Peaceful Taste?</h2>
-          <div className="space-y-6">
-            {[
-              {
-                title: '100% Fresh Daily',
-                description: 'All our treats are made fresh each day. No preservatives, no shortcuts, just pure quality.',
-              },
-              {
-                title: 'Premium Ingredients',
-                description: 'We source only the finest ingredients from trusted suppliers. Quality you can taste in every bite.',
-              },
-              {
-                title: 'Certified Hygiene',
-                description: 'Our kitchen meets all health and safety standards. Your health and safety are our top priority.',
-              },
-              {
-                title: 'Customization Available',
-                description: 'Have special dietary needs or preferences? We can customize orders to suit your requirements.',
-              },
-              {
-                title: 'Fast & Reliable Delivery',
-                description: 'We ensure your treats arrive fresh and on time. Delivery tracking available for all orders.',
-              },
-              {
-                title: 'Customer Support',
-                description: 'Our friendly team is here to help. Contact us anytime with questions or special requests.',
-              },
-            ].map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg border border-border" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-16 md:py-24">
-        <div className="container max-w-3xl">
-          <h2 className="text-heading mb-8 text-foreground text-center">Meet Our Team</h2>
-          <div className="bg-white p-8 rounded-lg border border-border text-center" style={{ boxShadow: '0 4px 12px rgba(44, 44, 44, 0.08)' }}>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-              Our small but passionate team is dedicated to creating the best treats for you. From sourcing ingredients to preparing each product with care, every team member shares our commitment to excellence.
-            </p>
-            <p className="text-muted-foreground">
-              We're always growing and looking for talented individuals who share our passion for quality and customer satisfaction. If you're interested in joining our team, get in touch!
+          <div className="glass-panel rounded-3xl p-8 text-center">
+            <h2 className="text-heading mb-4 text-foreground">Why customers choose us</h2>
+            <p className="mx-auto max-w-3xl text-muted-foreground">
+              Fresh daily production, stronger visual presentation, event support, and a smoother order flow all come together to make Peaceful Taste feel more premium from the first click to delivery.
             </p>
           </div>
         </div>

@@ -8,87 +8,54 @@ interface CheckoutProgressProps {
 
 export default function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
   const steps: Array<{ id: CheckoutStep; label: string; icon: React.ReactNode }> = [
-    { id: 'cart', label: 'Cart', icon: <ShoppingCart className="w-5 h-5" /> },
-    { id: 'delivery', label: 'Delivery', icon: <MapPin className="w-5 h-5" /> },
-    { id: 'payment', label: 'Payment', icon: <CreditCard className="w-5 h-5" /> },
-    { id: 'confirmation', label: 'Confirmation', icon: <CheckCircle className="w-5 h-5" /> },
+    { id: 'cart', label: 'Cart', icon: <ShoppingCart className="h-5 w-5" /> },
+    { id: 'delivery', label: 'Delivery', icon: <MapPin className="h-5 w-5" /> },
+    { id: 'payment', label: 'Payment', icon: <CreditCard className="h-5 w-5" /> },
+    { id: 'confirmation', label: 'Confirmation', icon: <CheckCircle className="h-5 w-5" /> },
   ];
 
-  const stepOrder = ['cart', 'delivery', 'payment', 'confirmation'];
+  const stepOrder: CheckoutStep[] = ['cart', 'delivery', 'payment', 'confirmation'];
   const currentStepIndex = stepOrder.indexOf(currentStep);
 
   return (
-    <div className="bg-background border-b border-border py-8 px-4">
+    <div className="border-b border-border bg-background/70 px-4 py-8 backdrop-blur-xl">
       <div className="container">
-        {/* Progress Bar */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((step, index) => {
-            const isCompleted = index < currentStepIndex;
-            const isCurrent = index === currentStepIndex;
+        <div className="glass-panel rounded-3xl p-5 md:p-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {steps.map((step, index) => {
+              const isCompleted = index < currentStepIndex;
+              const isCurrent = index === currentStepIndex;
 
-            return (
-              <div key={step.id} className="flex flex-col items-center flex-1">
-                {/* Step Circle */}
-                <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-full mb-3 transition-all duration-300 ${
-                    isCompleted
-                      ? 'bg-primary text-background'
-                      : isCurrent
-                      ? 'bg-primary text-background ring-4 ring-primary/30'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {step.icon}
-                </div>
-
-                {/* Step Label */}
-                <span
-                  className={`text-sm font-semibold transition-colors duration-300 ${
-                    isCurrent
-                      ? 'text-primary'
-                      : isCompleted
-                      ? 'text-primary'
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {step.label}
-                </span>
-
-                {/* Connecting Line */}
-                {index < steps.length - 1 && (
+              return (
+                <div key={step.id} className="relative flex items-center gap-3">
                   <div
-                    className={`absolute w-16 h-1 top-6 -right-8 transition-all duration-300 ${
-                      isCompleted ? 'bg-primary' : 'bg-muted'
+                    className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition-all ${
+                      isCompleted || isCurrent
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-card text-muted-foreground'
                     }`}
-                    style={{
-                      left: 'calc(50% + 24px)',
-                      width: 'calc(100% - 48px)',
-                    }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  >
+                    {step.icon}
+                  </div>
+                  <div>
+                    <p className={`text-xs uppercase tracking-[0.2em] ${isCurrent ? 'text-accent' : 'text-muted-foreground'}`}>
+                      Step {index + 1}
+                    </p>
+                    <p className={`text-sm font-semibold ${isCompleted || isCurrent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {step.label}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Progress Percentage */}
-        <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-primary h-full transition-all duration-500 ease-out"
-            style={{
-              width: `${((currentStepIndex + 1) / steps.length) * 100}%`,
-            }}
-          />
-        </div>
-
-        {/* Step Description */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Step {currentStepIndex + 1} of {steps.length}:{' '}
-            <span className="text-foreground font-semibold">
-              {steps[currentStepIndex].label}
-            </span>
-          </p>
+          <div className="mt-6 h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
     </div>
