@@ -18,13 +18,15 @@ import {
   type OrderReceiptPayload,
 } from '@shared/orderReceipt';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { uploadPrivateBlob } from './blob-storage';
 
-initializeAllWorkbooks().catch((err) => console.error('[Excel] Initialization error:', err));
-
 function ensureReceiptDir() {
-  const receiptDir = path.join(process.cwd(), 'data', 'receipts');
+  const baseDir = process.env.VERCEL
+    ? path.join(os.tmpdir(), 'peaceful-taste-data')
+    : path.join(process.cwd(), 'data');
+  const receiptDir = path.join(baseDir, 'receipts');
   if (!fs.existsSync(receiptDir)) {
     fs.mkdirSync(receiptDir, { recursive: true });
   }

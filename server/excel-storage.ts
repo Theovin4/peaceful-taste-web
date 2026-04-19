@@ -1,16 +1,26 @@
-/**
- * Excel Storage Service
- * Stores all orders and inquiries in Excel workbooks
- */
-
 import ExcelJS from 'exceljs';
-const { Workbook } = ExcelJS;
-import * as fs from 'fs';
-import * as path from 'path';
-import { hydrateWorkbookFromBlob, syncWorkbookToBlob } from './blob-storage';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import {
+  blobStorageEnabled,
+  downloadPrivateBlob,
+  listPrivateBlobs,
+  uploadPrivateJson,
+} from './blob-storage';
 
-const ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.xlsx');
-const INQUIRIES_FILE = path.join(process.cwd(), 'data', 'inquiries.xlsx');
+const { Workbook } = ExcelJS;
+
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'peaceful-taste-data')
+  : path.join(process.cwd(), 'data');
+
+const ORDERS_FILE = path.join(DATA_DIR, 'orders.xlsx');
+const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.xlsx');
+const ORDER_RECORD_PREFIX = 'records/orders/';
+const INQUIRY_RECORD_PREFIX = 'records/inquiries/';
+const LOCAL_ORDER_RECORDS_DIR = path.join(DATA_DIR, 'records', 'orders');
+const LOCAL_INQUIRY_RECORDS_DIR = path.join(DATA_DIR, 'records', 'inquiries');
 
 export interface OrderWorkbookRow {
   orderNumber: string;
@@ -40,30 +50,124 @@ export interface InquiryWorkbookRow {
   status: string;
 }
 
-// Ensure data directory exists
-function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+type OrderRecord = OrderWorkbookRow;
+type InquiryRecord = InquiryWorkbookRow;
+
+function ensureDir(dirPath: string) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
   }
 }
 
-/**
- * Initialize orders workbook
- */
-async function initializeOrdersWorkbook() {
+function ensureDataDir() {
+  ensureDir(DATA_DIR);
+  ensureDir(LOCAL_ORDER_RECORDS_DIR);
+  ensureDir(LOCAL_INQUIRY_RECORDS_DIR);
+}
+
+function orderRecordPath(orderNumber: string) {
+  return `${ORDER_RECORD_PREFIX}${orderNumber}.json`;
+}
+
+function inquiryRecordPath(createdAt: string, email: string) {
+  const safeCreatedAt = createdAt.replace(/[^0-9]/g, '');
+  const safeEmail = email.replace(/[^a-zA-Z0-9._-]/g, '-');
+  return `${INQUIRY_RECORD_PREFIX}${safeCreatedAt}-${safeEmail}.json`;
+}
+
+function localOrderRecordFile(orderNumber: string) {
+  return path.join(LOCAL_ORDER_RECORDS_DIR, `${orderNumber}.json`);
+}
+
+function localInquiryRecordFile(createdAt: string, email: string) {
+  const safeCreatedAt = createdAt.replace(/[^0-9]/g, '');
+  const safeEmail = email.replace(/[^a-zA-Z0-9._-]/g, '-');
+  return path.join(LOCAL_INQUIRY_RECORDS_DIR, `${safeCreatedAt}-${safeEmail}.json`);
+}
+
+async function writeOrderRecord(record: OrderRecord) {
   ensureDataDir();
+  fs.writeFileSync(localOrderRecordFile(record.orderNumber), JSON.stringify(record, null, 2));
 
-  await hydrateWorkbookFromBlob(ORDERS_FILE, 'orders');
-  
-  if (fs.existsSync(ORDERS_FILE)) {
-    return;
+  if (blobStorageEnabled()) {
+    await uploadPrivateJson(orderRecordPath(record.orderNumber), record);
   }
+}
 
+async function writeInquiryRecord(record: InquiryRecord) {
+  ensureDataDir();
+  fs.writeFileSync(
+    localInquiryRecordFile(record.createdAt, record.email),
+    JSON.stringify(record, null, 2)
+  );
+
+  if (blobStorageEnabled()) {
+    await uploadPrivateJson(inquiryRecordPath(record.createdAt, record.email), record);
+  }
+}
+
+async function readBlobJson<T>(pathname: string): Promise<T | null> {
+  const blob = await downloadPrivateBlob(pathname);
+  if (!blob) return null;
+
+  try {
+    return JSON.parse(blob.buffer.toString('utf8')) as T;
+  } catch (error) {
+    console.error('[Storage] Failed to parse blob JSON:', pathname, error);
+    return null;
+  }
+}
+
+async function readAllBlobRecords<T>(prefix: string): Promise<T[]> {
+  const blobs = await listPrivateBlobs(prefix);
+  const records = await Promise.all(
+    blobs.map((blob) => readBlobJson<T>(blob.pathname))
+  );
+
+  return records.filter(Boolean) as T[];
+}
+
+function readLocalJsonRecords<T>(dirPath: string): T[] {
+  ensureDir(dirPath);
+
+  return fs
+    .readdirSync(dirPath)
+    .filter((fileName) => fileName.endsWith('.json'))
+    .map((fileName) => {
+      try {
+        return JSON.parse(fs.readFileSync(path.join(dirPath, fileName), 'utf8')) as T;
+      } catch (error) {
+        console.error('[Storage] Failed to parse local JSON:', fileName, error);
+        return null;
+      }
+    })
+    .filter((record): record is T => Boolean(record));
+}
+
+async function getOrderRecords(): Promise<OrderRecord[]> {
+  ensureDataDir();
+  const records = blobStorageEnabled()
+    ? await readAllBlobRecords<OrderRecord>(ORDER_RECORD_PREFIX)
+    : readLocalJsonRecords<OrderRecord>(LOCAL_ORDER_RECORDS_DIR);
+
+  return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+async function getInquiryRecords(): Promise<InquiryRecord[]> {
+  ensureDataDir();
+  const records = blobStorageEnabled()
+    ? await readAllBlobRecords<InquiryRecord>(INQUIRY_RECORD_PREFIX)
+    : readLocalJsonRecords<InquiryRecord>(LOCAL_INQUIRY_RECORDS_DIR);
+
+  return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+async function buildOrdersWorkbookFile() {
+  ensureDataDir();
+  const orders = await getOrderRecords();
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet('Orders');
 
-  // Set column widths
   worksheet.columns = [
     { header: 'Order Number', key: 'orderNumber', width: 20 },
     { header: 'Date', key: 'createdAt', width: 20 },
@@ -71,41 +175,34 @@ async function initializeOrdersWorkbook() {
     { header: 'Email', key: 'customerEmail', width: 30 },
     { header: 'Phone', key: 'customerPhone', width: 15 },
     { header: 'Items', key: 'items', width: 40 },
-    { header: 'Subtotal (₦)', key: 'subtotal', width: 15 },
-    { header: 'Shipping (₦)', key: 'shippingCost', width: 15 },
-    { header: 'Tax (₦)', key: 'tax', width: 15 },
-    { header: 'Total (₦)', key: 'totalAmount', width: 15 },
-    { header: 'Status', key: 'status', width: 15 },
-    { header: 'Payment Method', key: 'paymentMethod', width: 15 },
-    { header: 'Receipt URL', key: 'receiptUrl', width: 40 },
+    { header: 'Subtotal (Naira)', key: 'subtotal', width: 15 },
+    { header: 'Shipping (Naira)', key: 'shippingCost', width: 15 },
+    { header: 'Tax (Naira)', key: 'tax', width: 15 },
+    { header: 'Total (Naira)', key: 'totalAmount', width: 15 },
+    { header: 'Status', key: 'status', width: 18 },
+    { header: 'Payment Method', key: 'paymentMethod', width: 18 },
+    { header: 'Receipt URL', key: 'receiptUrl', width: 50 },
     { header: 'Notes', key: 'notes', width: 30 },
   ];
 
-  // Style header row
   worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B4513' } };
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF8B4513' },
+  };
 
+  orders.forEach((order) => worksheet.addRow(order));
   await workbook.xlsx.writeFile(ORDERS_FILE);
-  await syncWorkbookToBlob(ORDERS_FILE, 'orders');
-  console.log('[Excel] Orders workbook initialized');
+  return ORDERS_FILE;
 }
 
-/**
- * Initialize inquiries workbook
- */
-async function initializeInquiriesWorkbook() {
+async function buildInquiriesWorkbookFile() {
   ensureDataDir();
-
-  await hydrateWorkbookFromBlob(INQUIRIES_FILE, 'inquiries');
-  
-  if (fs.existsSync(INQUIRIES_FILE)) {
-    return;
-  }
-
+  const inquiries = await getInquiryRecords();
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet('Inquiries');
 
-  // Set column widths
   worksheet.columns = [
     { header: 'Date', key: 'createdAt', width: 20 },
     { header: 'Name', key: 'name', width: 25 },
@@ -117,25 +214,25 @@ async function initializeInquiriesWorkbook() {
     { header: 'Status', key: 'status', width: 15 },
   ];
 
-  // Style header row
   worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B4513' } };
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF8B4513' },
+  };
 
+  inquiries.forEach((inquiry) => worksheet.addRow(inquiry));
   await workbook.xlsx.writeFile(INQUIRIES_FILE);
-  await syncWorkbookToBlob(INQUIRIES_FILE, 'inquiries');
-  console.log('[Excel] Inquiries workbook initialized');
+  return INQUIRIES_FILE;
 }
 
-/**
- * Add order to Excel
- */
 export async function addOrderToExcel(orderData: {
   orderNumber: string;
   createdAt: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  items: any;
+  items: { name: string; quantity: number }[] | unknown;
   subtotal: number;
   shippingCost: number;
   tax: number;
@@ -145,147 +242,73 @@ export async function addOrderToExcel(orderData: {
   receiptUrl?: string;
   notes?: string;
 }) {
-  try {
-    await initializeOrdersWorkbook();
+  const itemsString = Array.isArray(orderData.items)
+    ? orderData.items.map((item) => `${item.name} x${item.quantity}`).join(', ')
+    : JSON.stringify(orderData.items);
 
-    const workbook = new Workbook();
-    await workbook.xlsx.readFile(ORDERS_FILE);
-    const worksheet = workbook.getWorksheet('Orders');
-    if (!worksheet) throw new Error('Orders worksheet not found');
+  const record: OrderRecord = {
+    orderNumber: orderData.orderNumber,
+    createdAt: orderData.createdAt,
+    customerName: orderData.customerName,
+    customerEmail: orderData.customerEmail,
+    customerPhone: orderData.customerPhone || 'N/A',
+    items: itemsString,
+    subtotal: orderData.subtotal,
+    shippingCost: orderData.shippingCost,
+    tax: orderData.tax,
+    totalAmount: orderData.totalAmount,
+    status: orderData.status,
+    paymentMethod: orderData.paymentMethod,
+    receiptUrl: orderData.receiptUrl || 'Pending',
+    notes: orderData.notes || '',
+  };
 
-    // Format items as string
-    const itemsString = Array.isArray(orderData.items)
-      ? orderData.items.map((i: any) => `${i.name} x${i.quantity}`).join(', ')
-      : JSON.stringify(orderData.items);
-
-    // Add row
-    worksheet.addRow({
-      orderNumber: orderData.orderNumber,
-      createdAt: new Date().toLocaleString('en-NG'),
-      customerName: orderData.customerName,
-      customerEmail: orderData.customerEmail,
-      customerPhone: orderData.customerPhone || 'N/A',
-      items: itemsString,
-      subtotal: orderData.subtotal,
-      shippingCost: orderData.shippingCost,
-      tax: orderData.tax,
-      totalAmount: orderData.totalAmount,
-      status: orderData.status,
-      paymentMethod: orderData.paymentMethod,
-      receiptUrl: orderData.receiptUrl || 'Pending',
-      notes: orderData.notes || '',
-    });
-
-    await workbook.xlsx.writeFile(ORDERS_FILE);
-    await syncWorkbookToBlob(ORDERS_FILE, 'orders');
-    console.log(`[Excel] Order ${orderData.orderNumber} added to workbook`);
-    return true;
-  } catch (error) {
-    console.error('[Excel] Error adding order:', error);
-    throw error;
-  }
+  await writeOrderRecord(record);
+  await buildOrdersWorkbookFile();
+  return true;
 }
 
-export async function updateOrderReceiptInExcel(orderNumber: string, receiptUrl: string, status: string = 'receipt_uploaded') {
-  try {
-    await initializeOrdersWorkbook();
+export async function updateOrderReceiptInExcel(
+  orderNumber: string,
+  receiptUrl: string,
+  status: string = 'receipt_uploaded'
+) {
+  const records = await getOrderRecords();
+  const existing = records.find((record) => record.orderNumber === orderNumber);
+  if (!existing) return false;
 
-    const workbook = new Workbook();
-    await workbook.xlsx.readFile(ORDERS_FILE);
-    const worksheet = workbook.getWorksheet('Orders');
-    if (!worksheet) throw new Error('Orders worksheet not found');
+  await writeOrderRecord({
+    ...existing,
+    receiptUrl,
+    status,
+  });
+  await buildOrdersWorkbookFile();
 
-    let updated = false;
-
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return;
-
-      const currentOrderNumber = row.getCell(1).text?.trim() || row.getCell(1).value?.toString().trim();
-      if (currentOrderNumber === orderNumber) {
-        row.getCell(11).value = status;
-        row.getCell(13).value = receiptUrl;
-        updated = true;
-      }
-    });
-
-    await workbook.xlsx.writeFile(ORDERS_FILE);
-    await syncWorkbookToBlob(ORDERS_FILE, 'orders');
-    return updated;
-  } catch (error) {
-    console.error('[Excel] Error updating order receipt:', error);
-    throw error;
-  }
+  return true;
 }
 
 export async function getOrdersFromExcel(): Promise<OrderWorkbookRow[]> {
-  await initializeOrdersWorkbook();
-
-  const workbook = new Workbook();
-  await workbook.xlsx.readFile(ORDERS_FILE);
-  const worksheet = workbook.getWorksheet('Orders');
-  if (!worksheet) throw new Error('Orders worksheet not found');
-
-  const orders: OrderWorkbookRow[] = [];
-
-  worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber === 1) return;
-
-    orders.push({
-      orderNumber: row.getCell(1).text || '',
-      createdAt: row.getCell(2).text || '',
-      customerName: row.getCell(3).text || '',
-      customerEmail: row.getCell(4).text || '',
-      customerPhone: row.getCell(5).text || '',
-      items: row.getCell(6).text || '',
-      subtotal: Number(row.getCell(7).value || 0),
-      shippingCost: Number(row.getCell(8).value || 0),
-      tax: Number(row.getCell(9).value || 0),
-      totalAmount: Number(row.getCell(10).value || 0),
-      status: row.getCell(11).text || '',
-      paymentMethod: row.getCell(12).text || '',
-      receiptUrl: row.getCell(13).text || '',
-      notes: row.getCell(14).text || '',
-    });
-  });
-
-  return orders.filter((order) => order.orderNumber);
+  return getOrderRecords();
 }
 
 export async function getInquiriesFromExcel(): Promise<InquiryWorkbookRow[]> {
-  await initializeInquiriesWorkbook();
-
-  const workbook = new Workbook();
-  await workbook.xlsx.readFile(INQUIRIES_FILE);
-  const worksheet = workbook.getWorksheet('Inquiries');
-  if (!worksheet) throw new Error('Inquiries worksheet not found');
-
-  const inquiries: InquiryWorkbookRow[] = [];
-
-  worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber === 1) return;
-
-    inquiries.push({
-      createdAt: row.getCell(1).text || '',
-      name: row.getCell(2).text || '',
-      email: row.getCell(3).text || '',
-      phone: row.getCell(4).text || '',
-      subject: row.getCell(5).text || '',
-      message: row.getCell(6).text || '',
-      inquiryType: row.getCell(7).text || '',
-      status: row.getCell(8).text || '',
-    });
-  });
-
-  return inquiries.filter((inquiry) => inquiry.email || inquiry.subject);
+  return getInquiryRecords();
 }
 
 export async function getWorkbookSummary() {
-  const [orders, inquiries] = await Promise.all([getOrdersFromExcel(), getInquiriesFromExcel()]);
+  const [orders, inquiries] = await Promise.all([
+    getOrderRecords(),
+    getInquiryRecords(),
+  ]);
 
   const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
   const pendingOrders = orders.filter((order) => order.status === 'pending').length;
-  const receiptUploadedOrders = orders.filter((order) => order.status === 'receipt_uploaded').length;
-  const uniqueCustomers = new Set(orders.map((order) => order.customerEmail).filter(Boolean)).size;
+  const receiptUploadedOrders = orders.filter(
+    (order) => order.status === 'receipt_uploaded'
+  ).length;
+  const uniqueCustomers = new Set(
+    orders.map((order) => order.customerEmail).filter(Boolean)
+  ).size;
 
   return {
     ordersCount: orders.length,
@@ -299,9 +322,6 @@ export async function getWorkbookSummary() {
   };
 }
 
-/**
- * Add inquiry to Excel
- */
 export async function addInquiryToExcel(inquiryData: {
   name: string;
   email: string;
@@ -311,55 +331,38 @@ export async function addInquiryToExcel(inquiryData: {
   inquiryType: string;
   status: string;
 }) {
-  try {
-    await initializeInquiriesWorkbook();
+  const record: InquiryRecord = {
+    createdAt: new Date().toISOString(),
+    name: inquiryData.name,
+    email: inquiryData.email,
+    phone: inquiryData.phone || 'N/A',
+    subject: inquiryData.subject,
+    message: inquiryData.message,
+    inquiryType: inquiryData.inquiryType,
+    status: inquiryData.status,
+  };
 
-    const workbook = new Workbook();
-    await workbook.xlsx.readFile(INQUIRIES_FILE);
-    const worksheet = workbook.getWorksheet('Inquiries');
-    if (!worksheet) throw new Error('Inquiries worksheet not found');
-
-    // Add row
-    worksheet.addRow({
-      createdAt: new Date().toLocaleString('en-NG'),
-      name: inquiryData.name,
-      email: inquiryData.email,
-      phone: inquiryData.phone || 'N/A',
-      subject: inquiryData.subject,
-      message: inquiryData.message,
-      inquiryType: inquiryData.inquiryType,
-      status: inquiryData.status,
-    });
-
-    await workbook.xlsx.writeFile(INQUIRIES_FILE);
-    await syncWorkbookToBlob(INQUIRIES_FILE, 'inquiries');
-    console.log(`[Excel] Inquiry from ${inquiryData.name} added to workbook`);
-    return true;
-  } catch (error) {
-    console.error('[Excel] Error adding inquiry:', error);
-    throw error;
-  }
+  await writeInquiryRecord(record);
+  await buildInquiriesWorkbookFile();
+  return true;
 }
 
-/**
- * Get orders Excel file path
- */
+export async function prepareOrdersWorkbookDownload() {
+  return buildOrdersWorkbookFile();
+}
+
+export async function prepareInquiriesWorkbookDownload() {
+  return buildInquiriesWorkbookFile();
+}
+
 export function getOrdersFilePath(): string {
   return ORDERS_FILE;
 }
 
-/**
- * Get inquiries Excel file path
- */
 export function getInquiriesFilePath(): string {
   return INQUIRIES_FILE;
 }
 
-/**
- * Initialize all workbooks
- */
 export async function initializeAllWorkbooks() {
-  await initializeOrdersWorkbook();
-  await initializeInquiriesWorkbook();
-  console.log('[Excel] All workbooks initialized');
+  ensureDataDir();
 }

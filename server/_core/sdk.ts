@@ -302,4 +302,12 @@ class SDKServer {
   }
 }
 
-export const sdk = new SDKServer();
+let sdkInstance: SDKServer | null = null;
+
+export function getSdk(): SDKServer {
+  if (!sdkInstance) {
+    sdkInstance = new SDKServer();
+  }
+
+  return sdkInstance;
+}
