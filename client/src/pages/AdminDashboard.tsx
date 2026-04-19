@@ -158,7 +158,7 @@ export default function AdminDashboard() {
               </div>
               <div className="rounded-3xl border border-border bg-background/60 p-4">
                 <p className="font-semibold text-foreground">Email business copy</p>
-                <p className="mt-1">Enabled through prefilled email drafts. Fully automatic sending still requires a real email delivery provider.</p>
+                <p className="mt-1">Chosen provider: Resend free tier. The code is ready, but automatic sending still needs a real Resend account key and verified sending domain.</p>
               </div>
             </div>
           </Card>

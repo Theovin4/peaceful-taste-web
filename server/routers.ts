@@ -9,6 +9,7 @@ import { notifyOwner } from './_core/notification';
 import { addOrderToExcel, addInquiryToExcel, getWorkbookSummary, initializeAllWorkbooks, updateOrderReceiptInExcel } from './excel-storage';
 import { sendOrderConfirmationSMS } from './termii-sms';
 import { generateOrderReceipt } from './pdf-receipt';
+import { sendCustomerReceiptEmail, sendOwnerOrderEmail, sendOwnerPaymentProofEmail } from './email';
 import {
   buildBusinessEmailUrl,
   buildBusinessWhatsAppUrl,
@@ -143,6 +144,13 @@ export const appRouter = router({
             content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nTotal: ${formatNairaAmount(totalAmount)}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
           });
 
+          sendOwnerOrderEmail(receiptPayload, receiptBase64).catch((error) =>
+            console.warn('[Email] Failed to send owner order email:', error)
+          );
+          sendCustomerReceiptEmail(receiptPayload, receiptBase64).catch((error) =>
+            console.warn('[Email] Failed to send customer receipt email:', error)
+          );
+
           if (input.customerPhone) {
             sendOrderConfirmationSMS(input.customerPhone, orderNumber, totalAmount).catch((err) =>
               console.error('[SMS] Failed to send order confirmation:', err)
@@ -186,6 +194,10 @@ export const appRouter = router({
             title: `Payment Receipt: ${input.orderNumber}`,
             content: `Order ${input.orderNumber} receipt uploaded.\nStored at: ${persistedReceipt.storedLocation}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
           });
+
+          sendOwnerPaymentProofEmail(input.orderNumber, persistedReceipt.storedLocation).catch((error) =>
+            console.warn('[Email] Failed to send payment proof email:', error)
+          );
 
           return {
             success: true,
