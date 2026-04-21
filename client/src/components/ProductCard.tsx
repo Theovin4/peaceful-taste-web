@@ -49,12 +49,20 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex flex-col gap-3 p-4">
         <div>
+          {product.size && (
+            <p className="mb-2 inline-flex rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+              {product.size}
+            </p>
+          )}
           <h3 className="mb-1 text-lg font-semibold text-foreground">{product.name}</h3>
           <p className="line-clamp-2 text-sm text-muted-foreground">{product.description}</p>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-primary/40 bg-primary/10 p-3">
-          <span className="text-3xl font-black text-primary drop-shadow-lg">{formatNaira(product.price)}</span>
+        <div className="flex items-center justify-between rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/20 via-primary/20 to-accent/10 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.2)]">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Price</p>
+            <span className="text-3xl font-black text-foreground">{formatNaira(product.price)}</span>
+          </div>
           <div className="flex items-center gap-1 text-accent">
             <Star className="h-4 w-4 fill-current" />
             <span className="text-xs font-medium">4.8</span>

@@ -1,24 +1,110 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Download, Eye, EyeOff, Lock, BarChart3, FileSpreadsheet, Mail, MessageCircle, Package, Receipt, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  BarChart3,
+  Download,
+  Eye,
+  EyeOff,
+  FileSpreadsheet,
+  ImagePlus,
+  Lock,
+  Mail,
+  MessageCircle,
+  Package,
+  Plus,
+  Receipt,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { formatNaira } from '@/lib/format';
+import { fileToDataUrl } from '@/lib/orderReceipt';
 
 const ADMIN_PASSWORD = 'peaceful123';
+
+type ProductFormState = {
+  name: string;
+  categoryId: string;
+  price: string;
+  description: string;
+  size: string;
+  imageUrl: string;
+  imageFile: File | null;
+  isBestSeller: boolean;
+  isNew: boolean;
+  isActive: boolean;
+};
+
+const initialProductForm: ProductFormState = {
+  name: '',
+  categoryId: '',
+  price: '',
+  description: '',
+  size: '',
+  imageUrl: '',
+  imageFile: null,
+  isBestSeller: false,
+  isNew: false,
+  isActive: true,
+};
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
+  const [productForm, setProductForm] = useState<ProductFormState>(initialProductForm);
 
   const summaryQuery = trpc.orders.dashboardSummary.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchOnWindowFocus: false,
   });
+  const catalogQuery = trpc.catalog.getCatalog.useQuery(undefined, {
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: false,
+  });
+
+  const createCategoryMutation = trpc.catalog.createCategory.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Category created successfully.');
+      setCategoryForm({ name: '', description: '' });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const deleteCategoryMutation = trpc.catalog.deleteCategory.useMutation({
+    onSuccess: async () => {
+      await Promise.all([catalogQuery.refetch(), summaryQuery.refetch()]);
+      toast.success('Category removed.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const createProductMutation = trpc.catalog.createProduct.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Product created successfully.');
+      setProductForm(initialProductForm);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const deleteProductMutation = trpc.catalog.deleteProduct.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Product removed.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   const summary = summaryQuery.data;
+  const catalog = catalogQuery.data;
+
   const stats = useMemo(() => {
     if (!summary) {
       return [
@@ -54,6 +140,36 @@ export default function AdminDashboard() {
     window.open(url, '_blank');
   };
 
+  const submitCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createCategoryMutation.mutateAsync(categoryForm);
+  };
+
+  const submitProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let imageDataUrl: string | undefined;
+    let imageFileName: string | undefined;
+    if (productForm.imageFile) {
+      imageDataUrl = await fileToDataUrl(productForm.imageFile);
+      imageFileName = productForm.imageFile.name;
+    }
+
+    await createProductMutation.mutateAsync({
+      name: productForm.name,
+      categoryId: productForm.categoryId,
+      price: Number(productForm.price),
+      description: productForm.description,
+      size: productForm.size,
+      imageUrl: productForm.imageUrl,
+      imageDataUrl,
+      imageFileName,
+      isBestSeller: productForm.isBestSeller,
+      isNew: productForm.isNew,
+      isActive: productForm.isActive,
+    });
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background py-12">
@@ -63,7 +179,7 @@ export default function AdminDashboard() {
               <Lock className="h-12 w-12 text-accent" />
             </div>
             <h1 className="mb-2 text-center text-3xl font-bold text-foreground">Admin Access</h1>
-            <p className="mb-6 text-center text-muted-foreground">Enter password to access workbook downloads and analysis.</p>
+            <p className="mb-6 text-center text-muted-foreground">Enter password to manage products, categories, receipts, and workbook exports.</p>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
@@ -101,9 +217,12 @@ export default function AdminDashboard() {
       <div className="container space-y-8">
         <div>
           <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-            Workbook control
+            Operations dashboard
           </p>
-          <h1 className="text-4xl font-bold text-foreground">Orders, receipts, and inquiry analysis</h1>
+          <h1 className="text-4xl font-bold text-foreground">Manage products, receipts, and business records</h1>
+          <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
+            Use this page to create categories, upload new products, remove outdated items, review recent orders, and download Excel workbooks for analysis.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -118,14 +237,14 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Card className="glass-panel border-0 p-6">
             <div className="mb-4 flex items-center gap-3">
               <FileSpreadsheet className="h-6 w-6 text-accent" />
               <h2 className="text-2xl font-bold text-foreground">Excel downloads</h2>
             </div>
             <p className="mb-6 text-sm text-muted-foreground">
-              Download the latest workbook files for offline review, filtering, charting, and analysis in Excel or Google Sheets.
+              Download the latest order and inquiry workbooks for Excel, Google Sheets, and manual business analysis.
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <Button onClick={() => openDownload('orders')} className="btn-primary text-white">
@@ -137,9 +256,6 @@ export default function AdminDashboard() {
                 Download Inquiries Workbook
               </Button>
             </div>
-            <div className="mt-6 rounded-3xl border border-border bg-background/60 p-4 text-sm text-muted-foreground">
-              Orders workbook columns include customer details, totals, payment status, and receipt storage path for auditing.
-            </div>
           </Card>
 
           <Card className="glass-panel border-0 p-6">
@@ -149,72 +265,290 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-4 text-sm text-muted-foreground">
               <div className="rounded-3xl border border-border bg-background/60 p-4">
-                <p className="font-semibold text-foreground">Customer receipt copy</p>
-                <p className="mt-1">Enabled. Each order now generates a downloadable PDF receipt immediately.</p>
+                <p className="font-semibold text-foreground">Customer PDF receipts</p>
+                <p className="mt-1">Enabled. Every order generates a customer receipt with payment details and full line-item totals.</p>
               </div>
               <div className="rounded-3xl border border-border bg-background/60 p-4">
                 <p className="flex items-center gap-2 font-semibold text-foreground"><MessageCircle className="h-4 w-4 text-emerald-400" /> WhatsApp business copy</p>
-                <p className="mt-1">Enabled through prefilled business-share links. Fully automatic sending still requires a real provider account.</p>
+                <p className="mt-1">Enabled through prefilled business-share links.</p>
               </div>
               <div className="rounded-3xl border border-border bg-background/60 p-4">
-                <p className="font-semibold text-foreground">Email business copy</p>
-                <p className="mt-1">Chosen provider: Resend free tier. The code is ready, but automatic sending still needs a real Resend account key and verified sending domain.</p>
+                <p className="font-semibold text-foreground">Automatic email sending</p>
+                <p className="mt-1">Code is ready. Resend still needs an allowed sender domain before automatic email can go to customers.</p>
               </div>
             </div>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Card className="glass-panel border-0 p-6">
-            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent orders</h2>
-            {summaryQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading workbook summary...</p>
-            ) : summary?.recentOrders?.length ? (
-              <div className="space-y-3">
-                {summary.recentOrders.map((order) => (
-                  <div key={order.orderNumber} className="rounded-3xl border border-border bg-background/60 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-foreground">{order.customerName}</p>
-                        <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-primary">{formatNaira(order.totalAmount)}</p>
-                        <p className="text-xs uppercase tracking-[0.2em] text-accent">{order.status || 'pending'}</p>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">{order.items}</p>
-                  </div>
-                ))}
+            <div className="mb-5 flex items-center gap-3">
+              <Plus className="h-6 w-6 text-accent" />
+              <h2 className="text-2xl font-bold text-foreground">Create category</h2>
+            </div>
+            <form onSubmit={submitCategory} className="space-y-4">
+              <div>
+                <Label htmlFor="categoryName" className="mb-2 block font-semibold text-foreground">Category name</Label>
+                <Input
+                  id="categoryName"
+                  value={categoryForm.name}
+                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g. Fresh Juices"
+                  className="bg-background"
+                  required
+                />
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No orders stored yet.</p>
-            )}
+              <div>
+                <Label htmlFor="categoryDescription" className="mb-2 block font-semibold text-foreground">Description</Label>
+                <textarea
+                  id="categoryDescription"
+                  value={categoryForm.description}
+                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Short description shown on the shop page"
+                  className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={createCategoryMutation.isPending} className="btn-primary text-white">
+                Create Category
+              </Button>
+            </form>
+
+            <div className="mt-6 space-y-3">
+              {(catalog?.categories ?? []).map((category) => (
+                <div key={category.id} className="rounded-3xl border border-border bg-background/60 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-semibold text-foreground">{category.name}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => deleteCategoryMutation.mutate({ categoryId: category.id })}
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </Card>
 
           <Card className="glass-panel border-0 p-6">
-            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent inquiries</h2>
-            {summaryQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading workbook summary...</p>
-            ) : summary?.recentInquiries?.length ? (
-              <div className="space-y-3">
-                {summary.recentInquiries.map((inquiry, index) => (
-                  <div key={`${inquiry.email}-${index}`} className="rounded-3xl border border-border bg-background/60 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-foreground">{inquiry.name}</p>
-                        <p className="text-xs text-muted-foreground">{inquiry.email}</p>
-                      </div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-accent">{inquiry.inquiryType}</p>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">{inquiry.subject}</p>
-                  </div>
+            <div className="mb-5 flex items-center gap-3">
+              <ImagePlus className="h-6 w-6 text-accent" />
+              <h2 className="text-2xl font-bold text-foreground">Add product</h2>
+            </div>
+            <form onSubmit={submitProduct} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="productName" className="mb-2 block font-semibold text-foreground">Product name</Label>
+                  <Input
+                    id="productName"
+                    value={productForm.name}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g. Mango Yoghurt 35cl"
+                    className="bg-background"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="productCategory" className="mb-2 block font-semibold text-foreground">Category</Label>
+                  <select
+                    id="productCategory"
+                    value={productForm.categoryId}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, categoryId: e.target.value }))}
+                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                    required
+                  >
+                    <option value="">Select category</option>
+                    {(catalog?.categories ?? []).map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="productPrice" className="mb-2 block font-semibold text-foreground">Price (NGN)</Label>
+                  <Input
+                    id="productPrice"
+                    type="number"
+                    min="1"
+                    value={productForm.price}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, price: e.target.value }))}
+                    placeholder="3500"
+                    className="bg-background"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="productSize" className="mb-2 block font-semibold text-foreground">Size or pack</Label>
+                  <Input
+                    id="productSize"
+                    value={productForm.size}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, size: e.target.value }))}
+                    placeholder="35cl, 330ml, family pack"
+                    className="bg-background"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="productDescription" className="mb-2 block font-semibold text-foreground">Description</Label>
+                <textarea
+                  id="productDescription"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Short clear description for customers"
+                  className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="productImageUrl" className="mb-2 block font-semibold text-foreground">Image URL</Label>
+                  <Input
+                    id="productImageUrl"
+                    value={productForm.imageUrl}
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                    placeholder="https://..."
+                    className="bg-background"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="productImageFile" className="mb-2 block font-semibold text-foreground">Or upload image</Label>
+                  <input
+                    id="productImageFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setProductForm((prev) => ({ ...prev, imageFile: e.target.files?.[0] ?? null }))}
+                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                {[
+                  { key: 'isBestSeller', label: 'Best seller' },
+                  { key: 'isNew', label: 'New arrival' },
+                  { key: 'isActive', label: 'Visible in shop' },
+                ].map((option) => (
+                  <label key={option.key} className="flex items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(productForm[option.key as keyof ProductFormState])}
+                      onChange={(e) =>
+                        setProductForm((prev) => ({
+                          ...prev,
+                          [option.key]: e.target.checked,
+                        }))
+                      }
+                    />
+                    {option.label}
+                  </label>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No inquiries stored yet.</p>
-            )}
+
+              <Button type="submit" disabled={createProductMutation.isPending} className="btn-primary text-white">
+                Upload Product
+              </Button>
+            </form>
           </Card>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+          <Card className="glass-panel border-0 p-6">
+            <h2 className="mb-4 text-2xl font-bold text-foreground">Current products</h2>
+            <div className="space-y-3">
+              {(catalog?.products ?? []).map((product) => {
+                const category = catalog?.categories.find((item) => item.id === product.categoryId);
+                return (
+                  <div key={product.id} className="rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex gap-4">
+                        <img src={product.image} alt={product.name} className="h-20 w-20 rounded-2xl object-cover" />
+                        <div>
+                          <p className="font-semibold text-foreground">{product.name}</p>
+                          <p className="text-sm text-accent">{formatNaira(product.price)}</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                            {category?.name ?? product.categoryId}
+                            {product.size ? ` • ${product.size}` : ''}
+                          </p>
+                          <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        onClick={() => deleteProductMutation.mutate({ productId: product.id })}
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+
+          <div className="space-y-8">
+            <Card className="glass-panel border-0 p-6">
+              <h2 className="mb-4 text-2xl font-bold text-foreground">Recent orders</h2>
+              {summaryQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading order summary...</p>
+              ) : summary?.recentOrders?.length ? (
+                <div className="space-y-3">
+                  {summary.recentOrders.map((order) => (
+                    <div key={order.orderNumber} className="rounded-3xl border border-border bg-background/60 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-foreground">{order.customerName}</p>
+                          <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-foreground">{formatNaira(order.totalAmount)}</p>
+                          <p className="text-xs uppercase tracking-[0.2em] text-accent">{order.status || 'pending'}</p>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{order.items}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No orders stored yet.</p>
+              )}
+            </Card>
+
+            <Card className="glass-panel border-0 p-6">
+              <h2 className="mb-4 text-2xl font-bold text-foreground">Recent inquiries</h2>
+              {summaryQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading inquiry summary...</p>
+              ) : summary?.recentInquiries?.length ? (
+                <div className="space-y-3">
+                  {summary.recentInquiries.map((inquiry, index) => (
+                    <div key={`${inquiry.email}-${index}`} className="rounded-3xl border border-border bg-background/60 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-foreground">{inquiry.name}</p>
+                          <p className="text-xs text-muted-foreground">{inquiry.email}</p>
+                        </div>
+                        <p className="text-xs uppercase tracking-[0.2em] text-accent">{inquiry.inquiryType}</p>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{inquiry.subject}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No inquiries stored yet.</p>
+              )}
+            </Card>
+          </div>
         </div>
 
         <div>

@@ -35,6 +35,7 @@ export default function Footer() {
                 ['Shop', '/shop'],
                 ['Services', '/services'],
                 ['About', '/about'],
+                ['Dashboard', '/admin'],
               ].map(([label, href]) => (
                 <li key={href}>
                   <a href={href} className="text-muted-foreground hover:text-accent" style={transitionStyle}>
@@ -77,6 +78,7 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
             <p className="text-muted-foreground">&copy; {currentYear} Peaceful Taste. All rights reserved.</p>
             <div className="flex gap-6">
+              <a href="/admin" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Dashboard</a>
               <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Privacy Policy</a>
               <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Terms of Service</a>
             </div>

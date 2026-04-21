@@ -12,11 +12,12 @@ import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
 import CheckoutProgress from '@/components/CheckoutProgress';
 import { formatNaira } from '@/lib/format';
 import { copyTextToClipboard, downloadPdfReceipt, saveLatestReceipt, type OrderReceiptClientPackage } from '@/lib/orderReceipt';
+import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
 
 const BANK_ACCOUNT = {
-  name: 'Vincent Theophilus',
-  bank: 'Monie Point Bank',
-  accountNumber: '8139171125',
+  name: PEACEFUL_TASTE_CONTACT.accountName,
+  bank: PEACEFUL_TASTE_CONTACT.bankName,
+  accountNumber: PEACEFUL_TASTE_CONTACT.accountNumber,
 };
 
 export default function PaymentCheckout() {
@@ -76,7 +77,7 @@ export default function PaymentCheckout() {
         customerPhone: formData.customerPhone,
         deliveryLocation: DELIVERY_LOCATIONS.find((location) => location.id === formData.deliveryLocation)?.name || 'Lagos',
         items: items.map((item) => ({
-          productId: parseInt(item.product.id.split('-')[1] || '0'),
+          productId: item.product.id,
           name: item.product.name,
           quantity: item.quantity,
           price: item.product.price,
@@ -116,12 +117,12 @@ export default function PaymentCheckout() {
 
   const handleWhatsApp = () => {
     const message = `Hi, I have an order (${orderCreated?.orderNumber}) for ${formatNaira(orderCreated?.totalAmount ?? totalAmount)}. I am ready to make payment.`;
-    window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleSendProofViaWhatsApp = () => {
     const message = `Hi, I have completed payment for order ${orderCreated?.orderNumber}. The amount transferred was ${formatNaira(orderCreated?.totalAmount ?? totalAmount)}. Please confirm receipt.`;
-    window.open(`https://wa.me/2349022621323?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (items.length === 0 && !orderCreated) {

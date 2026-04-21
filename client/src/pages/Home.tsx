@@ -2,14 +2,15 @@ import { useLocation } from 'wouter';
 import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/lib/products';
 import LimitedTimeOffers from '@/components/LimitedTimeOffers';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import { useCatalog } from '@/hooks/useCatalog';
 
 const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { products } = useCatalog();
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
 
   return (

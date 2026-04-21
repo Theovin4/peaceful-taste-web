@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { COOKIE_NAME } from '@shared/const';
+import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
 import { getSessionCookieOptions } from './_core/cookies';
 import { systemRouter } from './_core/systemRouter';
 import { publicProcedure, router } from './_core/trpc';
@@ -21,6 +22,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { uploadPrivateBlob } from './blob-storage';
+import { createCategory, createProduct, deleteCategory, deleteProduct, getCatalog } from './catalog-storage';
 
 function ensureReceiptDir() {
   const baseDir = process.env.VERCEL
@@ -71,6 +73,79 @@ async function persistReceipt(orderNumber: string, receiptName: string, receiptD
 
 export const appRouter = router({
   system: systemRouter,
+  catalog: router({
+    getCatalog: publicProcedure.query(async () => {
+      return getCatalog();
+    }),
+
+    createCategory: publicProcedure
+      .input(z.object({
+        name: z.string().min(2).max(80),
+        description: z.string().min(4).max(180),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          return await createCategory(input);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to create category',
+          });
+        }
+      }),
+
+    deleteCategory: publicProcedure
+      .input(z.object({ categoryId: z.string().min(1) }))
+      .mutation(async ({ input }) => {
+        try {
+          return await deleteCategory(input.categoryId);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to delete category',
+          });
+        }
+      }),
+
+    createProduct: publicProcedure
+      .input(z.object({
+        name: z.string().min(2).max(120),
+        categoryId: z.string().min(1).max(60),
+        price: z.number().positive().max(1000000),
+        imageUrl: z.string().url().optional().or(z.literal('')),
+        imageDataUrl: z.string().optional(),
+        imageFileName: z.string().optional(),
+        description: z.string().min(8).max(500),
+        size: z.string().max(60).optional().or(z.literal('')),
+        isBestSeller: z.boolean().optional(),
+        isNew: z.boolean().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          return await createProduct(input);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to create product',
+          });
+        }
+      }),
+
+    deleteProduct: publicProcedure
+      .input(z.object({ productId: z.string().min(1) }))
+      .mutation(async ({ input }) => {
+        try {
+          return await deleteProduct(input.productId);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to delete product',
+          });
+        }
+      }),
+  }),
+
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -90,7 +165,7 @@ export const appRouter = router({
         customerPhone: z.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
         deliveryLocation: z.string().min(1).max(100).default('Lagos'),
         items: z.array(z.object({
-          productId: z.number().positive(),
+          productId: z.union([z.number().positive(), z.string().min(1).max(120)]),
           name: z.string().min(1).max(200),
           quantity: z.number().int().positive().max(1000),
           price: z.number().positive().max(1000000),
@@ -143,7 +218,7 @@ export const appRouter = router({
 
           await notifyOwner({
             title: `New Order: ${orderNumber}`,
-            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nTotal: ${formatNairaAmount(totalAmount)}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
+            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nDelivery: ${input.deliveryLocation}\nTotal: ${formatNairaAmount(totalAmount)}\nPayment Bank: ${PEACEFUL_TASTE_CONTACT.bankName}\nAccount: ${PEACEFUL_TASTE_CONTACT.accountNumber}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
           });
 
           sendOwnerOrderEmail(receiptPayload, receiptBase64).catch((error) =>

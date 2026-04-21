@@ -47,12 +47,14 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
     yPosition -= 15;
   };
 
-  drawText('PEACEFUL TASTE', 20, true, [0.78, 0.39, 0.2]);
-  drawText('Order Receipt', 14, true);
+  drawText('PEACEFUL TASTE', 22, true, [0.07, 0.27, 0.15]);
+  drawText('Premium Catering Order Receipt', 13, true, [0.45, 0.29, 0.14]);
   drawLine();
 
   drawText(`Order Number: ${data.orderNumber}`, 11, true);
-  drawText(`Date: ${new Date(data.createdAt).toLocaleDateString('en-NG')}`, 11);
+  drawText(`Receipt Date: ${new Date(data.createdAt).toLocaleString('en-NG')}`, 11);
+  drawText('Payment Method: Bank Transfer', 11);
+  drawText('Payment Status: Awaiting confirmation', 11);
   yPosition -= 10;
 
   drawText('CUSTOMER INFORMATION', 12, true);
@@ -61,7 +63,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
   if (data.customerPhone) {
     drawText(`Phone: ${data.customerPhone}`, 10);
   }
-  drawText(`Delivery: ${data.deliveryLocation}`, 10);
+  drawText(`Delivery Location: ${data.deliveryLocation}`, 10);
   drawLine();
 
   drawText('ORDER ITEMS', 12, true);
@@ -107,12 +109,15 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
   drawText(`Account Holder: ${PEACEFUL_TASTE_CONTACT.accountName}`, 10);
   drawText(`Bank: ${PEACEFUL_TASTE_CONTACT.bankName}`, 10);
   drawText(`Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`, 10, true);
-  drawText(`Amount: ${formatPdfAmount(data.totalAmount)}`, 10, true);
+  drawText(`Transfer Amount: ${formatPdfAmount(data.totalAmount)}`, 10, true);
+  drawText(`Payment Reference: ${data.orderNumber}`, 10, true);
+  drawText('Upload or send your transfer receipt after payment for manual confirmation.', 9);
   yPosition -= 15;
 
-  drawText('Thank you for your order!', 10, true, [0.78, 0.39, 0.2]);
+  drawText('Thank you for your order!', 10, true, [0.07, 0.27, 0.15]);
   drawText(`Contact: ${PEACEFUL_TASTE_CONTACT.phone} | WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`, 9);
   drawText(`Email: ${PEACEFUL_TASTE_CONTACT.email}`, 9);
+  drawText(`Address: ${PEACEFUL_TASTE_CONTACT.address}`, 9);
 
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);

@@ -29,6 +29,17 @@ export async function uploadPrivateBlob(pathname: string, data: Buffer, contentT
   });
 }
 
+export async function uploadPublicBlob(pathname: string, data: Buffer, contentType: string) {
+  if (!hasBlobToken()) return null;
+
+  return put(pathname, data, {
+    access: 'public',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType,
+  });
+}
+
 export async function uploadPrivateJson(pathname: string, data: unknown) {
   return uploadPrivateBlob(
     pathname,

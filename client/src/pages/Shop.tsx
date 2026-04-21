@@ -1,30 +1,29 @@
 import { useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { products } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
 import Breadcrumb from '@/components/Breadcrumb';
+import { useCatalog } from '@/hooks/useCatalog';
 
-type Category = 'all' | 'parfait' | 'yoghurt' | 'pastries' | 'cakes' | 'zobo' | 'tiger-nut' | 'only-food';
+type Category = 'all' | string;
 
 export default function Shop() {
+  const { categories, products, isLoading } = useCatalog();
   const [selectedCategory, setSelectedCategory] = useState<Category>('all');
 
-  const categories: { value: Category; label: string; description: string }[] = [
+  const categoryOptions: { value: Category; label: string; description: string }[] = [
     { value: 'all', label: 'All Products', description: 'Everything available now' },
-    { value: 'parfait', label: 'Parfait 330ml', description: 'Layered cups and chilled favorites' },
-    { value: 'yoghurt', label: 'Yoghurt', description: 'Fresh yoghurt bottles in multiple sizes' },
-    { value: 'pastries', label: 'Pastries', description: 'Savory and sweet bakery picks' },
-    { value: 'cakes', label: 'Cakes', description: 'Celebration-ready cake slices and flavors' },
-    { value: 'zobo', label: 'Zobo', description: 'Refreshing hibiscus drinks' },
-    { value: 'tiger-nut', label: 'Tiger Nut Drink', description: 'Creamy local drink options' },
-    { value: 'only-food', label: 'Only Food', description: 'Meals and soup selections' },
+    ...categories.map((category) => ({
+      value: category.id,
+      label: category.name,
+      description: category.description,
+    })),
   ];
 
-  const selectedCategoryMeta = categories.find((category) => category.value === selectedCategory) ?? categories[0];
+  const selectedCategoryMeta = categoryOptions.find((category) => category.value === selectedCategory) ?? categoryOptions[0];
 
   const filteredProducts = useMemo(
-    () => (selectedCategory === 'all' ? products : products.filter((product) => product.category === selectedCategory)),
-    [selectedCategory]
+    () => (selectedCategory === 'all' ? products : products.filter((product) => product.categoryId === selectedCategory)),
+    [products, selectedCategory]
   );
 
   return (
@@ -54,7 +53,7 @@ export default function Shop() {
                   <h2 className="font-semibold text-foreground">Categories</h2>
                 </div>
                 <div className="space-y-2">
-                  {categories.map((category) => {
+                  {categoryOptions.map((category) => {
                     const active = selectedCategory === category.value;
 
                     return (
@@ -93,7 +92,11 @@ export default function Shop() {
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredProducts.map((product, index) => (
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="glass-panel h-[430px] animate-pulse rounded-2xl" />
+                  ))
+                ) : filteredProducts.map((product, index) => (
                   <div key={product.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.04}s` }}>
                     <ProductCard product={product} />
                   </div>

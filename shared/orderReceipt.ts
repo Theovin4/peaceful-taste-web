@@ -6,6 +6,7 @@ export const PEACEFUL_TASTE_CONTACT = {
   accountName: "Vincent Theophilus",
   accountNumber: "8139171125",
   siteUrl: "https://peacefultaste.vercel.app",
+  address: "Lagos-Ibadan Expressway, Nigeria",
 } as const;
 
 export interface OrderReceiptItem {
@@ -49,6 +50,8 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Customer Email: ${payload.customerEmail}`,
     `Customer Phone: ${payload.customerPhone || "N/A"}`,
     `Delivery Location: ${payload.deliveryLocation}`,
+    `Payment Method: Bank Transfer`,
+    `Payment Status: Awaiting confirmation`,
     "",
     "Items:",
     items,
@@ -62,9 +65,12 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Account Name: ${PEACEFUL_TASTE_CONTACT.accountName}`,
     `Bank: ${PEACEFUL_TASTE_CONTACT.bankName}`,
     `Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`,
+    `Transfer Amount: ${formatNairaAmount(payload.totalAmount)}`,
+    `Payment Reference: ${payload.orderNumber}`,
     "",
     `WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`,
     `Email: ${PEACEFUL_TASTE_CONTACT.email}`,
+    `Address: ${PEACEFUL_TASTE_CONTACT.address}`,
   ].join("\n");
 }
 
