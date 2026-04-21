@@ -1,6 +1,7 @@
 // @ts-nocheck
 import express from "express";
 import fs from "node:fs";
+import { readAdminSessionFromRequest } from "./_core/adminSession";
 import {
   prepareInquiriesWorkbookDownload,
   prepareOrdersWorkbookDownload,
@@ -9,6 +10,11 @@ import {
 const app = express();
 
 app.get("*", async (req, res) => {
+  if (!readAdminSessionFromRequest(req)) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+
   const sheet = req.path.split("/").filter(Boolean).pop();
 
   if (sheet === "orders") {

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import express from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { readAdminSessionFromRequest } from "./_core/adminSession";
 import { registerOAuthRoutes } from "./_core/oauth";
 import { createContext } from "./_core/context";
 import { appRouter } from "./routers";
@@ -41,6 +42,11 @@ export function createVercelApp() {
   });
 
   apiRouter.get("/admin/export/orders", async (_req, res) => {
+    if (!readAdminSessionFromRequest(_req)) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
     await warmWorkbooks();
     const ordersFile = await prepareOrdersWorkbookDownload();
 
@@ -53,6 +59,11 @@ export function createVercelApp() {
   });
 
   apiRouter.get("/admin/export/inquiries", async (_req, res) => {
+    if (!readAdminSessionFromRequest(_req)) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+
     await warmWorkbooks();
     const inquiriesFile = await prepareInquiriesWorkbookDownload();
 

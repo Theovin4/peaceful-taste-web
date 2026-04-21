@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.26em] text-accent">Peaceful Taste</p>
-            <h3 className="mb-4 text-lg font-bold">Handcrafted treats, darker premium feel.</h3>
+            <h3 className="mb-4 text-lg font-bold">Order fresh favorites customers come back for.</h3>
             <p className="mb-4 text-sm text-muted-foreground">
               Fresh parfaits, pastries, drinks, and custom orders prepared with care and delivered across key Lagos routes.
             </p>
@@ -20,6 +20,9 @@ export default function Footer() {
               </a>
               <a href="https://instagram.com/peacefultaste" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
                 <Instagram className="h-4 w-4" />
+              </a>
+              <a href="https://tiktok.com/@peacefultaste_" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border px-2 py-2 text-[10px] font-bold text-muted-foreground hover:text-accent" style={transitionStyle}>
+                TT
               </a>
               <a href="https://wa.me/2349022621323" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
                 <MessageCircle className="h-4 w-4" />
@@ -35,7 +38,6 @@ export default function Footer() {
                 ['Shop', '/shop'],
                 ['Services', '/services'],
                 ['About', '/about'],
-                ['Dashboard', '/admin'],
               ].map(([label, href]) => (
                 <li key={href}>
                   <a href={href} className="text-muted-foreground hover:text-accent" style={transitionStyle}>
@@ -78,7 +80,6 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
             <p className="text-muted-foreground">&copy; {currentYear} Peaceful Taste. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="/admin" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Dashboard</a>
               <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Privacy Policy</a>
               <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Terms of Service</a>
             </div>

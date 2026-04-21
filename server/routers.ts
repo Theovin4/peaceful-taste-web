@@ -1,9 +1,15 @@
 // @ts-nocheck
 import { COOKIE_NAME } from '@shared/const';
 import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
+import {
+  clearAdminSessionCookie,
+  createAdminSessionToken,
+  isValidAdminPassword,
+  setAdminSessionCookie,
+} from './_core/adminSession';
 import { getSessionCookieOptions } from './_core/cookies';
 import { systemRouter } from './_core/systemRouter';
-import { publicProcedure, router } from './_core/trpc';
+import { adminSessionProcedure, publicProcedure, router } from './_core/trpc';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { notifyOwner } from './_core/notification';
@@ -22,7 +28,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { uploadPrivateBlob } from './blob-storage';
-import { createCategory, createProduct, deleteCategory, deleteProduct, getCatalog } from './catalog-storage';
+import {
+  createCategory,
+  createProduct,
+  deleteCategory,
+  deleteProduct,
+  getCatalog,
+  updateProduct,
+  updateSiteSettings,
+} from './catalog-storage';
 
 function ensureReceiptDir() {
   const baseDir = process.env.VERCEL
@@ -78,7 +92,7 @@ export const appRouter = router({
       return getCatalog();
     }),
 
-    createCategory: publicProcedure
+    createCategory: adminSessionProcedure
       .input(z.object({
         name: z.string().min(2).max(80),
         description: z.string().min(4).max(180),
@@ -94,7 +108,7 @@ export const appRouter = router({
         }
       }),
 
-    deleteCategory: publicProcedure
+    deleteCategory: adminSessionProcedure
       .input(z.object({ categoryId: z.string().min(1) }))
       .mutation(async ({ input }) => {
         try {
@@ -107,7 +121,7 @@ export const appRouter = router({
         }
       }),
 
-    createProduct: publicProcedure
+    createProduct: adminSessionProcedure
       .input(z.object({
         name: z.string().min(2).max(120),
         categoryId: z.string().min(1).max(60),
@@ -132,7 +146,33 @@ export const appRouter = router({
         }
       }),
 
-    deleteProduct: publicProcedure
+    updateProduct: adminSessionProcedure
+      .input(z.object({
+        productId: z.string().min(1).max(120),
+        name: z.string().min(2).max(120),
+        categoryId: z.string().min(1).max(60),
+        price: z.number().positive().max(1000000),
+        imageUrl: z.string().url().optional().or(z.literal('')),
+        imageDataUrl: z.string().optional(),
+        imageFileName: z.string().optional(),
+        description: z.string().min(8).max(500),
+        size: z.string().max(60).optional().or(z.literal('')),
+        isBestSeller: z.boolean().optional(),
+        isNew: z.boolean().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          return await updateProduct(input);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to update product',
+          });
+        }
+      }),
+
+    deleteProduct: adminSessionProcedure
       .input(z.object({ productId: z.string().min(1) }))
       .mutation(async ({ input }) => {
         try {
@@ -141,6 +181,22 @@ export const appRouter = router({
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: error instanceof Error ? error.message : 'Failed to delete product',
+          });
+        }
+      }),
+
+    updateSiteSettings: adminSessionProcedure
+      .input(z.object({
+        featuredStoryProductId: z.string().min(1).max(120),
+        flashDealProductIds: z.array(z.string().min(1).max(120)).min(1).max(6),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          return await updateSiteSettings(input);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to update site settings',
           });
         }
       }),
@@ -157,6 +213,33 @@ export const appRouter = router({
     }),
   }),
 
+  admin: router({
+    status: publicProcedure.query(({ ctx }) => ({
+      isAuthenticated: ctx.isAdminSession,
+    })),
+
+    login: publicProcedure
+      .input(z.object({
+        password: z.string().min(1).max(200),
+      }))
+      .mutation(({ ctx, input }) => {
+        if (!isValidAdminPassword(input.password)) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Invalid admin password',
+          });
+        }
+
+        setAdminSessionCookie(ctx.res, createAdminSessionToken());
+        return { success: true } as const;
+      }),
+
+    logout: publicProcedure.mutation(({ ctx }) => {
+      clearAdminSessionCookie(ctx.res);
+      return { success: true } as const;
+    }),
+  }),
+
   orders: router({
     createOrder: publicProcedure
       .input(z.object({
@@ -164,6 +247,7 @@ export const appRouter = router({
         customerName: z.string().min(1).max(100),
         customerPhone: z.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
         deliveryLocation: z.string().min(1).max(100).default('Lagos'),
+        deliveryAddress: z.string().min(8).max(300),
         items: z.array(z.object({
           productId: z.union([z.number().positive(), z.string().min(1).max(120)]),
           name: z.string().min(1).max(200),
@@ -185,6 +269,7 @@ export const appRouter = router({
             customerEmail: input.customerEmail,
             customerPhone: input.customerPhone,
             deliveryLocation: input.deliveryLocation,
+            deliveryAddress: input.deliveryAddress,
             createdAt,
             items: input.items,
             subtotal: input.subtotal,
@@ -207,6 +292,7 @@ export const appRouter = router({
             customerName: input.customerName,
             customerEmail: input.customerEmail,
             customerPhone: input.customerPhone,
+            deliveryAddress: input.deliveryAddress,
             items: input.items,
             subtotal: input.subtotal,
             tax: input.tax,
@@ -218,7 +304,7 @@ export const appRouter = router({
 
           await notifyOwner({
             title: `New Order: ${orderNumber}`,
-            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nDelivery: ${input.deliveryLocation}\nTotal: ${formatNairaAmount(totalAmount)}\nPayment Bank: ${PEACEFUL_TASTE_CONTACT.bankName}\nAccount: ${PEACEFUL_TASTE_CONTACT.accountNumber}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
+            content: `Customer: ${input.customerName} (${input.customerEmail})\nPhone: ${input.customerPhone || 'N/A'}\nDelivery: ${input.deliveryLocation}\nAddress: ${input.deliveryAddress}\nTotal: ${formatNairaAmount(totalAmount)}\nPayment Bank: ${PEACEFUL_TASTE_CONTACT.bankName}\nAccount: ${PEACEFUL_TASTE_CONTACT.accountNumber}\n\nItems:\n${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.price)}`).join('\n')}`,
           });
 
           sendOwnerOrderEmail(receiptPayload, receiptBase64).catch((error) =>
@@ -292,7 +378,7 @@ export const appRouter = router({
         }
       }),
 
-    dashboardSummary: publicProcedure.query(async () => {
+    dashboardSummary: adminSessionProcedure.query(async () => {
       try {
         return await getWorkbookSummary();
       } catch (error) {

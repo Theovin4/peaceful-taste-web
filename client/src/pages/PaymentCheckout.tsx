@@ -4,14 +4,29 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, Copy, MessageCircle, ShieldCheck, ArrowRight, Mail, Download } from 'lucide-react';
+import {
+  Loader2,
+  CheckCircle,
+  Copy,
+  MessageCircle,
+  ShieldCheck,
+  ArrowRight,
+  Mail,
+  Download,
+  MapPin,
+} from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useCart, type CartItem } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { DELIVERY_LOCATIONS, getDeliveryCost } from '@/lib/delivery';
 import CheckoutProgress from '@/components/CheckoutProgress';
 import { formatNaira } from '@/lib/format';
-import { copyTextToClipboard, downloadPdfReceipt, saveLatestReceipt, type OrderReceiptClientPackage } from '@/lib/orderReceipt';
+import {
+  copyTextToClipboard,
+  downloadPdfReceipt,
+  saveLatestReceipt,
+  type OrderReceiptClientPackage,
+} from '@/lib/orderReceipt';
 import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
 
 const BANK_ACCOUNT = {
@@ -22,12 +37,13 @@ const BANK_ACCOUNT = {
 
 export default function PaymentCheckout() {
   const [, setLocation] = useLocation();
-  const { items, total } = useCart();
+  const { items, total, clearCart } = useCart();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
     customerPhone: '',
     deliveryLocation: 'lagos',
+    deliveryAddress: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState<any>(null);
@@ -40,11 +56,14 @@ export default function PaymentCheckout() {
   const shippingCost = getDeliveryCost(formData.deliveryLocation);
   const tax = Math.round(subtotal * 0.1);
   const totalAmount = subtotal + shippingCost + tax;
+  const deliveryLocationLabel =
+    DELIVERY_LOCATIONS.find((location) => location.id === formData.deliveryLocation)?.name || 'Lagos';
 
   const orderItems = useMemo<Array<{ name: string; quantity: number; price: number }>>(() => {
     if (orderCreated?.receipt?.payload?.items) {
       return orderCreated.receipt.payload.items;
     }
+
     return items.map((item: CartItem) => ({
       name: item.product.name,
       quantity: item.quantity,
@@ -52,7 +71,9 @@ export default function PaymentCheckout() {
     }));
   }, [items, orderCreated]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -63,8 +84,13 @@ export default function PaymentCheckout() {
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.customerName || !formData.customerEmail) {
-      toast.error('Please fill in all required fields');
+    if (!formData.customerName || !formData.customerEmail || !formData.deliveryAddress.trim()) {
+      toast.error('Please complete the required delivery details.');
+      return;
+    }
+
+    if (items.length === 0) {
+      toast.error('Your cart is empty.');
       return;
     }
 
@@ -75,7 +101,8 @@ export default function PaymentCheckout() {
         customerEmail: formData.customerEmail,
         customerName: formData.customerName,
         customerPhone: formData.customerPhone,
-        deliveryLocation: DELIVERY_LOCATIONS.find((location) => location.id === formData.deliveryLocation)?.name || 'Lagos',
+        deliveryLocation: deliveryLocationLabel,
+        deliveryAddress: formData.deliveryAddress.trim(),
         items: items.map((item) => ({
           productId: item.product.id,
           name: item.product.name,
@@ -91,7 +118,8 @@ export default function PaymentCheckout() {
         setOrderCreated(response);
         saveLatestReceipt(response.receipt as OrderReceiptClientPackage);
         downloadPdfReceipt(response.receipt.fileName, response.receipt.pdfBase64);
-        toast.success('Order created and customer receipt downloaded. Proceed with payment.');
+        clearCart();
+        toast.success('Order created, cart cleared, and customer receipt downloaded. Proceed with payment.');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create order';
@@ -145,6 +173,8 @@ export default function PaymentCheckout() {
   }
 
   if (orderCreated) {
+    const receiptPayload = orderCreated.receipt.payload;
+
     return (
       <div className="min-h-screen bg-background">
         <CheckoutProgress currentStep="payment" />
@@ -167,7 +197,7 @@ export default function PaymentCheckout() {
                       <p className="text-sm text-muted-foreground">
                         Order Number: <span className="font-mono font-bold text-accent">{orderCreated.orderNumber}</span>
                       </p>
-                      <p className="mt-2 text-sm text-muted-foreground">A PDF receipt has already been downloaded for the customer.</p>
+                      <p className="mt-2 text-sm text-muted-foreground">Your cart has been cleared and the customer PDF receipt is ready.</p>
                     </div>
                   </div>
                 </Card>
@@ -216,7 +246,7 @@ export default function PaymentCheckout() {
                       <div key={field.key}>
                         <p className="mb-1 text-sm text-muted-foreground">{field.label}</p>
                         <div className="flex items-center justify-between gap-3">
-                          <p className={`font-semibold text-foreground ${field.key === 'account' ? 'text-lg tracking-[0.18em]' : ''}`}>
+                          <p className={`font-semibold text-foreground ${field.key === 'account' ? 'text-lg tracking-[0.1em]' : ''}`}>
                             {field.value}
                           </p>
                           <Button
@@ -307,21 +337,32 @@ export default function PaymentCheckout() {
                   <div className="space-y-3 border-b border-border pb-6 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.subtotal)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(receiptPayload.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery</span>
-                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.shippingCost)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(receiptPayload.shippingCost)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tax (10%)</span>
-                      <span className="font-medium text-foreground">{formatNaira(orderCreated.receipt.payload.tax)}</span>
+                      <span className="font-medium text-foreground">{formatNaira(receiptPayload.tax)}</span>
                     </div>
                   </div>
 
                   <div className="my-6">
                     <p className="mb-2 text-xs text-muted-foreground">Total Amount</p>
                     <p className="text-2xl font-bold text-primary">{formatNaira(orderCreated.totalAmount)}</p>
+                  </div>
+
+                  <div className="mb-6 rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="mb-2 flex items-start gap-2">
+                      <MapPin className="mt-0.5 h-4 w-4 text-accent" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Delivery</p>
+                        <p className="mt-1 text-sm font-medium text-foreground">{receiptPayload.deliveryLocation}</p>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{receiptPayload.deliveryAddress}</p>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -428,6 +469,22 @@ export default function PaymentCheckout() {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="deliveryAddress" className="mb-2 block font-semibold text-foreground">Full Delivery Address *</Label>
+                    <textarea
+                      id="deliveryAddress"
+                      name="deliveryAddress"
+                      value={formData.deliveryAddress}
+                      onChange={handleInputChange}
+                      placeholder="House number, street, estate, bus stop, area, and any useful landmark"
+                      className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                      required
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      This exact address will appear on the customer receipt and order workbook.
+                    </p>
                   </div>
 
                   <Button type="submit" disabled={isLoading} className="btn-primary w-full text-white">

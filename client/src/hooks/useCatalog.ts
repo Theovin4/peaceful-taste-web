@@ -4,6 +4,7 @@ import { trpc } from '@/lib/trpc';
 export function useCatalog() {
   const catalogQuery = trpc.catalog.getCatalog.useQuery(undefined, {
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5,
   });
 
   const categories = useMemo(
@@ -19,5 +20,6 @@ export function useCatalog() {
     ...catalogQuery,
     categories,
     products,
+    settings: catalogQuery.data?.settings,
   };
 }

@@ -345,7 +345,7 @@ var require_bytes = __commonJS({
     "use strict";
     module2.exports = bytes2;
     module2.exports.format = format;
-    module2.exports.parse = parse4;
+    module2.exports.parse = parse5;
     var formatThousandsRegExp = /\B(?=(\d{3})+(?!\d))/g;
     var formatDecimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
     var map3 = {
@@ -359,7 +359,7 @@ var require_bytes = __commonJS({
     var parseRegExp2 = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i;
     function bytes2(value, options) {
       if (typeof value === "string") {
-        return parse4(value);
+        return parse5(value);
       }
       if (typeof value === "number") {
         return format(value, options);
@@ -403,7 +403,7 @@ var require_bytes = __commonJS({
       }
       return str + unitSeparator + unit;
     }
-    function parse4(val) {
+    function parse5(val) {
       if (typeof val === "number" && !isNaN(val)) {
         return val;
       }
@@ -439,7 +439,7 @@ var require_content_type = __commonJS({
     var QUOTE_REGEXP = /([\\"])/g;
     var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
     exports2.format = format;
-    exports2.parse = parse4;
+    exports2.parse = parse5;
     function format(obj2) {
       if (!obj2 || typeof obj2 !== "object") {
         throw new TypeError("argument obj is required");
@@ -463,7 +463,7 @@ var require_content_type = __commonJS({
       }
       return string4;
     }
-    function parse4(string4) {
+    function parse5(string4) {
       if (!string4) {
         throw new TypeError("argument string is required");
       }
@@ -929,7 +929,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse4(val);
+        return parse5(val);
       } else if (type === "number" && isNaN(val) === false) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -937,7 +937,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse4(str) {
+    function parse5(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -5255,7 +5255,7 @@ var require_read = __commonJS({
     var unpipe = require_unpipe();
     var zlib2 = require("zlib");
     module2.exports = read;
-    function read(req, res, next, parse4, debug2, options) {
+    function read(req, res, next, parse5, debug2, options) {
       var length;
       var opts = options;
       var stream4;
@@ -5314,7 +5314,7 @@ var require_read = __commonJS({
         try {
           debug2("parse body");
           str = typeof body !== "string" && encoding !== null ? iconv.decode(body, encoding) : body;
-          req.body = parse4(str);
+          req.body = parse5(str);
         } catch (err) {
           next(createError(400, err, {
             body: str,
@@ -5382,7 +5382,7 @@ var require_media_typer = __commonJS({
     var typeNameRegExp = /^[A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126}$/;
     var typeRegExp = /^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})\/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$/;
     exports2.format = format;
-    exports2.parse = parse4;
+    exports2.parse = parse5;
     function format(obj2) {
       if (!obj2 || typeof obj2 !== "object") {
         throw new TypeError("argument obj is required");
@@ -5417,7 +5417,7 @@ var require_media_typer = __commonJS({
       }
       return string4;
     }
-    function parse4(string4) {
+    function parse5(string4) {
       if (!string4) {
         throw new TypeError("argument string is required");
       }
@@ -14247,7 +14247,7 @@ var require_json = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse4(body) {
+      function parse5(body) {
         if (body.length === 0) {
           return {};
         }
@@ -14295,7 +14295,7 @@ var require_json = __commonJS({
           }));
           return;
         }
-        read(req, res, next, parse4, debug2, {
+        read(req, res, next, parse5, debug2, {
           encoding: charset,
           inflate,
           limit,
@@ -14374,7 +14374,7 @@ var require_raw = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse4(buf) {
+      function parse5(buf) {
         return buf;
       }
       return function rawParser(req, res, next) {
@@ -14395,7 +14395,7 @@ var require_raw = __commonJS({
           next();
           return;
         }
-        read(req, res, next, parse4, debug2, {
+        read(req, res, next, parse5, debug2, {
           encoding: null,
           inflate,
           limit,
@@ -14432,7 +14432,7 @@ var require_text = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse4(buf) {
+      function parse5(buf) {
         return buf;
       }
       return function textParser(req, res, next) {
@@ -14454,7 +14454,7 @@ var require_text = __commonJS({
           return;
         }
         var charset = getCharset(req) || defaultCharset;
-        read(req, res, next, parse4, debug2, {
+        read(req, res, next, parse5, debug2, {
           encoding: charset,
           inflate,
           limit,
@@ -16846,11 +16846,11 @@ var require_lib2 = __commonJS({
   "node_modules/.pnpm/qs@6.13.0/node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify2 = require_stringify();
-    var parse4 = require_parse();
+    var parse5 = require_parse();
     var formats = require_formats();
     module2.exports = {
       formats,
-      parse: parse4,
+      parse: parse5,
       stringify: stringify2
     };
   }
@@ -16885,7 +16885,7 @@ var require_urlencoded = __commonJS({
       }
       var queryparse = extended ? extendedparser(opts) : simpleparser(opts);
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse4(body) {
+      function parse5(body) {
         return body.length ? queryparse(body) : {};
       }
       return function urlencodedParser(req, res, next) {
@@ -16915,7 +16915,7 @@ var require_urlencoded = __commonJS({
           }));
           return;
         }
-        read(req, res, next, parse4, debug2, {
+        read(req, res, next, parse5, debug2, {
           debug: debug2,
           encoding: charset,
           inflate,
@@ -16928,7 +16928,7 @@ var require_urlencoded = __commonJS({
     function extendedparser(options) {
       var parameterLimit = options.parameterLimit !== void 0 ? options.parameterLimit : 1e3;
       var depth = typeof options.depth !== "number" ? Number(options.depth || 32) : options.depth;
-      var parse4 = parser("qs");
+      var parse5 = parser("qs");
       if (isNaN(parameterLimit) || parameterLimit < 1) {
         throw new TypeError("option parameterLimit must be a positive number");
       }
@@ -16949,7 +16949,7 @@ var require_urlencoded = __commonJS({
         var arrayLimit = Math.max(100, paramCount);
         debug2("parse extended urlencoding");
         try {
-          return parse4(body, {
+          return parse5(body, {
             allowPrototypes: true,
             arrayLimit,
             depth,
@@ -17004,7 +17004,7 @@ var require_urlencoded = __commonJS({
     }
     function simpleparser(options) {
       var parameterLimit = options.parameterLimit !== void 0 ? options.parameterLimit : 1e3;
-      var parse4 = parser("querystring");
+      var parse5 = parser("querystring");
       if (isNaN(parameterLimit) || parameterLimit < 1) {
         throw new TypeError("option parameterLimit must be a positive number");
       }
@@ -17020,7 +17020,7 @@ var require_urlencoded = __commonJS({
           });
         }
         debug2("parse urlencoding");
-        return parse4(body, void 0, void 0, { maxKeys: parameterLimit });
+        return parse5(body, void 0, void 0, { maxKeys: parameterLimit });
       };
     }
     function typeChecker(type) {
@@ -17202,7 +17202,7 @@ var require_parseurl = __commonJS({
   "node_modules/.pnpm/parseurl@1.3.3/node_modules/parseurl/index.js"(exports2, module2) {
     "use strict";
     var url3 = require("url");
-    var parse4 = url3.parse;
+    var parse5 = url3.parse;
     var Url = url3.Url;
     module2.exports = parseurl;
     module2.exports.original = originalurl;
@@ -17234,7 +17234,7 @@ var require_parseurl = __commonJS({
     }
     function fastparse(str) {
       if (typeof str !== "string" || str.charCodeAt(0) !== 47) {
-        return parse4(str);
+        return parse5(str);
       }
       var pathname = str;
       var query = null;
@@ -17262,7 +17262,7 @@ var require_parseurl = __commonJS({
           /* #  */
           case 160:
           case 65279:
-            return parse4(str);
+            return parse5(str);
         }
       }
       var url4 = Url !== void 0 ? new Url() : {};
@@ -18413,7 +18413,7 @@ var require_content_disposition = __commonJS({
   "node_modules/.pnpm/content-disposition@0.5.4/node_modules/content-disposition/index.js"(exports2, module2) {
     "use strict";
     module2.exports = contentDisposition;
-    module2.exports.parse = parse4;
+    module2.exports.parse = parse5;
     var basename = require("path").basename;
     var Buffer2 = require_safe_buffer().Buffer;
     var ENCODE_URL_ATTR_CHAR_REGEXP = /[\x00-\x20"'()*,/:;<=>?@[\\\]{}\x7f]/g;
@@ -18504,7 +18504,7 @@ var require_content_disposition = __commonJS({
     function getlatin1(val) {
       return String(val).replace(NON_LATIN1_REGEXP, "?");
     }
-    function parse4(string4) {
+    function parse5(string4) {
       if (!string4 || typeof string4 !== "string") {
         throw new TypeError("argument string is required");
       }
@@ -18590,14 +18590,14 @@ var require_etag = __commonJS({
   "node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var Stats = require("fs").Stats;
     var toString3 = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash2 = crypto6.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash2 = crypto7.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash2 + '"';
     }
@@ -18774,7 +18774,7 @@ var require_ms2 = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse4(val);
+        return parse5(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -18782,7 +18782,7 @@ var require_ms2 = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse4(str) {
+    function parse5(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -19512,7 +19512,7 @@ var require_forwarded = __commonJS({
       if (!req) {
         throw new TypeError("argument req is required");
       }
-      var proxyAddrs = parse4(req.headers["x-forwarded-for"] || "");
+      var proxyAddrs = parse5(req.headers["x-forwarded-for"] || "");
       var socketAddr = getSocketAddr(req);
       var addrs = [socketAddr].concat(proxyAddrs);
       return addrs;
@@ -19520,7 +19520,7 @@ var require_forwarded = __commonJS({
     function getSocketAddr(req) {
       return req.socket ? req.socket.remoteAddress : req.connection.remoteAddress;
     }
-    function parse4(header) {
+    function parse5(header) {
       var end = header.length;
       var list2 = [];
       var start = header.length;
@@ -21333,7 +21333,7 @@ var require_request = __commonJS({
     var http2 = require("http");
     var fresh = require_fresh();
     var parseRange = require_range_parser();
-    var parse4 = require_parseurl();
+    var parse5 = require_parseurl();
     var proxyaddr = require_proxy_addr();
     var req = Object.create(http2.IncomingMessage.prototype);
     module2.exports = req;
@@ -21438,7 +21438,7 @@ var require_request = __commonJS({
       return subdomains2.slice(offset);
     });
     defineGetter(req, "path", function path4() {
-      return parse4(this).pathname;
+      return parse5(this).pathname;
     });
     defineGetter(req, "hostname", function hostname3() {
       var trust = this.app.get("trust proxy fn");
@@ -21489,11 +21489,11 @@ var require_request = __commonJS({
 // node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports2) {
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto6.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto7.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21502,7 +21502,7 @@ var require_cookie_signature = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto6.createHash("sha1").update(str).digest("hex");
+      return crypto7.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -21511,14 +21511,14 @@ var require_cookie_signature = __commonJS({
 var require_cookie = __commonJS({
   "node_modules/.pnpm/cookie@0.7.1/node_modules/cookie/index.js"(exports2) {
     "use strict";
-    exports2.parse = parse4;
+    exports2.parse = parse5;
     exports2.serialize = serialize;
     var __toString = Object.prototype.toString;
     var cookieNameRegExp = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
     var cookieValueRegExp = /^("?)[\u0021\u0023-\u002B\u002D-\u003A\u003C-\u005B\u005D-\u007E]*\1$/;
     var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
     var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
-    function parse4(str, opt) {
+    function parse5(str, opt) {
       if (typeof str !== "string") {
         throw new TypeError("argument str must be a string");
       }
@@ -21686,7 +21686,7 @@ var require_vary = __commonJS({
       if (!field) {
         throw new TypeError("field argument is required");
       }
-      var fields = !Array.isArray(field) ? parse4(String(field)) : field;
+      var fields = !Array.isArray(field) ? parse5(String(field)) : field;
       for (var j = 0; j < fields.length; j++) {
         if (!FIELD_NAME_REGEXP.test(fields[j])) {
           throw new TypeError("field argument contains an invalid header name");
@@ -21696,7 +21696,7 @@ var require_vary = __commonJS({
         return header;
       }
       var val = header;
-      var vals = parse4(header.toLowerCase());
+      var vals = parse5(header.toLowerCase());
       if (fields.indexOf("*") !== -1 || vals.indexOf("*") !== -1) {
         return "*";
       }
@@ -21709,7 +21709,7 @@ var require_vary = __commonJS({
       }
       return val;
     }
-    function parse4(header) {
+    function parse5(header) {
       var end = 0;
       var list2 = [];
       var start = 0;
@@ -21765,7 +21765,7 @@ var require_response = __commonJS({
     var normalizeType = require_utils2().normalizeType;
     var normalizeTypes = require_utils2().normalizeTypes;
     var setCharset = require_utils2().setCharset;
-    var cookie = require_cookie();
+    var cookie2 = require_cookie();
     var send = require_send();
     var extname = path4.extname;
     var mime = send.mime;
@@ -22128,7 +22128,7 @@ var require_response = __commonJS({
       if (opts.path == null) {
         opts.path = "/";
       }
-      this.append("Set-Cookie", cookie.serialize(name, String(val), opts));
+      this.append("Set-Cookie", cookie2.serialize(name, String(val), opts));
       return this;
     };
     res.location = function location(url3) {
@@ -22466,6 +22466,255 @@ var require_express2 = __commonJS({
   "node_modules/.pnpm/express@4.21.2/node_modules/express/index.js"(exports2, module2) {
     "use strict";
     module2.exports = require_express();
+  }
+});
+
+// node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js
+var require_dist = __commonJS({
+  "node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.parseCookie = parseCookie;
+    exports2.parse = parseCookie;
+    exports2.stringifyCookie = stringifyCookie;
+    exports2.stringifySetCookie = stringifySetCookie;
+    exports2.serialize = stringifySetCookie;
+    exports2.parseSetCookie = parseSetCookie;
+    exports2.stringifySetCookie = stringifySetCookie;
+    exports2.serialize = stringifySetCookie;
+    var cookieNameRegExp = /^[\u0021-\u003A\u003C\u003E-\u007E]+$/;
+    var cookieValueRegExp = /^[\u0021-\u003A\u003C-\u007E]*$/;
+    var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+    var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
+    var maxAgeRegExp = /^-?\d+$/;
+    var __toString = Object.prototype.toString;
+    var NullObject = /* @__PURE__ */ (() => {
+      const C = function() {
+      };
+      C.prototype = /* @__PURE__ */ Object.create(null);
+      return C;
+    })();
+    function parseCookie(str, options) {
+      const obj2 = new NullObject();
+      const len = str.length;
+      if (len < 2)
+        return obj2;
+      const dec = options?.decode || decode4;
+      let index = 0;
+      do {
+        const eqIdx = eqIndex(str, index, len);
+        if (eqIdx === -1)
+          break;
+        const endIdx = endIndex(str, index, len);
+        if (eqIdx > endIdx) {
+          index = str.lastIndexOf(";", eqIdx - 1) + 1;
+          continue;
+        }
+        const key = valueSlice(str, index, eqIdx);
+        if (obj2[key] === void 0) {
+          obj2[key] = dec(valueSlice(str, eqIdx + 1, endIdx));
+        }
+        index = endIdx + 1;
+      } while (index < len);
+      return obj2;
+    }
+    function stringifyCookie(cookie2, options) {
+      const enc = options?.encode || encodeURIComponent;
+      const cookieStrings = [];
+      for (const name of Object.keys(cookie2)) {
+        const val = cookie2[name];
+        if (val === void 0)
+          continue;
+        if (!cookieNameRegExp.test(name)) {
+          throw new TypeError(`cookie name is invalid: ${name}`);
+        }
+        const value = enc(val);
+        if (!cookieValueRegExp.test(value)) {
+          throw new TypeError(`cookie val is invalid: ${val}`);
+        }
+        cookieStrings.push(`${name}=${value}`);
+      }
+      return cookieStrings.join("; ");
+    }
+    function stringifySetCookie(_name, _val, _opts) {
+      const cookie2 = typeof _name === "object" ? _name : { ..._opts, name: _name, value: String(_val) };
+      const options = typeof _val === "object" ? _val : _opts;
+      const enc = options?.encode || encodeURIComponent;
+      if (!cookieNameRegExp.test(cookie2.name)) {
+        throw new TypeError(`argument name is invalid: ${cookie2.name}`);
+      }
+      const value = cookie2.value ? enc(cookie2.value) : "";
+      if (!cookieValueRegExp.test(value)) {
+        throw new TypeError(`argument val is invalid: ${cookie2.value}`);
+      }
+      let str = cookie2.name + "=" + value;
+      if (cookie2.maxAge !== void 0) {
+        if (!Number.isInteger(cookie2.maxAge)) {
+          throw new TypeError(`option maxAge is invalid: ${cookie2.maxAge}`);
+        }
+        str += "; Max-Age=" + cookie2.maxAge;
+      }
+      if (cookie2.domain) {
+        if (!domainValueRegExp.test(cookie2.domain)) {
+          throw new TypeError(`option domain is invalid: ${cookie2.domain}`);
+        }
+        str += "; Domain=" + cookie2.domain;
+      }
+      if (cookie2.path) {
+        if (!pathValueRegExp.test(cookie2.path)) {
+          throw new TypeError(`option path is invalid: ${cookie2.path}`);
+        }
+        str += "; Path=" + cookie2.path;
+      }
+      if (cookie2.expires) {
+        if (!isDate2(cookie2.expires) || !Number.isFinite(cookie2.expires.valueOf())) {
+          throw new TypeError(`option expires is invalid: ${cookie2.expires}`);
+        }
+        str += "; Expires=" + cookie2.expires.toUTCString();
+      }
+      if (cookie2.httpOnly) {
+        str += "; HttpOnly";
+      }
+      if (cookie2.secure) {
+        str += "; Secure";
+      }
+      if (cookie2.partitioned) {
+        str += "; Partitioned";
+      }
+      if (cookie2.priority) {
+        const priority = typeof cookie2.priority === "string" ? cookie2.priority.toLowerCase() : void 0;
+        switch (priority) {
+          case "low":
+            str += "; Priority=Low";
+            break;
+          case "medium":
+            str += "; Priority=Medium";
+            break;
+          case "high":
+            str += "; Priority=High";
+            break;
+          default:
+            throw new TypeError(`option priority is invalid: ${cookie2.priority}`);
+        }
+      }
+      if (cookie2.sameSite) {
+        const sameSite = typeof cookie2.sameSite === "string" ? cookie2.sameSite.toLowerCase() : cookie2.sameSite;
+        switch (sameSite) {
+          case true:
+          case "strict":
+            str += "; SameSite=Strict";
+            break;
+          case "lax":
+            str += "; SameSite=Lax";
+            break;
+          case "none":
+            str += "; SameSite=None";
+            break;
+          default:
+            throw new TypeError(`option sameSite is invalid: ${cookie2.sameSite}`);
+        }
+      }
+      return str;
+    }
+    function parseSetCookie(str, options) {
+      const dec = options?.decode || decode4;
+      const len = str.length;
+      const endIdx = endIndex(str, 0, len);
+      const eqIdx = eqIndex(str, 0, endIdx);
+      const setCookie = eqIdx === -1 ? { name: "", value: dec(valueSlice(str, 0, endIdx)) } : {
+        name: valueSlice(str, 0, eqIdx),
+        value: dec(valueSlice(str, eqIdx + 1, endIdx))
+      };
+      let index = endIdx + 1;
+      while (index < len) {
+        const endIdx2 = endIndex(str, index, len);
+        const eqIdx2 = eqIndex(str, index, endIdx2);
+        const attr = eqIdx2 === -1 ? valueSlice(str, index, endIdx2) : valueSlice(str, index, eqIdx2);
+        const val = eqIdx2 === -1 ? void 0 : valueSlice(str, eqIdx2 + 1, endIdx2);
+        switch (attr.toLowerCase()) {
+          case "httponly":
+            setCookie.httpOnly = true;
+            break;
+          case "secure":
+            setCookie.secure = true;
+            break;
+          case "partitioned":
+            setCookie.partitioned = true;
+            break;
+          case "domain":
+            setCookie.domain = val;
+            break;
+          case "path":
+            setCookie.path = val;
+            break;
+          case "max-age":
+            if (val && maxAgeRegExp.test(val))
+              setCookie.maxAge = Number(val);
+            break;
+          case "expires":
+            if (!val)
+              break;
+            const date6 = new Date(val);
+            if (Number.isFinite(date6.valueOf()))
+              setCookie.expires = date6;
+            break;
+          case "priority":
+            if (!val)
+              break;
+            const priority = val.toLowerCase();
+            if (priority === "low" || priority === "medium" || priority === "high") {
+              setCookie.priority = priority;
+            }
+            break;
+          case "samesite":
+            if (!val)
+              break;
+            const sameSite = val.toLowerCase();
+            if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") {
+              setCookie.sameSite = sameSite;
+            }
+            break;
+        }
+        index = endIdx2 + 1;
+      }
+      return setCookie;
+    }
+    function endIndex(str, min, len) {
+      const index = str.indexOf(";", min);
+      return index === -1 ? len : index;
+    }
+    function eqIndex(str, min, max) {
+      const index = str.indexOf("=", min);
+      return index < max ? index : -1;
+    }
+    function valueSlice(str, min, max) {
+      let start = min;
+      let end = max;
+      do {
+        const code = str.charCodeAt(start);
+        if (code !== 32 && code !== 9)
+          break;
+      } while (++start < end);
+      while (end > start) {
+        const code = str.charCodeAt(end - 1);
+        if (code !== 32 && code !== 9)
+          break;
+        end--;
+      }
+      return str.slice(start, end);
+    }
+    function decode4(str) {
+      if (str.indexOf("%") === -1)
+        return str;
+      try {
+        return decodeURIComponent(str);
+      } catch (e) {
+        return str;
+      }
+    }
+    function isDate2(val) {
+      return __toString.call(val) === "[object Date]";
+    }
   }
 });
 
@@ -34386,9 +34635,9 @@ var require_binlog_dump = __commonJS({
 var require_auth_41 = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_41.js"(exports2) {
     "use strict";
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     function sha12(msg, msg1, msg2) {
-      const hash2 = crypto6.createHash("sha1");
+      const hash2 = crypto7.createHash("sha1");
       hash2.update(msg);
       if (msg1) {
         hash2.update(msg1);
@@ -36157,7 +36406,7 @@ var require_sha256_password = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_plugins/sha256_password.js"(exports2, module2) {
     "use strict";
     var PLUGIN_NAME = "sha256_password";
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var { xorRotating } = require_auth_41();
     var Tls = require("tls");
     var REQUEST_SERVER_KEY_PACKET = Buffer.from([1]);
@@ -36166,7 +36415,7 @@ var require_sha256_password = __commonJS({
     var STATE_FINAL = -1;
     function encrypt(password, scramble, key) {
       const stage1 = xorRotating(Buffer.from(`${password}\0`, "utf8"), scramble);
-      return crypto6.publicEncrypt(key, stage1);
+      return crypto7.publicEncrypt(key, stage1);
     }
     module2.exports = (pluginOptions = {}) => ({ connection }) => {
       let state = 0;
@@ -36212,7 +36461,7 @@ var require_caching_sha2_password = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_plugins/caching_sha2_password.js"(exports2, module2) {
     "use strict";
     var PLUGIN_NAME = "caching_sha2_password";
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var { xor, xorRotating } = require_auth_41();
     var REQUEST_SERVER_KEY_PACKET = Buffer.from([2]);
     var FAST_AUTH_SUCCESS_PACKET = Buffer.from([3]);
@@ -36222,7 +36471,7 @@ var require_caching_sha2_password = __commonJS({
     var STATE_WAIT_SERVER_KEY = 2;
     var STATE_FINAL = -1;
     function sha256(msg) {
-      const hash2 = crypto6.createHash("sha256");
+      const hash2 = crypto7.createHash("sha256");
       hash2.update(msg);
       return hash2.digest();
     }
@@ -36237,10 +36486,10 @@ var require_caching_sha2_password = __commonJS({
     }
     function encrypt(password, scramble, key) {
       const stage1 = xorRotating(Buffer.from(`${password}\0`, "utf8"), scramble);
-      return crypto6.publicEncrypt(
+      return crypto7.publicEncrypt(
         {
           key,
-          padding: crypto6.constants.RSA_PKCS1_OAEP_PADDING
+          padding: crypto7.constants.RSA_PKCS1_OAEP_PADDING
         },
         stage1
       );
@@ -38867,7 +39116,7 @@ var require_named_placeholders = __commonJS({
     var DQUOTE = 34;
     var SQUOTE = 39;
     var BSLASH = 92;
-    function parse4(query) {
+    function parse5(query) {
       let ppos = RE_PARAM.exec(query);
       let curpos = 0;
       let start = 0;
@@ -38982,17 +39231,17 @@ var require_named_placeholders = __commonJS({
         if (cache2 && (tree = cache2.get(query))) {
           return toArrayParams(tree, paramsObj);
         }
-        tree = join3(parse4(query));
+        tree = join3(parse5(query));
         if (cache2) {
           cache2.set(query, tree);
         }
         return toArrayParams(tree, paramsObj);
       }
-      compile.parse = parse4;
+      compile.parse = parse5;
       return compile;
     }
     function toNumbered(q, params) {
-      const tree = parse4(q);
+      const tree = parse5(q);
       const paramsArr = [];
       if (tree.length === 1) {
         return [tree[0], paramsArr];
@@ -41863,7 +42112,7 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs5 = require("fs");
     var Stream = require("stream").Stream;
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -42069,7 +42318,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData3.prototype._generateBoundary = function() {
-      this._boundary = "--------------------------" + crypto6.randomBytes(12).toString("hex");
+      this._boundary = "--------------------------" + crypto7.randomBytes(12).toString("hex");
     };
     FormData3.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -42753,255 +43002,6 @@ var require_follow_redirects = __commonJS({
     }
     module2.exports = wrap({ http: http2, https: https2 });
     module2.exports.wrap = wrap;
-  }
-});
-
-// node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js
-var require_dist = __commonJS({
-  "node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.parseCookie = parseCookie;
-    exports2.parse = parseCookie;
-    exports2.stringifyCookie = stringifyCookie;
-    exports2.stringifySetCookie = stringifySetCookie;
-    exports2.serialize = stringifySetCookie;
-    exports2.parseSetCookie = parseSetCookie;
-    exports2.stringifySetCookie = stringifySetCookie;
-    exports2.serialize = stringifySetCookie;
-    var cookieNameRegExp = /^[\u0021-\u003A\u003C\u003E-\u007E]+$/;
-    var cookieValueRegExp = /^[\u0021-\u003A\u003C-\u007E]*$/;
-    var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
-    var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
-    var maxAgeRegExp = /^-?\d+$/;
-    var __toString = Object.prototype.toString;
-    var NullObject = /* @__PURE__ */ (() => {
-      const C = function() {
-      };
-      C.prototype = /* @__PURE__ */ Object.create(null);
-      return C;
-    })();
-    function parseCookie(str, options) {
-      const obj2 = new NullObject();
-      const len = str.length;
-      if (len < 2)
-        return obj2;
-      const dec = options?.decode || decode4;
-      let index = 0;
-      do {
-        const eqIdx = eqIndex(str, index, len);
-        if (eqIdx === -1)
-          break;
-        const endIdx = endIndex(str, index, len);
-        if (eqIdx > endIdx) {
-          index = str.lastIndexOf(";", eqIdx - 1) + 1;
-          continue;
-        }
-        const key = valueSlice(str, index, eqIdx);
-        if (obj2[key] === void 0) {
-          obj2[key] = dec(valueSlice(str, eqIdx + 1, endIdx));
-        }
-        index = endIdx + 1;
-      } while (index < len);
-      return obj2;
-    }
-    function stringifyCookie(cookie, options) {
-      const enc = options?.encode || encodeURIComponent;
-      const cookieStrings = [];
-      for (const name of Object.keys(cookie)) {
-        const val = cookie[name];
-        if (val === void 0)
-          continue;
-        if (!cookieNameRegExp.test(name)) {
-          throw new TypeError(`cookie name is invalid: ${name}`);
-        }
-        const value = enc(val);
-        if (!cookieValueRegExp.test(value)) {
-          throw new TypeError(`cookie val is invalid: ${val}`);
-        }
-        cookieStrings.push(`${name}=${value}`);
-      }
-      return cookieStrings.join("; ");
-    }
-    function stringifySetCookie(_name, _val, _opts) {
-      const cookie = typeof _name === "object" ? _name : { ..._opts, name: _name, value: String(_val) };
-      const options = typeof _val === "object" ? _val : _opts;
-      const enc = options?.encode || encodeURIComponent;
-      if (!cookieNameRegExp.test(cookie.name)) {
-        throw new TypeError(`argument name is invalid: ${cookie.name}`);
-      }
-      const value = cookie.value ? enc(cookie.value) : "";
-      if (!cookieValueRegExp.test(value)) {
-        throw new TypeError(`argument val is invalid: ${cookie.value}`);
-      }
-      let str = cookie.name + "=" + value;
-      if (cookie.maxAge !== void 0) {
-        if (!Number.isInteger(cookie.maxAge)) {
-          throw new TypeError(`option maxAge is invalid: ${cookie.maxAge}`);
-        }
-        str += "; Max-Age=" + cookie.maxAge;
-      }
-      if (cookie.domain) {
-        if (!domainValueRegExp.test(cookie.domain)) {
-          throw new TypeError(`option domain is invalid: ${cookie.domain}`);
-        }
-        str += "; Domain=" + cookie.domain;
-      }
-      if (cookie.path) {
-        if (!pathValueRegExp.test(cookie.path)) {
-          throw new TypeError(`option path is invalid: ${cookie.path}`);
-        }
-        str += "; Path=" + cookie.path;
-      }
-      if (cookie.expires) {
-        if (!isDate2(cookie.expires) || !Number.isFinite(cookie.expires.valueOf())) {
-          throw new TypeError(`option expires is invalid: ${cookie.expires}`);
-        }
-        str += "; Expires=" + cookie.expires.toUTCString();
-      }
-      if (cookie.httpOnly) {
-        str += "; HttpOnly";
-      }
-      if (cookie.secure) {
-        str += "; Secure";
-      }
-      if (cookie.partitioned) {
-        str += "; Partitioned";
-      }
-      if (cookie.priority) {
-        const priority = typeof cookie.priority === "string" ? cookie.priority.toLowerCase() : void 0;
-        switch (priority) {
-          case "low":
-            str += "; Priority=Low";
-            break;
-          case "medium":
-            str += "; Priority=Medium";
-            break;
-          case "high":
-            str += "; Priority=High";
-            break;
-          default:
-            throw new TypeError(`option priority is invalid: ${cookie.priority}`);
-        }
-      }
-      if (cookie.sameSite) {
-        const sameSite = typeof cookie.sameSite === "string" ? cookie.sameSite.toLowerCase() : cookie.sameSite;
-        switch (sameSite) {
-          case true:
-          case "strict":
-            str += "; SameSite=Strict";
-            break;
-          case "lax":
-            str += "; SameSite=Lax";
-            break;
-          case "none":
-            str += "; SameSite=None";
-            break;
-          default:
-            throw new TypeError(`option sameSite is invalid: ${cookie.sameSite}`);
-        }
-      }
-      return str;
-    }
-    function parseSetCookie(str, options) {
-      const dec = options?.decode || decode4;
-      const len = str.length;
-      const endIdx = endIndex(str, 0, len);
-      const eqIdx = eqIndex(str, 0, endIdx);
-      const setCookie = eqIdx === -1 ? { name: "", value: dec(valueSlice(str, 0, endIdx)) } : {
-        name: valueSlice(str, 0, eqIdx),
-        value: dec(valueSlice(str, eqIdx + 1, endIdx))
-      };
-      let index = endIdx + 1;
-      while (index < len) {
-        const endIdx2 = endIndex(str, index, len);
-        const eqIdx2 = eqIndex(str, index, endIdx2);
-        const attr = eqIdx2 === -1 ? valueSlice(str, index, endIdx2) : valueSlice(str, index, eqIdx2);
-        const val = eqIdx2 === -1 ? void 0 : valueSlice(str, eqIdx2 + 1, endIdx2);
-        switch (attr.toLowerCase()) {
-          case "httponly":
-            setCookie.httpOnly = true;
-            break;
-          case "secure":
-            setCookie.secure = true;
-            break;
-          case "partitioned":
-            setCookie.partitioned = true;
-            break;
-          case "domain":
-            setCookie.domain = val;
-            break;
-          case "path":
-            setCookie.path = val;
-            break;
-          case "max-age":
-            if (val && maxAgeRegExp.test(val))
-              setCookie.maxAge = Number(val);
-            break;
-          case "expires":
-            if (!val)
-              break;
-            const date6 = new Date(val);
-            if (Number.isFinite(date6.valueOf()))
-              setCookie.expires = date6;
-            break;
-          case "priority":
-            if (!val)
-              break;
-            const priority = val.toLowerCase();
-            if (priority === "low" || priority === "medium" || priority === "high") {
-              setCookie.priority = priority;
-            }
-            break;
-          case "samesite":
-            if (!val)
-              break;
-            const sameSite = val.toLowerCase();
-            if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") {
-              setCookie.sameSite = sameSite;
-            }
-            break;
-        }
-        index = endIdx2 + 1;
-      }
-      return setCookie;
-    }
-    function endIndex(str, min, len) {
-      const index = str.indexOf(";", min);
-      return index === -1 ? len : index;
-    }
-    function eqIndex(str, min, max) {
-      const index = str.indexOf("=", min);
-      return index < max ? index : -1;
-    }
-    function valueSlice(str, min, max) {
-      let start = min;
-      let end = max;
-      do {
-        const code = str.charCodeAt(start);
-        if (code !== 32 && code !== 9)
-          break;
-      } while (++start < end);
-      while (end > start) {
-        const code = str.charCodeAt(end - 1);
-        if (code !== 32 && code !== 9)
-          break;
-        end--;
-      }
-      return str.slice(start, end);
-    }
-    function decode4(str) {
-      if (str.indexOf("%") === -1)
-        return str;
-      try {
-        return decodeURIComponent(str);
-      } catch (e) {
-        return str;
-      }
-    }
-    function isDate2(val) {
-      return __toString.call(val) === "[object Date]";
-    }
   }
 });
 
@@ -47206,7 +47206,7 @@ var require_data_validations = __commonJS({
 var require_encryptor = __commonJS({
   "node_modules/.pnpm/exceljs@4.4.0/node_modules/exceljs/lib/utils/encryptor.js"(exports2, module2) {
     "use strict";
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var Encryptor = {
       /**
        * Calculate a hash of the concatenated buffers with the given algorithm.
@@ -47214,7 +47214,7 @@ var require_encryptor = __commonJS({
        * @returns {Buffer} The hash
        */
       hash(algorithm, ...buffers) {
-        const hash2 = crypto6.createHash(algorithm);
+        const hash2 = crypto7.createHash(algorithm);
         hash2.update(Buffer.concat(buffers));
         return hash2.digest();
       },
@@ -47230,7 +47230,7 @@ var require_encryptor = __commonJS({
        */
       convertPasswordToHash(password, hashAlgorithm, saltValue, spinCount) {
         hashAlgorithm = hashAlgorithm.toLowerCase();
-        const hashes = crypto6.getHashes();
+        const hashes = crypto7.getHashes();
         if (hashes.indexOf(hashAlgorithm) < 0) {
           throw new Error(`Hash algorithm '${hashAlgorithm}' not supported!`);
         }
@@ -47248,7 +47248,7 @@ var require_encryptor = __commonJS({
        * @param size The size argument is a number indicating the number of bytes to generate.
        */
       randomBytes(size) {
-        return crypto6.randomBytes(size);
+        return crypto7.randomBytes(size);
       }
     };
     module2.exports = Encryptor;
@@ -69771,7 +69771,7 @@ var init_v1 = __esm({
 });
 
 // node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/parse.js
-function parse3(uuid3) {
+function parse4(uuid3) {
   if (!validate_default(uuid3)) {
     throw TypeError("Invalid UUID");
   }
@@ -69799,7 +69799,7 @@ var parse_default;
 var init_parse = __esm({
   "node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/parse.js"() {
     init_validate();
-    parse_default = parse3;
+    parse_default = parse4;
   }
 });
 
@@ -83416,9 +83416,9 @@ var require_minimatch2 = __commonJS({
         throw new TypeError("pattern is too long");
       }
     };
-    Minimatch.prototype.parse = parse4;
+    Minimatch.prototype.parse = parse5;
     var SUBPARSE = {};
-    function parse4(pattern, isSub) {
+    function parse5(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
       if (pattern === "**") {
@@ -91038,7 +91038,7 @@ var require_binary = __commonJS({
       });
       return stream4;
     };
-    exports2.parse = function parse4(buffer) {
+    exports2.parse = function parse5(buffer) {
       var self2 = words(function(bytes2, cb) {
         return function(name) {
           if (offset + bytes2 <= buffer.length) {
@@ -100315,7 +100315,7 @@ var require_tmp = __commonJS({
     var fs5 = require("fs");
     var os4 = require("os");
     var path4 = require("path");
-    var crypto6 = require("crypto");
+    var crypto7 = require("crypto");
     var _c = { fs: fs5.constants, os: os4.constants };
     var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var TEMPLATE_PATTERN = /XXXXXX/;
@@ -100495,9 +100495,9 @@ var require_tmp = __commonJS({
     function _randomChars(howMany) {
       let value = [], rnd = null;
       try {
-        rnd = crypto6.randomBytes(howMany);
+        rnd = crypto7.randomBytes(howMany);
       } catch (e) {
-        rnd = crypto6.pseudoRandomBytes(howMany);
+        rnd = crypto7.pseudoRandomBytes(howMany);
       }
       for (let i = 0; i < howMany; i++) {
         value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
@@ -105492,11 +105492,11 @@ var require_util7 = __commonJS({
     var { isUint8Array } = require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto6;
+    var crypto7;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto6.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
+      supportedHashes = crypto7.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
     } catch {
     }
     function responseURL(response) {
@@ -105769,7 +105769,7 @@ var require_util7 = __commonJS({
       }
     }
     function bytesMatch(bytes2, metadataList) {
-      if (crypto6 === void 0) {
+      if (crypto7 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -105784,7 +105784,7 @@ var require_util7 = __commonJS({
       for (const item of metadata) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto6.createHash(algorithm).update(bytes2).digest("base64");
+        let actualValue = crypto7.createHash(algorithm).update(bytes2).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -106848,8 +106848,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto6 = require("node:crypto");
-      random = (max) => crypto6.randomInt(0, max);
+      const crypto7 = require("node:crypto");
+      random = (max) => crypto7.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -113313,8 +113313,8 @@ var require_headers2 = __commonJS({
         if (this[kHeadersMap].size !== 0) {
           for (const { 0: lowerName, 1: { name, value } } of this[kHeadersMap]) {
             if (lowerName === "set-cookie") {
-              for (const cookie of this.cookies) {
-                headers.push([name, cookie]);
+              for (const cookie2 of this.cookies) {
+                headers.push([name, cookie2]);
               }
             } else {
               headers.push([name, value]);
@@ -117411,46 +117411,46 @@ var require_util11 = __commonJS({
         throw new Error("Invalid cookie max-age");
       }
     }
-    function stringify2(cookie) {
-      if (cookie.name.length === 0) {
+    function stringify2(cookie2) {
+      if (cookie2.name.length === 0) {
         return null;
       }
-      validateCookieName(cookie.name);
-      validateCookieValue(cookie.value);
-      const out = [`${cookie.name}=${cookie.value}`];
-      if (cookie.name.startsWith("__Secure-")) {
-        cookie.secure = true;
+      validateCookieName(cookie2.name);
+      validateCookieValue(cookie2.value);
+      const out = [`${cookie2.name}=${cookie2.value}`];
+      if (cookie2.name.startsWith("__Secure-")) {
+        cookie2.secure = true;
       }
-      if (cookie.name.startsWith("__Host-")) {
-        cookie.secure = true;
-        cookie.domain = null;
-        cookie.path = "/";
+      if (cookie2.name.startsWith("__Host-")) {
+        cookie2.secure = true;
+        cookie2.domain = null;
+        cookie2.path = "/";
       }
-      if (cookie.secure) {
+      if (cookie2.secure) {
         out.push("Secure");
       }
-      if (cookie.httpOnly) {
+      if (cookie2.httpOnly) {
         out.push("HttpOnly");
       }
-      if (typeof cookie.maxAge === "number") {
-        validateCookieMaxAge(cookie.maxAge);
-        out.push(`Max-Age=${cookie.maxAge}`);
+      if (typeof cookie2.maxAge === "number") {
+        validateCookieMaxAge(cookie2.maxAge);
+        out.push(`Max-Age=${cookie2.maxAge}`);
       }
-      if (cookie.domain) {
-        validateCookieDomain(cookie.domain);
-        out.push(`Domain=${cookie.domain}`);
+      if (cookie2.domain) {
+        validateCookieDomain(cookie2.domain);
+        out.push(`Domain=${cookie2.domain}`);
       }
-      if (cookie.path) {
-        validateCookiePath(cookie.path);
-        out.push(`Path=${cookie.path}`);
+      if (cookie2.path) {
+        validateCookiePath(cookie2.path);
+        out.push(`Path=${cookie2.path}`);
       }
-      if (cookie.expires && cookie.expires.toString() !== "Invalid Date") {
-        out.push(`Expires=${toIMFDate(cookie.expires)}`);
+      if (cookie2.expires && cookie2.expires.toString() !== "Invalid Date") {
+        out.push(`Expires=${toIMFDate(cookie2.expires)}`);
       }
-      if (cookie.sameSite) {
-        out.push(`SameSite=${cookie.sameSite}`);
+      if (cookie2.sameSite) {
+        out.push(`SameSite=${cookie2.sameSite}`);
       }
-      for (const part of cookie.unparsed) {
+      for (const part of cookie2.unparsed) {
         if (!part.includes("=")) {
           throw new Error("Invalid unparsed");
         }
@@ -117621,12 +117621,12 @@ var require_cookies = __commonJS({
     function getCookies(headers) {
       webidl.argumentLengthCheck(arguments, 1, "getCookies");
       webidl.brandCheck(headers, Headers2, { strict: false });
-      const cookie = headers.get("cookie");
+      const cookie2 = headers.get("cookie");
       const out = {};
-      if (!cookie) {
+      if (!cookie2) {
         return out;
       }
-      for (const piece of cookie.split(";")) {
+      for (const piece of cookie2.split(";")) {
         const [name, ...value] = piece.split("=");
         out[name.trim()] = value.join("=");
       }
@@ -117654,11 +117654,11 @@ var require_cookies = __commonJS({
       }
       return cookies.map((pair) => parseSetCookie(pair));
     }
-    function setCookie(headers, cookie) {
+    function setCookie(headers, cookie2) {
       webidl.argumentLengthCheck(arguments, 2, "setCookie");
       webidl.brandCheck(headers, Headers2, { strict: false });
-      cookie = webidl.converters.Cookie(cookie);
-      const str = stringify2(cookie);
+      cookie2 = webidl.converters.Cookie(cookie2);
+      const str = stringify2(cookie2);
       if (str) {
         headers.append("Set-Cookie", str);
       }
@@ -118258,13 +118258,13 @@ var require_frame = __commonJS({
     "use strict";
     var { maxUnsigned16Bit } = require_constants7();
     var BUFFER_SIZE = 16386;
-    var crypto6;
+    var crypto7;
     var buffer = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
     } catch {
-      crypto6 = {
+      crypto7 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer2, _offset, _size2) {
           for (let i = 0; i < buffer2.length; ++i) {
@@ -118277,7 +118277,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto6.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto7.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++]];
     }
@@ -118349,9 +118349,9 @@ var require_connection4 = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers2();
     var { getDecodeSplit } = require_util7();
     var { WebsocketFrameSend } = require_frame();
-    var crypto6;
+    var crypto7;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url3, protocols, client, ws, onEstablish, options) {
@@ -118371,7 +118371,7 @@ var require_connection4 = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto6.randomBytes(16).toString("base64");
+      const keyValue = crypto7.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue);
       request.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -118401,7 +118401,7 @@ var require_connection4 = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto6.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto7.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -132558,7 +132558,7 @@ var require_svgPath = __commonJS({
       ["Z", 0],
       ["z", 0]
     ]);
-    var parse4 = function(path4) {
+    var parse5 = function(path4) {
       var cmd;
       var ret2 = [];
       var args = [];
@@ -132880,7 +132880,7 @@ var require_svgPath = __commonJS({
       return result;
     };
     exports2.svgPathToOperators = function(path4) {
-      return apply(parse4(path4));
+      return apply(parse5(path4));
     };
   }
 });
@@ -135616,23 +135616,23 @@ var require_StandardFonts = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.StandardFonts = void 0;
-    var StandardFonts;
-    (function(StandardFonts2) {
-      StandardFonts2["Courier"] = "Courier";
-      StandardFonts2["CourierBold"] = "Courier-Bold";
-      StandardFonts2["CourierOblique"] = "Courier-Oblique";
-      StandardFonts2["CourierBoldOblique"] = "Courier-BoldOblique";
-      StandardFonts2["Helvetica"] = "Helvetica";
-      StandardFonts2["HelveticaBold"] = "Helvetica-Bold";
-      StandardFonts2["HelveticaOblique"] = "Helvetica-Oblique";
-      StandardFonts2["HelveticaBoldOblique"] = "Helvetica-BoldOblique";
-      StandardFonts2["TimesRoman"] = "Times-Roman";
-      StandardFonts2["TimesRomanBold"] = "Times-Bold";
-      StandardFonts2["TimesRomanItalic"] = "Times-Italic";
-      StandardFonts2["TimesRomanBoldItalic"] = "Times-BoldItalic";
-      StandardFonts2["Symbol"] = "Symbol";
-      StandardFonts2["ZapfDingbats"] = "ZapfDingbats";
-    })(StandardFonts = exports2.StandardFonts || (exports2.StandardFonts = {}));
+    var StandardFonts2;
+    (function(StandardFonts3) {
+      StandardFonts3["Courier"] = "Courier";
+      StandardFonts3["CourierBold"] = "Courier-Bold";
+      StandardFonts3["CourierOblique"] = "Courier-Oblique";
+      StandardFonts3["CourierBoldOblique"] = "Courier-BoldOblique";
+      StandardFonts3["Helvetica"] = "Helvetica";
+      StandardFonts3["HelveticaBold"] = "Helvetica-Bold";
+      StandardFonts3["HelveticaOblique"] = "Helvetica-Oblique";
+      StandardFonts3["HelveticaBoldOblique"] = "Helvetica-BoldOblique";
+      StandardFonts3["TimesRoman"] = "Times-Roman";
+      StandardFonts3["TimesRomanBold"] = "Times-Bold";
+      StandardFonts3["TimesRomanItalic"] = "Times-Italic";
+      StandardFonts3["TimesRomanBoldItalic"] = "Times-BoldItalic";
+      StandardFonts3["Symbol"] = "Symbol";
+      StandardFonts3["ZapfDingbats"] = "ZapfDingbats";
+    })(StandardFonts2 = exports2.StandardFonts || (exports2.StandardFonts = {}));
   }
 });
 
@@ -140193,12 +140193,12 @@ function createMiddlewareFactory() {
   }
   return createMiddleware;
 }
-function createInputMiddleware(parse4) {
+function createInputMiddleware(parse5) {
   const inputMiddleware = async function inputValidatorMiddleware(opts) {
     let parsedInput;
     const rawInput = await opts.getRawInput();
     try {
-      parsedInput = await parse4(rawInput);
+      parsedInput = await parse5(rawInput);
     } catch (cause) {
       throw new TRPCError({
         code: "BAD_REQUEST",
@@ -140211,12 +140211,12 @@ function createInputMiddleware(parse4) {
   inputMiddleware._type = "input";
   return inputMiddleware;
 }
-function createOutputMiddleware(parse4) {
+function createOutputMiddleware(parse5) {
   const outputMiddleware = async function outputValidatorMiddleware({ next }) {
     const result = await next();
     if (!result.ok) return result;
     try {
-      const data = await parse4(result.data);
+      const data = await parse5(result.data);
       return (0, import_objectSpread2$2.default)((0, import_objectSpread2$2.default)({}, result), {}, { data });
     } catch (cause) {
       throw new TRPCError({
@@ -140700,6 +140700,98 @@ function createExpressMiddleware(opts) {
       path: path4
     }, opts)));
   };
+}
+
+// server/_core/adminSession.ts
+var import_node_crypto = __toESM(require("node:crypto"), 1);
+var cookie = __toESM(require_dist(), 1);
+
+// server/_core/env.ts
+var ENV = {
+  appId: process.env.VITE_APP_ID ?? "",
+  cookieSecret: process.env.JWT_SECRET ?? "",
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
+  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
+  ownerEmail: process.env.OWNER_EMAIL ?? "queenofpeace323@gmail.com",
+  isProduction: process.env.NODE_ENV === "production",
+  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  resendFromEmail: process.env.RESEND_FROM_EMAIL ?? ""
+};
+
+// server/_core/adminSession.ts
+var ADMIN_COOKIE_NAME = "peaceful_taste_admin";
+var ADMIN_SESSION_DURATION_MS = 1e3 * 60 * 60 * 8;
+function getAdminPassword() {
+  return process.env.ADMIN_PASSWORD ?? "peaceful123";
+}
+function getSigningSecret() {
+  return ENV.cookieSecret || getAdminPassword();
+}
+function signValue(value) {
+  return import_node_crypto.default.createHmac("sha256", getSigningSecret()).update(value).digest("hex");
+}
+function isValidAdminPassword(password) {
+  return password === getAdminPassword();
+}
+function createAdminSessionToken() {
+  const payload = {
+    exp: Date.now() + ADMIN_SESSION_DURATION_MS
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = signValue(encoded);
+  return `${encoded}.${signature}`;
+}
+function verifyAdminSessionToken(token) {
+  if (!token) return false;
+  const [encoded, signature] = token.split(".");
+  if (!encoded || !signature) return false;
+  const expectedSignature = signValue(encoded);
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+  if (!import_node_crypto.default.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+    return false;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    return payload.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+function readAdminSessionFromRequest(req) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return false;
+  const cookies = cookie.parse(cookieHeader);
+  return verifyAdminSessionToken(cookies[ADMIN_COOKIE_NAME]);
+}
+function buildCookieString(token, maxAge) {
+  const parts = [
+    `${ADMIN_COOKIE_NAME}=${encodeURIComponent(token)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`
+  ];
+  if (ENV.isProduction) {
+    parts.push("Secure");
+  }
+  return parts.join("; ");
+}
+function setAdminSessionCookie(res, token) {
+  res.append(
+    "Set-Cookie",
+    buildCookieString(token, Math.floor(ADMIN_SESSION_DURATION_MS / 1e3))
+  );
+}
+function clearAdminSessionCookie(res) {
+  res.append(
+    "Set-Cookie",
+    buildCookieString("", 0)
+  );
 }
 
 // shared/const.ts
@@ -146968,21 +147060,6 @@ var inquiries = mysqlTable("inquiries", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
 });
 
-// server/_core/env.ts
-var ENV = {
-  appId: process.env.VITE_APP_ID ?? "",
-  cookieSecret: process.env.JWT_SECRET ?? "",
-  databaseUrl: process.env.DATABASE_URL ?? "",
-  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
-  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
-  ownerEmail: process.env.OWNER_EMAIL ?? "queenofpeace323@gmail.com",
-  isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
-  resendApiKey: process.env.RESEND_API_KEY ?? "",
-  resendFromEmail: process.env.RESEND_FROM_EMAIL ?? ""
-};
-
 // server/db.ts
 var _db = null;
 async function getDb() {
@@ -149365,12 +149442,12 @@ var cookies_default = platform_default.hasStandardBrowserEnv ? (
   // Standard browser envs support document.cookie
   {
     write(name, value, expires, path4, domain2, secure) {
-      const cookie = [name + "=" + encodeURIComponent(value)];
-      utils_default.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
-      utils_default.isString(path4) && cookie.push("path=" + path4);
-      utils_default.isString(domain2) && cookie.push("domain=" + domain2);
-      secure === true && cookie.push("secure");
-      document.cookie = cookie.join("; ");
+      const cookie2 = [name + "=" + encodeURIComponent(value)];
+      utils_default.isNumber(expires) && cookie2.push("expires=" + new Date(expires).toGMTString());
+      utils_default.isString(path4) && cookie2.push("path=" + path4);
+      utils_default.isString(domain2) && cookie2.push("domain=" + domain2);
+      secure === true && cookie2.push("secure");
+      document.cookie = cookie2.join("; ");
     },
     read(name) {
       const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
@@ -152152,7 +152229,8 @@ async function createContext(opts) {
   return {
     req: opts.req,
     res: opts.res,
-    user
+    user,
+    isAdminSession: readAdminSessionFromRequest(opts.req)
   };
 }
 
@@ -152161,11 +152239,15 @@ var PEACEFUL_TASTE_CONTACT = {
   phone: "+234 902 262 1323",
   whatsappNumber: "2349022621323",
   email: "queenofpeace323@gmail.com",
-  bankName: "Monie Point Bank",
-  accountName: "Vincent Theophilus",
-  accountNumber: "8139171125",
+  bankName: "Providus Bank",
+  accountName: "ELYSIUM ENT (PEACEFUL TASTE)",
+  accountNumber: "1104428705",
   siteUrl: "https://peacefultaste.vercel.app",
-  address: "Lagos-Ibadan Expressway, Nigeria"
+  address: "Lagos-Ibadan Expressway, Nigeria",
+  instagram: "@peacefultaste",
+  facebook: "peacefultaste",
+  tiktok: "@peacefultaste_",
+  logoUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful-taste-logo_09e2b0c8.jpg"
 };
 function formatNairaAmount(amount) {
   return new Intl.NumberFormat("en-NG", {
@@ -152184,6 +152266,7 @@ function buildReceiptText(payload) {
     `Customer Email: ${payload.customerEmail}`,
     `Customer Phone: ${payload.customerPhone || "N/A"}`,
     `Delivery Location: ${payload.deliveryLocation}`,
+    `Full Delivery Address: ${payload.deliveryAddress}`,
     `Payment Method: Bank Transfer`,
     `Payment Status: Awaiting confirmation`,
     "",
@@ -152201,6 +152284,11 @@ function buildReceiptText(payload) {
     `Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`,
     `Transfer Amount: ${formatNairaAmount(payload.totalAmount)}`,
     `Payment Reference: ${payload.orderNumber}`,
+    "",
+    "Brand Contacts:",
+    `Instagram: ${PEACEFUL_TASTE_CONTACT.instagram}`,
+    `Facebook: ${PEACEFUL_TASTE_CONTACT.facebook}`,
+    `TikTok: ${PEACEFUL_TASTE_CONTACT.tiktok}`,
     "",
     `WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`,
     `Email: ${PEACEFUL_TASTE_CONTACT.email}`,
@@ -152399,7 +152487,7 @@ __export(external_exports, {
   object: () => object,
   optional: () => optional,
   overwrite: () => _overwrite,
-  parse: () => parse2,
+  parse: () => parse3,
   parseAsync: () => parseAsync2,
   partialRecord: () => partialRecord,
   pipe: () => pipe,
@@ -152703,7 +152791,7 @@ __export(core_exports2, {
   isValidBase64URL: () => isValidBase64URL,
   isValidJWT: () => isValidJWT,
   locales: () => locales_exports,
-  parse: () => parse,
+  parse: () => parse2,
   parseAsync: () => parseAsync,
   prettifyError: () => prettifyError,
   regexes: () => regexes_exports,
@@ -153571,7 +153659,7 @@ var _parse = (_Err) => (schema, value, _ctx, _params) => {
   }
   return result.value;
 };
-var parse = /* @__PURE__ */ _parse($ZodRealError);
+var parse2 = /* @__PURE__ */ _parse($ZodRealError);
 var _parseAsync = (_Err) => async (schema, value, _ctx, params) => {
   const ctx = _ctx ? Object.assign(_ctx, { async: true }) : { async: true };
   let result = schema._zod.run({ value, issues: [] }, ctx);
@@ -156107,10 +156195,10 @@ var $ZodFunction = /* @__PURE__ */ $constructor("$ZodFunction", (inst, def) => {
       throw new Error("implement() must be called with a function");
     }
     return function(...args) {
-      const parsedArgs = inst._def.input ? parse(inst._def.input, args) : args;
+      const parsedArgs = inst._def.input ? parse2(inst._def.input, args) : args;
       const result = Reflect.apply(func, this, parsedArgs);
       if (inst._def.output) {
-        return parse(inst._def.output, result);
+        return parse2(inst._def.output, result);
       }
       return result;
     };
@@ -163732,7 +163820,7 @@ var ZodRealError = $constructor("ZodError", initializer2, {
 });
 
 // node_modules/.pnpm/zod@4.1.12/node_modules/zod/v4/classic/parse.js
-var parse2 = /* @__PURE__ */ _parse(ZodRealError);
+var parse3 = /* @__PURE__ */ _parse(ZodRealError);
 var parseAsync2 = /* @__PURE__ */ _parseAsync(ZodRealError);
 var safeParse2 = /* @__PURE__ */ _safeParse(ZodRealError);
 var safeParseAsync2 = /* @__PURE__ */ _safeParseAsync(ZodRealError);
@@ -163765,7 +163853,7 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
     reg.add(inst, meta);
     return inst;
   });
-  inst.parse = (data, params) => parse2(inst, data, params, { callee: inst.parse });
+  inst.parse = (data, params) => parse3(inst, data, params, { callee: inst.parse });
   inst.safeParse = (data, params) => safeParse2(inst, data, params);
   inst.parseAsync = async (data, params) => parseAsync2(inst, data, params, { callee: inst.parseAsync });
   inst.safeParseAsync = async (data, params) => safeParseAsync2(inst, data, params);
@@ -164853,6 +164941,18 @@ var t = initTRPC.context().create({
 });
 var router = t.router;
 var publicProcedure = t.procedure;
+var requireAdminSession = t.middleware(async (opts) => {
+  const { ctx, next } = opts;
+  if (!ctx.isAdminSession) {
+    throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      isAdminSession: true
+    }
+  });
+});
 var requireUser = t.middleware(async (opts) => {
   const { ctx, next } = opts;
   if (!ctx.user) {
@@ -164880,6 +164980,7 @@ var adminProcedure = t.procedure.use(
     });
   })
 );
+var adminSessionProcedure = t.procedure.use(requireAdminSession);
 
 // server/_core/systemRouter.ts
 var systemRouter = router({
@@ -166580,6 +166681,8 @@ async function buildOrdersWorkbookFile() {
     { header: "Customer Name", key: "customerName", width: 25 },
     { header: "Email", key: "customerEmail", width: 30 },
     { header: "Phone", key: "customerPhone", width: 15 },
+    { header: "Delivery Location", key: "deliveryLocation", width: 20 },
+    { header: "Delivery Address", key: "deliveryAddress", width: 40 },
     { header: "Items", key: "items", width: 40 },
     { header: "Subtotal (Naira)", key: "subtotal", width: 15 },
     { header: "Shipping (Naira)", key: "shippingCost", width: 15 },
@@ -166633,6 +166736,8 @@ async function addOrderToExcel(orderData) {
     customerName: orderData.customerName,
     customerEmail: orderData.customerEmail,
     customerPhone: orderData.customerPhone || "N/A",
+    deliveryLocation: orderData.deliveryLocation,
+    deliveryAddress: orderData.deliveryAddress,
     items: itemsString,
     subtotal: orderData.subtotal,
     shippingCost: orderData.shippingCost,
@@ -166744,27 +166849,22 @@ async function sendTermiiSMS(phoneNumber, message2, senderID = "PEACEFUL_TASTE")
         { timeout: 5e3 }
       );
       if (response.data.code === "00") {
-        console.log("[SMS Sent]", response.data.message_id);
         return {
           success: true,
           messageId: response.data.message_id
         };
-      } else {
-        console.error("[SMS Error]", response.data);
-        return {
-          success: false,
-          error: response.data.message || "Failed to send SMS"
-        };
       }
-    } catch (apiError) {
-      console.error("[SMS API Error]", apiError);
+      return {
+        success: false,
+        error: response.data.message || "Failed to send SMS"
+      };
+    } catch {
       return {
         success: true,
         messageId: "fallback_" + Date.now()
       };
     }
   } catch (error46) {
-    console.error("[SMS Error]", error46);
     return {
       success: false,
       error: error46 instanceof Error ? error46.message : "Unknown error"
@@ -166772,23 +166872,23 @@ async function sendTermiiSMS(phoneNumber, message2, senderID = "PEACEFUL_TASTE")
   }
 }
 async function sendOrderConfirmationSMS(phoneNumber, orderReference, totalAmount, senderID) {
-  const message2 = `
-\u{1F389} Order Confirmed!
-
-Your order #${orderReference} has been received.
-Amount: \u20A6${totalAmount.toLocaleString()}
-
-\u{1F4DD} Bank Details:
-Name: Vincent Theophilus
-Bank: Monie Point Bank
-Account: 8139171125
-
-Please transfer and upload receipt on our website.
-
-\u{1F4DE} WhatsApp: https://wa.me/2349022621323
-
-- Peaceful Taste
-  `.trim();
+  const message2 = [
+    "Order Confirmed!",
+    "",
+    `Your order #${orderReference} has been received.`,
+    `Amount: NGN ${totalAmount.toLocaleString("en-NG")}`,
+    "",
+    "Bank Details:",
+    `Name: ${PEACEFUL_TASTE_CONTACT.accountName}`,
+    `Bank: ${PEACEFUL_TASTE_CONTACT.bankName}`,
+    `Account: ${PEACEFUL_TASTE_CONTACT.accountNumber}`,
+    "",
+    "Please transfer and upload receipt on our website.",
+    "",
+    `WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`,
+    "",
+    "- Peaceful Taste"
+  ].join("\n");
   const result = await sendTermiiSMS(phoneNumber, message2, senderID);
   return result.success;
 }
@@ -166798,88 +166898,283 @@ var import_pdf_lib = __toESM(require_cjs3(), 1);
 function formatPdfAmount(amount) {
   return `NGN ${amount.toLocaleString("en-NG")}`;
 }
+async function fetchLogoBytes() {
+  try {
+    const response = await fetch(PEACEFUL_TASTE_CONTACT.logoUrl);
+    if (!response.ok) return null;
+    return Buffer.from(await response.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
 async function generateOrderReceipt(data) {
   const pdfDoc = await import_pdf_lib.PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]);
   const { width, height } = page.getSize();
-  const margin = 40;
-  let yPosition = height - margin;
-  const drawText = (text2, fontSize = 12, _bold = false, color = [0, 0, 0]) => {
-    page.drawText(text2, {
-      x: margin,
-      y: yPosition,
-      size: fontSize,
-      color: (0, import_pdf_lib.rgb)(...color)
-    });
-    yPosition -= fontSize + 5;
+  const fontRegular = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(import_pdf_lib.StandardFonts.HelveticaBold);
+  const logoBytes = await fetchLogoBytes();
+  const logoImage = logoBytes ? await pdfDoc.embedJpg(logoBytes) : null;
+  const colors = {
+    bg: (0, import_pdf_lib.rgb)(0.97, 0.95, 0.9),
+    green: (0, import_pdf_lib.rgb)(0.08, 0.26, 0.14),
+    brown: (0, import_pdf_lib.rgb)(0.47, 0.29, 0.14),
+    gold: (0, import_pdf_lib.rgb)(0.84, 0.66, 0.43),
+    text: (0, import_pdf_lib.rgb)(0.09, 0.11, 0.12),
+    muted: (0, import_pdf_lib.rgb)(0.37, 0.39, 0.41),
+    white: (0, import_pdf_lib.rgb)(1, 1, 1),
+    line: (0, import_pdf_lib.rgb)(0.82, 0.79, 0.73)
   };
-  const drawLine = () => {
-    page.drawLine({
-      start: { x: margin, y: yPosition },
-      end: { x: width - margin, y: yPosition },
-      thickness: 1,
-      color: (0, import_pdf_lib.rgb)(0.8, 0.8, 0.8)
+  page.drawRectangle({ x: 0, y: 0, width, height, color: colors.bg });
+  page.drawRectangle({ x: 0, y: height - 118, width, height: 118, color: colors.green });
+  page.drawRectangle({ x: 0, y: 0, width, height: 78, color: colors.green });
+  page.drawRectangle({ x: 40, y: height - 152, width: width - 80, height: 4, color: colors.gold });
+  if (logoImage) {
+    page.drawImage(logoImage, {
+      x: 42,
+      y: height - 96,
+      width: 56,
+      height: 56
     });
-    yPosition -= 15;
-  };
-  drawText("PEACEFUL TASTE", 22, true, [0.07, 0.27, 0.15]);
-  drawText("Premium Catering Order Receipt", 13, true, [0.45, 0.29, 0.14]);
-  drawLine();
-  drawText(`Order Number: ${data.orderNumber}`, 11, true);
-  drawText(`Receipt Date: ${new Date(data.createdAt).toLocaleString("en-NG")}`, 11);
-  drawText("Payment Method: Bank Transfer", 11);
-  drawText("Payment Status: Awaiting confirmation", 11);
-  yPosition -= 10;
-  drawText("CUSTOMER INFORMATION", 12, true);
-  drawText(`Name: ${data.customerName}`, 10);
-  drawText(`Email: ${data.customerEmail}`, 10);
-  if (data.customerPhone) {
-    drawText(`Phone: ${data.customerPhone}`, 10);
   }
-  drawText(`Delivery Location: ${data.deliveryLocation}`, 10);
-  drawLine();
-  drawText("ORDER ITEMS", 12, true);
-  yPosition -= 5;
-  page.drawText("Item", { x: margin, y: yPosition, size: 10 });
-  page.drawText("Qty", { x: margin + 300, y: yPosition, size: 10 });
-  page.drawText("Price", { x: margin + 350, y: yPosition, size: 10 });
-  page.drawText("Total", { x: margin + 430, y: yPosition, size: 10 });
-  yPosition -= 15;
-  data.items.forEach((item) => {
-    const itemTotal = item.price * item.quantity;
-    page.drawText(item.name, { x: margin, y: yPosition, size: 9 });
-    page.drawText(item.quantity.toString(), { x: margin + 300, y: yPosition, size: 9 });
-    page.drawText(formatPdfAmount(item.price), { x: margin + 350, y: yPosition, size: 9 });
-    page.drawText(formatPdfAmount(itemTotal), { x: margin + 430, y: yPosition, size: 9 });
-    yPosition -= 12;
+  page.drawText("PEACEFUL TASTE", {
+    x: 112,
+    y: height - 58,
+    size: 25,
+    font: fontBold,
+    color: colors.white
   });
-  drawLine();
-  yPosition -= 5;
-  page.drawText("Subtotal:", { x: margin + 350, y: yPosition, size: 10 });
-  page.drawText(formatPdfAmount(data.subtotal), { x: margin + 430, y: yPosition, size: 10 });
-  yPosition -= 12;
-  page.drawText("Tax (10%):", { x: margin + 350, y: yPosition, size: 10 });
-  page.drawText(formatPdfAmount(data.tax), { x: margin + 430, y: yPosition, size: 10 });
-  yPosition -= 12;
-  page.drawText("Delivery Fee:", { x: margin + 350, y: yPosition, size: 10 });
-  page.drawText(formatPdfAmount(data.shippingCost), { x: margin + 430, y: yPosition, size: 10 });
-  yPosition -= 15;
-  page.drawText("TOTAL:", { x: margin + 350, y: yPosition, size: 12, color: (0, import_pdf_lib.rgb)(0.78, 0.39, 0.2) });
-  page.drawText(formatPdfAmount(data.totalAmount), { x: margin + 430, y: yPosition, size: 12, color: (0, import_pdf_lib.rgb)(0.78, 0.39, 0.2) });
-  yPosition -= 25;
-  drawLine();
-  drawText("PAYMENT INSTRUCTIONS", 12, true);
-  drawText(`Account Holder: ${PEACEFUL_TASTE_CONTACT.accountName}`, 10);
-  drawText(`Bank: ${PEACEFUL_TASTE_CONTACT.bankName}`, 10);
-  drawText(`Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`, 10, true);
-  drawText(`Transfer Amount: ${formatPdfAmount(data.totalAmount)}`, 10, true);
-  drawText(`Payment Reference: ${data.orderNumber}`, 10, true);
-  drawText("Upload or send your transfer receipt after payment for manual confirmation.", 9);
-  yPosition -= 15;
-  drawText("Thank you for your order!", 10, true, [0.07, 0.27, 0.15]);
-  drawText(`Contact: ${PEACEFUL_TASTE_CONTACT.phone} | WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`, 9);
-  drawText(`Email: ${PEACEFUL_TASTE_CONTACT.email}`, 9);
-  drawText(`Address: ${PEACEFUL_TASTE_CONTACT.address}`, 9);
+  page.drawText("Premium Catering", {
+    x: 114,
+    y: height - 80,
+    size: 11,
+    font: fontRegular,
+    color: colors.white
+  });
+  page.drawText("ORDER RECEIPT", {
+    x: width - 180,
+    y: height - 58,
+    size: 20,
+    font: fontBold,
+    color: colors.white
+  });
+  page.drawText(`Receipt Date: ${new Date(data.createdAt).toLocaleString("en-NG")}`, {
+    x: width - 180,
+    y: height - 80,
+    size: 10,
+    font: fontRegular,
+    color: colors.white
+  });
+  let y = height - 182;
+  const drawSectionTitle = (title) => {
+    page.drawText(title, {
+      x: 42,
+      y,
+      size: 12,
+      font: fontBold,
+      color: colors.brown
+    });
+    y -= 8;
+    page.drawLine({
+      start: { x: 42, y },
+      end: { x: width - 42, y },
+      thickness: 1,
+      color: colors.line
+    });
+    y -= 18;
+  };
+  const drawLabelValue = (label, value, valueX = 175) => {
+    page.drawText(label, {
+      x: 42,
+      y,
+      size: 10,
+      font: fontBold,
+      color: colors.text
+    });
+    page.drawText(value, {
+      x: valueX,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    y -= 16;
+  };
+  drawSectionTitle("Receipt Summary");
+  drawLabelValue("Order Number", data.orderNumber);
+  drawLabelValue("Payment Method", "Bank Transfer");
+  drawLabelValue("Payment Status", "Awaiting confirmation");
+  drawLabelValue("Transfer Amount", formatPdfAmount(data.totalAmount));
+  drawLabelValue("Payment Reference", data.orderNumber);
+  y -= 8;
+  drawSectionTitle("Customer & Delivery Details");
+  drawLabelValue("Customer Name", data.customerName);
+  drawLabelValue("Customer Email", data.customerEmail);
+  drawLabelValue("Customer Phone", data.customerPhone || "N/A");
+  drawLabelValue("Delivery Location", data.deliveryLocation);
+  page.drawText("Full Delivery Address", {
+    x: 42,
+    y,
+    size: 10,
+    font: fontBold,
+    color: colors.text
+  });
+  y -= 15;
+  const addressLines = [data.deliveryAddress].flatMap(
+    (line) => line.match(/.{1,62}(|$)/g)?.map((part) => part.trim()).filter(Boolean) || [line]
+  );
+  addressLines.forEach((line) => {
+    page.drawText(line, {
+      x: 42,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    y -= 14;
+  });
+  y -= 6;
+  drawSectionTitle("Order Items");
+  const headers = [
+    { label: "Item", x: 42 },
+    { label: "Qty", x: 315 },
+    { label: "Price", x: 365 },
+    { label: "Total", x: 455 }
+  ];
+  headers.forEach((header) => {
+    page.drawText(header.label, {
+      x: header.x,
+      y,
+      size: 10,
+      font: fontBold,
+      color: colors.muted
+    });
+  });
+  y -= 14;
+  page.drawLine({
+    start: { x: 42, y },
+    end: { x: width - 42, y },
+    thickness: 1,
+    color: colors.line
+  });
+  y -= 16;
+  data.items.forEach((item) => {
+    const total = item.price * item.quantity;
+    page.drawText(item.name.slice(0, 42), {
+      x: 42,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    page.drawText(String(item.quantity), {
+      x: 320,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    page.drawText(formatPdfAmount(item.price), {
+      x: 365,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    page.drawText(formatPdfAmount(total), {
+      x: 455,
+      y,
+      size: 10,
+      font: fontBold,
+      color: colors.text
+    });
+    y -= 16;
+  });
+  y -= 2;
+  page.drawLine({
+    start: { x: 42, y },
+    end: { x: width - 42, y },
+    thickness: 1,
+    color: colors.line
+  });
+  y -= 18;
+  const totals = [
+    ["Subtotal", formatPdfAmount(data.subtotal)],
+    ["Tax (10%)", formatPdfAmount(data.tax)],
+    ["Delivery Fee", formatPdfAmount(data.shippingCost)]
+  ];
+  totals.forEach(([label, value]) => {
+    page.drawText(label, {
+      x: 350,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    page.drawText(value, {
+      x: 455,
+      y,
+      size: 10,
+      font: fontRegular,
+      color: colors.text
+    });
+    y -= 16;
+  });
+  page.drawText("TOTAL", {
+    x: 350,
+    y,
+    size: 12,
+    font: fontBold,
+    color: colors.brown
+  });
+  page.drawText(formatPdfAmount(data.totalAmount), {
+    x: 455,
+    y,
+    size: 12,
+    font: fontBold,
+    color: colors.brown
+  });
+  y -= 30;
+  drawSectionTitle("Bank Transfer Details");
+  drawLabelValue("Bank", PEACEFUL_TASTE_CONTACT.bankName);
+  drawLabelValue("Account Name", PEACEFUL_TASTE_CONTACT.accountName);
+  drawLabelValue("Account Number", PEACEFUL_TASTE_CONTACT.accountNumber);
+  drawLabelValue("Reference", data.orderNumber);
+  page.drawText("Please transfer the exact amount and upload your proof of payment for confirmation.", {
+    x: 42,
+    y,
+    size: 9,
+    font: fontRegular,
+    color: colors.muted
+  });
+  page.drawText(`WhatsApp: ${PEACEFUL_TASTE_CONTACT.phone}`, {
+    x: 42,
+    y: 48,
+    size: 9,
+    font: fontRegular,
+    color: colors.white
+  });
+  page.drawText(`Email: ${PEACEFUL_TASTE_CONTACT.email}`, {
+    x: 210,
+    y: 48,
+    size: 9,
+    font: fontRegular,
+    color: colors.white
+  });
+  page.drawText(`IG: ${PEACEFUL_TASTE_CONTACT.instagram} | FB: ${PEACEFUL_TASTE_CONTACT.facebook} | TikTok: ${PEACEFUL_TASTE_CONTACT.tiktok}`, {
+    x: 42,
+    y: 32,
+    size: 8.5,
+    font: fontRegular,
+    color: colors.white
+  });
+  page.drawText(PEACEFUL_TASTE_CONTACT.address, {
+    x: 42,
+    y: 17,
+    size: 8.5,
+    font: fontRegular,
+    color: colors.white
+  });
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);
 }
@@ -167005,7 +167300,7 @@ var defaultCategories = [
   { id: "parfait", name: "Parfait 330ml", description: "Layered cups and chilled favorites", sortOrder: 1 },
   { id: "yoghurt", name: "Yoghurt", description: "Fresh yoghurt bottles in multiple sizes", sortOrder: 2 },
   { id: "pastries", name: "Pastries & Snacks", description: "Savory and sweet bakery picks", sortOrder: 3 },
-  { id: "cakes", name: "Cakes", description: "Celebration-ready cake slices and flavors", sortOrder: 4 },
+  { id: "cakes", name: "Cakes", description: "Premium celebration cakes inspired by Lagos luxury dessert pricing", sortOrder: 4 },
   { id: "zobo", name: "Zobo", description: "Refreshing hibiscus drinks", sortOrder: 5 },
   { id: "tiger-nut", name: "Tiger Nut Drink", description: "Creamy local drink options", sortOrder: 6 },
   { id: "only-food", name: "Meals & Soups", description: "Meals and soup selections", sortOrder: 7 }
@@ -167017,7 +167312,7 @@ var defaultProducts = [
     categoryId: "parfait",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-plain-fruit-sticker-RwC2BsoncfSGTeEgmVkN92.webp",
-    description: "Plain fruit yogurt with fresh berries and granola",
+    description: "Creamy fruit parfait layered with berries and crunchy granola.",
     size: "330ml",
     isBestSeller: true,
     isActive: true
@@ -167028,38 +167323,38 @@ var defaultProducts = [
     categoryId: "parfait",
     price: 3900,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-cake-sticker-NpSP9LxRGxUMBpd8aoKQYP.webp",
-    description: "Vanilla cake layers with whipped cream and chocolate shavings",
+    description: "Vanilla cake layers, whipped cream, and chocolate shavings in a chilled cup.",
     size: "330ml",
     isNew: true,
     isActive: true
   },
   {
     id: "parfait-3",
-    name: "Strawberry Flavor Fruit Parfait 330ml",
+    name: "Strawberry Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-strawberry-sticker-ZUuz5AytiW9mYuKGJzZAbX.webp",
-    description: "Strawberry-flavored yogurt with fresh strawberries and granola",
+    description: "Strawberry-flavored parfait finished with fresh fruit notes and granola.",
     size: "330ml",
     isActive: true
   },
   {
     id: "parfait-4",
-    name: "Banana Flavor Fruit Parfait 330ml",
+    name: "Banana Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-banana-sticker-4SnP4L7nS57YoKavxn8S7R.webp",
-    description: "Banana-flavored yogurt with sliced bananas and granola",
+    description: "Banana parfait with smooth cream layers and a balanced sweetness.",
     size: "330ml",
     isActive: true
   },
   {
     id: "parfait-5",
-    name: "Vanilla Flavor Fruit Parfait 330ml",
+    name: "Vanilla Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-vanilla-sticker-jg9ouoCCfoBQRpdpRnr2fe.webp",
-    description: "Vanilla-flavored yogurt with mixed berries and honey granola",
+    description: "Vanilla parfait with mixed berries and honey granola.",
     size: "330ml",
     isActive: true
   },
@@ -167069,17 +167364,17 @@ var defaultProducts = [
     categoryId: "yoghurt",
     price: 2500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/yoghurt-plain-sweetened-sticker-CxWrEpqLqiZZrsmzMN6CQV.webp",
-    description: "Plain sweetened yogurt with a smooth premium finish.",
+    description: "Smooth bottled yoghurt with a clean, creamy finish.",
     size: "35cl",
     isActive: true
   },
   {
     id: "pastries-1",
-    name: "Chin-Chin",
+    name: "Chin-Chin Pack",
     categoryId: "pastries",
     price: 1500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
-    description: "Crispy, golden fried snack with perfect seasoning.",
+    description: "Crunchy chin-chin with the rich golden finish customers expect.",
     isBestSeller: true,
     isActive: true
   },
@@ -167089,7 +167384,7 @@ var defaultProducts = [
     categoryId: "pastries",
     price: 2e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
-    description: "Flaky pastry filled with seasoned fish.",
+    description: "Flaky fish pie baked with a savory Nigerian-style filling.",
     isActive: true
   },
   {
@@ -167098,7 +167393,7 @@ var defaultProducts = [
     categoryId: "pastries",
     price: 2e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
-    description: "Savory meat-filled pastry with herbs.",
+    description: "Classic meat pie with a buttery crust and seasoned filling.",
     isActive: true
   },
   {
@@ -167107,7 +167402,7 @@ var defaultProducts = [
     categoryId: "pastries",
     price: 2e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
-    description: "Tender chicken in flaky pastry shell.",
+    description: "Tender chicken pie with a flaky, golden pastry shell.",
     isActive: true
   },
   {
@@ -167116,16 +167411,16 @@ var defaultProducts = [
     categoryId: "pastries",
     price: 1500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
-    description: "Soft, fluffy doughnut with sugar coating.",
+    description: "Soft doughnut with a clean finish and light sugar coating.",
     isActive: true
   },
   {
     id: "pastries-6",
-    name: "Puff-Puff",
+    name: "Puff-Puff Pack",
     categoryId: "pastries",
     price: 1500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
-    description: "Golden, fluffy fried dough balls.",
+    description: "Soft, airy puff-puff with the golden look common in Nigerian snack spots.",
     isBestSeller: true,
     isActive: true
   },
@@ -167135,35 +167430,38 @@ var defaultProducts = [
     categoryId: "pastries",
     price: 2500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
-    description: "Grilled meat in soft pita bread with vegetables.",
+    description: "Loaded shawarma with grilled filling, vegetables, and creamy sauce.",
     isActive: true
   },
   {
     id: "cakes-1",
-    name: "Vanilla Cake",
+    name: "Vanilla Buttercream Cake",
     categoryId: "cakes",
-    price: 4500,
+    price: 45e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-sticker-UBtgsBfBka9yAbjJsXGyMq.webp",
-    description: "Classic vanilla cake with creamy frosting.",
+    description: "Premium 8-inch vanilla buttercream cake for birthdays and intimate celebrations.",
+    size: "8 inch",
     isBestSeller: true,
     isActive: true
   },
   {
     id: "cakes-2",
-    name: "Chocolate Cake",
+    name: "Chocolate Celebration Cake",
     categoryId: "cakes",
-    price: 4500,
+    price: 5e4,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-fpHHGRZCjgFBZLXMAVy6ZX.webp",
-    description: "Rich chocolate cake with chocolate frosting.",
+    description: "Premium chocolate cake styled for Lagos event gifting and small celebrations.",
+    size: "8 inch",
     isActive: true
   },
   {
     id: "cakes-3",
-    name: "Red Velvet Cake",
+    name: "Red Velvet Cream Cheese Cake",
     categoryId: "cakes",
-    price: 5e3,
+    price: 78e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-fpHHGRZCjgFBZLXMAVy6ZX.webp",
-    description: "Elegant red velvet cake with cream cheese frosting.",
+    description: "Luxury red velvet celebration cake with cream cheese styling, priced in line with premium Lekki and Ikoyi cake positioning.",
+    size: "8 inch",
     isNew: true,
     isActive: true
   },
@@ -167173,7 +167471,7 @@ var defaultProducts = [
     categoryId: "zobo",
     price: 1500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-sticker-bFuXKBRaP2omb5p5MJz9zg.webp",
-    description: "Refreshing hibiscus drink made the Nigerian way.",
+    description: "Fresh hibiscus zobo in a bottle with a bold Nigerian taste profile.",
     size: "35cl",
     isActive: true
   },
@@ -167183,7 +167481,7 @@ var defaultProducts = [
     categoryId: "zobo",
     price: 1200,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-jYEddzskMqGkKr6KaAoWP2.webp",
-    description: "Refreshing hibiscus drink made the Nigerian way.",
+    description: "Compact zobo bottle for quick refreshment and easy delivery.",
     size: "30cl",
     isActive: true
   },
@@ -167193,7 +167491,7 @@ var defaultProducts = [
     categoryId: "tiger-nut",
     price: 2e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/tiger-nut-drink-sticker-U2VPLDvKC2LWYg5eJKETQZ.webp",
-    description: "Nutritious tiger nut milk drink with a rich creamy body.",
+    description: "Creamy tiger nut drink with the rich texture people expect from local premium vendors.",
     size: "35cl",
     isActive: true
   },
@@ -167203,117 +167501,117 @@ var defaultProducts = [
     categoryId: "tiger-nut",
     price: 1700,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-jYEddzskMqGkKr6KaAoWP2.webp",
-    description: "Nutritious tiger nut milk drink with a rich creamy body.",
+    description: "Chilled tiger nut drink in a compact bottle size.",
     size: "30cl",
     isActive: true
   },
   {
     id: "only-food-1",
-    name: "Jollof Rice",
+    name: "Jollof Rice Tray",
     categoryId: "only-food",
     price: 3500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-sticker-P5rCN9yzKReiUjTwn95NV6.webp",
-    description: "Smoky tomato jollof rice served with protein.",
+    description: "Smoky party-style jollof rice served the way Nigerian customers expect.",
     isBestSeller: true,
     isActive: true
   },
   {
     id: "only-food-2",
-    name: "Fried Rice",
+    name: "Fried Rice Tray",
     categoryId: "only-food",
     price: 3500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Vegetable fried rice with protein options.",
+    description: "Colorful fried rice with vegetables and a party-style finish.",
     isActive: true
   },
   {
     id: "only-food-3",
-    name: "Coconut Rice",
+    name: "Coconut Rice Tray",
     categoryId: "only-food",
     price: 3500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Creamy coconut-infused rice for Nigerian party trays.",
+    description: "Coconut rice with a rich aroma and soft, flavorful grains.",
     isActive: true
   },
   {
     id: "only-food-4",
-    name: "Egusi Soup",
+    name: "Egusi Soup Bowl",
     categoryId: "only-food",
     price: 4e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/egusi-soup-sticker-XzPfCHQQ2yhuM2dppNJ4zv.webp",
-    description: "Rich melon seed soup with vegetables and assorted meat.",
+    description: "Rich egusi soup with vegetables and assorted protein.",
     isActive: true
   },
   {
     id: "only-food-5",
-    name: "Ogbono Soup",
+    name: "Ogbono Soup Bowl",
     categoryId: "only-food",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Silky ogbono soup with fish and meat.",
+    description: "Smooth ogbono soup prepared with a rich Nigerian flavor base.",
     isActive: true
   },
   {
     id: "only-food-6",
-    name: "Editan Soup",
+    name: "Editan Soup Bowl",
     categoryId: "only-food",
     price: 2800,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Traditional editan soup with rich local seasoning.",
+    description: "Traditional editan soup finished with a rich local seasoning profile.",
     isActive: true
   },
   {
     id: "only-food-7",
-    name: "Afang Soup",
+    name: "Afang Soup Bowl",
     categoryId: "only-food",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Afang soup with waterleaf, meat, and seafood.",
+    description: "Afang soup with seafood and meat for a fuller restaurant-style portion.",
     isActive: true
   },
   {
     id: "only-food-8",
-    name: "Okro Soup",
+    name: "Okro Soup Bowl",
     categoryId: "only-food",
     price: 2800,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Okro soup with meat and fish.",
+    description: "Okro soup with a hearty mix of meat and fish.",
     isActive: true
   },
   {
     id: "only-food-9",
-    name: "White Soup",
+    name: "White Soup Bowl",
     categoryId: "only-food",
     price: 3200,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Creamy white soup with yam and fresh spice profile.",
+    description: "White soup with a creamy body and bright traditional spice notes.",
     isActive: true
   },
   {
     id: "only-food-10",
-    name: "Pepper Soup (Goat Meat)",
+    name: "Goat Meat Pepper Soup",
     categoryId: "only-food",
     price: 3500,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Spicy goat meat pepper soup with authentic Nigerian spice.",
+    description: "Hot goat meat pepper soup with a proper restaurant-style spice blend.",
     isActive: true
   },
   {
     id: "only-food-11",
-    name: "Pepper Soup (Chicken)",
+    name: "Chicken Pepper Soup",
     categoryId: "only-food",
     price: 3e3,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Hot chicken pepper soup prepared for real Nigerian appetites.",
+    description: "Chicken pepper soup prepared for a bold, warming finish.",
     isActive: true
   },
   {
     id: "only-food-12",
-    name: "Efirin & Vegetable Soup",
+    name: "Efirin Vegetable Soup Bowl",
     categoryId: "only-food",
     price: 2800,
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
-    description: "Vegetable-rich soup with scent leaf and local seasoning.",
+    description: "Vegetable soup with scent leaf and a rich local flavor base.",
     isActive: true
   }
 ];
@@ -167322,9 +167620,16 @@ var defaultProducts = [
 var DATA_DIR2 = process.env.VERCEL ? path2.join(os2.tmpdir(), "peaceful-taste-data") : path2.join(process.cwd(), "data");
 var CATALOG_FILE = path2.join(DATA_DIR2, "catalog.json");
 var CATALOG_BLOB_PATH = "catalog/catalog.json";
+var CURRENT_CATALOG_VERSION = 2;
+var defaultSettings = {
+  version: CURRENT_CATALOG_VERSION,
+  featuredStoryProductId: "parfait-1",
+  flashDealProductIds: ["parfait-1", "pastries-6", "zobo-1"]
+};
 var defaultCatalog = {
   categories: defaultCategories,
-  products: defaultProducts
+  products: defaultProducts,
+  settings: defaultSettings
 };
 function ensureDataDir2() {
   if (!fs2.existsSync(DATA_DIR2)) {
@@ -167342,9 +167647,40 @@ async function readCatalogFromBlob() {
   }
 }
 function normalizeCatalog(catalog) {
+  const categoryMap = new Map(defaultCategories.map((category) => [category.id, category]));
+  const productMap = new Map(defaultProducts.map((product) => [product.id, product]));
+  const incomingCategories = Array.isArray(catalog.categories) ? catalog.categories : [];
+  const incomingProducts = Array.isArray(catalog.products) ? catalog.products : [];
+  const incomingSettings = catalog.settings ?? defaultSettings;
+  const mergedCategories = incomingCategories.map(
+    (category) => categoryMap.has(category.id) ? {
+      ...categoryMap.get(category.id),
+      ...category
+    } : category
+  );
+  const mergedProducts = incomingProducts.map(
+    (product) => productMap.has(product.id) ? {
+      ...productMap.get(product.id),
+      ...product
+    } : product
+  );
+  const settings = {
+    version: CURRENT_CATALOG_VERSION,
+    featuredStoryProductId: incomingSettings.featuredStoryProductId || defaultSettings.featuredStoryProductId,
+    flashDealProductIds: incomingSettings.flashDealProductIds?.length ? incomingSettings.flashDealProductIds : defaultSettings.flashDealProductIds
+  };
+  const safeFeaturedId = mergedProducts.find((product) => product.id === settings.featuredStoryProductId)?.id || mergedProducts[0]?.id || defaultSettings.featuredStoryProductId;
+  const safeFlashDeals = settings.flashDealProductIds.filter((productId, index, list2) => {
+    return list2.indexOf(productId) === index && mergedProducts.some((product) => product.id === productId && product.isActive !== false);
+  });
   return {
-    categories: [...catalog.categories].sort((a, b) => a.sortOrder - b.sortOrder),
-    products: [...catalog.products]
+    categories: [...mergedCategories].sort((a, b) => a.sortOrder - b.sortOrder),
+    products: [...mergedProducts],
+    settings: {
+      ...settings,
+      featuredStoryProductId: safeFeaturedId,
+      flashDealProductIds: safeFlashDeals.length > 0 ? safeFlashDeals : mergedProducts.filter((product) => product.isActive !== false).slice(0, 3).map((product) => product.id)
+    }
   };
 }
 async function writeCatalog(catalog) {
@@ -167361,14 +167697,20 @@ async function getCatalog() {
   if (blobStorageEnabled()) {
     const blobCatalog = await readCatalogFromBlob();
     if (blobCatalog) {
-      fs2.writeFileSync(CATALOG_FILE, JSON.stringify(blobCatalog, null, 2));
-      return normalizeCatalog(blobCatalog);
+      const normalized = normalizeCatalog(blobCatalog);
+      fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      if ((blobCatalog.settings?.version ?? 0) < CURRENT_CATALOG_VERSION) {
+        await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
+      }
+      return normalized;
     }
   }
   if (fs2.existsSync(CATALOG_FILE)) {
     try {
       const local = JSON.parse(fs2.readFileSync(CATALOG_FILE, "utf8"));
-      return normalizeCatalog(local);
+      const normalized = normalizeCatalog(local);
+      fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      return normalized;
     } catch (error46) {
       console.error("[Catalog] Failed to parse local catalog:", error46);
     }
@@ -167399,13 +167741,19 @@ async function createCategory(input) {
 async function deleteCategory(categoryId) {
   const catalog = await getCatalog();
   const nextCatalog = await writeCatalog({
+    ...catalog,
     categories: catalog.categories.filter((category) => category.id !== categoryId).map((category, index) => ({ ...category, sortOrder: index + 1 })),
-    products: catalog.products.filter((product) => product.categoryId !== categoryId)
+    products: catalog.products.filter((product) => product.categoryId !== categoryId),
+    settings: {
+      ...catalog.settings,
+      flashDealProductIds: catalog.settings.flashDealProductIds.filter(
+        (productId) => catalog.products.find((product) => product.id === productId)?.categoryId !== categoryId
+      )
+    }
   });
   return nextCatalog;
 }
-async function createProduct(input) {
-  const catalog = await getCatalog();
+async function resolveProductImage(input) {
   let image = input.imageUrl?.trim() || "";
   if (!image && input.imageDataUrl && input.imageFileName) {
     const dataUrlMatch = input.imageDataUrl.match(/^data:(.+?);base64,(.+)$/);
@@ -167415,16 +167763,17 @@ async function createProduct(input) {
     const [, mimeType, base64Content] = dataUrlMatch;
     const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, "-");
     const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
-    const blob = await uploadPublicBlob(
-      pathname,
-      Buffer.from(base64Content, "base64"),
-      mimeType
-    );
+    const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, "base64"), mimeType);
     image = blob?.url || "";
   }
   if (!image) {
     throw new Error("Provide an image URL or upload an image file.");
   }
+  return image;
+}
+async function createProduct(input) {
+  const catalog = await getCatalog();
+  const image = await resolveProductImage(input);
   const baseId = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   let id = baseId || `product-${Date.now()}`;
   let counter = 1;
@@ -167450,13 +167799,57 @@ async function createProduct(input) {
   });
   return { product, catalog: nextCatalog };
 }
+async function updateProduct(input) {
+  const catalog = await getCatalog();
+  const existingProduct = catalog.products.find((product) => product.id === input.productId);
+  if (!existingProduct) {
+    throw new Error("Product not found.");
+  }
+  const image = input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct.image;
+  const updatedProduct = {
+    ...existingProduct,
+    name: input.name,
+    categoryId: input.categoryId,
+    price: input.price,
+    image,
+    description: input.description,
+    size: input.size?.trim() || void 0,
+    isBestSeller: Boolean(input.isBestSeller),
+    isNew: Boolean(input.isNew),
+    isActive: input.isActive ?? true
+  };
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map(
+      (product) => product.id === input.productId ? updatedProduct : product
+    )
+  });
+  return { product: updatedProduct, catalog: nextCatalog };
+}
 async function deleteProduct(productId) {
   const catalog = await getCatalog();
   const nextCatalog = await writeCatalog({
     ...catalog,
-    products: catalog.products.filter((product) => product.id !== productId)
+    products: catalog.products.filter((product) => product.id !== productId),
+    settings: {
+      ...catalog.settings,
+      featuredStoryProductId: catalog.settings.featuredStoryProductId === productId ? catalog.products.find((product) => product.id !== productId)?.id || defaultSettings.featuredStoryProductId : catalog.settings.featuredStoryProductId,
+      flashDealProductIds: catalog.settings.flashDealProductIds.filter((id) => id !== productId)
+    }
   });
   return nextCatalog;
+}
+async function updateSiteSettings(input) {
+  const catalog = await getCatalog();
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    settings: {
+      ...catalog.settings,
+      featuredStoryProductId: input.featuredStoryProductId,
+      flashDealProductIds: input.flashDealProductIds
+    }
+  });
+  return nextCatalog.settings;
 }
 
 // server/routers.ts
@@ -167498,7 +167891,7 @@ var appRouter = router({
     getCatalog: publicProcedure.query(async () => {
       return getCatalog();
     }),
-    createCategory: publicProcedure.input(external_exports.object({
+    createCategory: adminSessionProcedure.input(external_exports.object({
       name: external_exports.string().min(2).max(80),
       description: external_exports.string().min(4).max(180)
     })).mutation(async ({ input }) => {
@@ -167511,7 +167904,7 @@ var appRouter = router({
         });
       }
     }),
-    deleteCategory: publicProcedure.input(external_exports.object({ categoryId: external_exports.string().min(1) })).mutation(async ({ input }) => {
+    deleteCategory: adminSessionProcedure.input(external_exports.object({ categoryId: external_exports.string().min(1) })).mutation(async ({ input }) => {
       try {
         return await deleteCategory(input.categoryId);
       } catch (error46) {
@@ -167521,7 +167914,7 @@ var appRouter = router({
         });
       }
     }),
-    createProduct: publicProcedure.input(external_exports.object({
+    createProduct: adminSessionProcedure.input(external_exports.object({
       name: external_exports.string().min(2).max(120),
       categoryId: external_exports.string().min(1).max(60),
       price: external_exports.number().positive().max(1e6),
@@ -167543,13 +167936,49 @@ var appRouter = router({
         });
       }
     }),
-    deleteProduct: publicProcedure.input(external_exports.object({ productId: external_exports.string().min(1) })).mutation(async ({ input }) => {
+    updateProduct: adminSessionProcedure.input(external_exports.object({
+      productId: external_exports.string().min(1).max(120),
+      name: external_exports.string().min(2).max(120),
+      categoryId: external_exports.string().min(1).max(60),
+      price: external_exports.number().positive().max(1e6),
+      imageUrl: external_exports.string().url().optional().or(external_exports.literal("")),
+      imageDataUrl: external_exports.string().optional(),
+      imageFileName: external_exports.string().optional(),
+      description: external_exports.string().min(8).max(500),
+      size: external_exports.string().max(60).optional().or(external_exports.literal("")),
+      isBestSeller: external_exports.boolean().optional(),
+      isNew: external_exports.boolean().optional(),
+      isActive: external_exports.boolean().optional()
+    })).mutation(async ({ input }) => {
+      try {
+        return await updateProduct(input);
+      } catch (error46) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: error46 instanceof Error ? error46.message : "Failed to update product"
+        });
+      }
+    }),
+    deleteProduct: adminSessionProcedure.input(external_exports.object({ productId: external_exports.string().min(1) })).mutation(async ({ input }) => {
       try {
         return await deleteProduct(input.productId);
       } catch (error46) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: error46 instanceof Error ? error46.message : "Failed to delete product"
+        });
+      }
+    }),
+    updateSiteSettings: adminSessionProcedure.input(external_exports.object({
+      featuredStoryProductId: external_exports.string().min(1).max(120),
+      flashDealProductIds: external_exports.array(external_exports.string().min(1).max(120)).min(1).max(6)
+    })).mutation(async ({ input }) => {
+      try {
+        return await updateSiteSettings(input);
+      } catch (error46) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: error46 instanceof Error ? error46.message : "Failed to update site settings"
         });
       }
     })
@@ -167564,12 +167993,34 @@ var appRouter = router({
       };
     })
   }),
+  admin: router({
+    status: publicProcedure.query(({ ctx }) => ({
+      isAuthenticated: ctx.isAdminSession
+    })),
+    login: publicProcedure.input(external_exports.object({
+      password: external_exports.string().min(1).max(200)
+    })).mutation(({ ctx, input }) => {
+      if (!isValidAdminPassword(input.password)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Invalid admin password"
+        });
+      }
+      setAdminSessionCookie(ctx.res, createAdminSessionToken());
+      return { success: true };
+    }),
+    logout: publicProcedure.mutation(({ ctx }) => {
+      clearAdminSessionCookie(ctx.res);
+      return { success: true };
+    })
+  }),
   orders: router({
     createOrder: publicProcedure.input(external_exports.object({
       customerEmail: external_exports.string().email().max(255),
       customerName: external_exports.string().min(1).max(100),
       customerPhone: external_exports.string().regex(/^[0-9+\-() ]{10,20}$/).optional(),
       deliveryLocation: external_exports.string().min(1).max(100).default("Lagos"),
+      deliveryAddress: external_exports.string().min(8).max(300),
       items: external_exports.array(external_exports.object({
         productId: external_exports.union([external_exports.number().positive(), external_exports.string().min(1).max(120)]),
         name: external_exports.string().min(1).max(200),
@@ -167590,6 +168041,7 @@ var appRouter = router({
           customerEmail: input.customerEmail,
           customerPhone: input.customerPhone,
           deliveryLocation: input.deliveryLocation,
+          deliveryAddress: input.deliveryAddress,
           createdAt,
           items: input.items,
           subtotal: input.subtotal,
@@ -167609,6 +168061,7 @@ var appRouter = router({
           customerName: input.customerName,
           customerEmail: input.customerEmail,
           customerPhone: input.customerPhone,
+          deliveryAddress: input.deliveryAddress,
           items: input.items,
           subtotal: input.subtotal,
           tax: input.tax,
@@ -167622,6 +168075,7 @@ var appRouter = router({
           content: `Customer: ${input.customerName} (${input.customerEmail})
 Phone: ${input.customerPhone || "N/A"}
 Delivery: ${input.deliveryLocation}
+Address: ${input.deliveryAddress}
 Total: ${formatNairaAmount(totalAmount)}
 Payment Bank: ${PEACEFUL_TASTE_CONTACT.bankName}
 Account: ${PEACEFUL_TASTE_CONTACT.accountNumber}
@@ -167693,7 +168147,7 @@ Workbook updated: ${workbookUpdated ? "yes" : "no"}`
         });
       }
     }),
-    dashboardSummary: publicProcedure.query(async () => {
+    dashboardSummary: adminSessionProcedure.query(async () => {
       try {
         return await getWorkbookSummary();
       } catch (error46) {
@@ -167786,6 +168240,10 @@ function createVercelApp() {
     res.status(200).json({ ok: true });
   });
   apiRouter.get("/admin/export/orders", async (_req, res) => {
+    if (!readAdminSessionFromRequest(_req)) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
     await warmWorkbooks();
     const ordersFile = await prepareOrdersWorkbookDownload();
     if (!import_node_fs2.default.existsSync(ordersFile)) {
@@ -167795,6 +168253,10 @@ function createVercelApp() {
     res.download(ordersFile, "peaceful-taste-orders.xlsx");
   });
   apiRouter.get("/admin/export/inquiries", async (_req, res) => {
+    if (!readAdminSessionFromRequest(_req)) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
     await warmWorkbooks();
     const inquiriesFile = await prepareInquiriesWorkbookDownload();
     if (!import_node_fs2.default.existsSync(inquiriesFile)) {

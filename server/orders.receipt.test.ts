@@ -24,6 +24,7 @@ describe('order receipt flow', () => {
       req: {} as any,
       res: {} as any,
       user: null,
+      isAdminSession: false,
     });
 
     const created = await caller.orders.createOrder({
@@ -31,6 +32,7 @@ describe('order receipt flow', () => {
       customerName: 'Receipt Test Customer',
       customerPhone: '+2348012345678',
       deliveryLocation: 'Lagos Mainland',
+      deliveryAddress: '12 Example Street, Magboro, Ogun State, near the expressway bridge',
       items: [
         {
           productId: 1,

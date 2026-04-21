@@ -1,7 +1,12 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { defaultCategories, defaultProducts, type Product, type ProductCategory } from '../client/src/lib/products';
+import {
+  defaultCategories,
+  defaultProducts,
+  type Product,
+  type ProductCategory,
+} from '../client/src/lib/products';
 import {
   blobStorageEnabled,
   downloadPrivateBlob,
@@ -15,15 +20,30 @@ const DATA_DIR = process.env.VERCEL
 
 const CATALOG_FILE = path.join(DATA_DIR, 'catalog.json');
 const CATALOG_BLOB_PATH = 'catalog/catalog.json';
+const CURRENT_CATALOG_VERSION = 2;
+
+export interface SiteSettings {
+  version: number;
+  featuredStoryProductId: string;
+  flashDealProductIds: string[];
+}
 
 export interface ProductCatalog {
   categories: ProductCategory[];
   products: Product[];
+  settings: SiteSettings;
 }
+
+const defaultSettings: SiteSettings = {
+  version: CURRENT_CATALOG_VERSION,
+  featuredStoryProductId: 'parfait-1',
+  flashDealProductIds: ['parfait-1', 'pastries-6', 'zobo-1'],
+};
 
 const defaultCatalog: ProductCatalog = {
   categories: defaultCategories,
   products: defaultProducts,
+  settings: defaultSettings,
 };
 
 function ensureDataDir() {
@@ -44,10 +64,68 @@ async function readCatalogFromBlob(): Promise<ProductCatalog | null> {
   }
 }
 
-function normalizeCatalog(catalog: ProductCatalog): ProductCatalog {
+function normalizeCatalog(catalog: Partial<ProductCatalog>): ProductCatalog {
+  const categoryMap = new Map(defaultCategories.map((category) => [category.id, category]));
+  const productMap = new Map(defaultProducts.map((product) => [product.id, product]));
+
+  const incomingCategories = Array.isArray(catalog.categories) ? catalog.categories : [];
+  const incomingProducts = Array.isArray(catalog.products) ? catalog.products : [];
+  const incomingSettings = catalog.settings ?? defaultSettings;
+
+  const mergedCategories = incomingCategories.map((category) =>
+    categoryMap.has(category.id)
+      ? {
+          ...categoryMap.get(category.id)!,
+          ...category,
+        }
+      : category
+  );
+
+  const mergedProducts = incomingProducts.map((product) =>
+    productMap.has(product.id)
+      ? {
+          ...productMap.get(product.id)!,
+          ...product,
+        }
+      : product
+  );
+
+  const settings: SiteSettings = {
+    version: CURRENT_CATALOG_VERSION,
+    featuredStoryProductId:
+      incomingSettings.featuredStoryProductId || defaultSettings.featuredStoryProductId,
+    flashDealProductIds:
+      incomingSettings.flashDealProductIds?.length
+        ? incomingSettings.flashDealProductIds
+        : defaultSettings.flashDealProductIds,
+  };
+
+  const safeFeaturedId =
+    mergedProducts.find((product) => product.id === settings.featuredStoryProductId)?.id ||
+    mergedProducts[0]?.id ||
+    defaultSettings.featuredStoryProductId;
+
+  const safeFlashDeals = settings.flashDealProductIds.filter((productId, index, list) => {
+    return (
+      list.indexOf(productId) === index &&
+      mergedProducts.some((product) => product.id === productId && product.isActive !== false)
+    );
+  });
+
   return {
-    categories: [...catalog.categories].sort((a, b) => a.sortOrder - b.sortOrder),
-    products: [...catalog.products],
+    categories: [...mergedCategories].sort((a, b) => a.sortOrder - b.sortOrder),
+    products: [...mergedProducts],
+    settings: {
+      ...settings,
+      featuredStoryProductId: safeFeaturedId,
+      flashDealProductIds:
+        safeFlashDeals.length > 0
+          ? safeFlashDeals
+          : mergedProducts
+              .filter((product) => product.isActive !== false)
+              .slice(0, 3)
+              .map((product) => product.id),
+    },
   };
 }
 
@@ -69,15 +147,21 @@ export async function getCatalog(): Promise<ProductCatalog> {
   if (blobStorageEnabled()) {
     const blobCatalog = await readCatalogFromBlob();
     if (blobCatalog) {
-      fs.writeFileSync(CATALOG_FILE, JSON.stringify(blobCatalog, null, 2));
-      return normalizeCatalog(blobCatalog);
+      const normalized = normalizeCatalog(blobCatalog);
+      fs.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      if ((blobCatalog.settings?.version ?? 0) < CURRENT_CATALOG_VERSION) {
+        await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
+      }
+      return normalized;
     }
   }
 
   if (fs.existsSync(CATALOG_FILE)) {
     try {
       const local = JSON.parse(fs.readFileSync(CATALOG_FILE, 'utf8')) as ProductCatalog;
-      return normalizeCatalog(local);
+      const normalized = normalizeCatalog(local);
+      fs.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      return normalized;
     } catch (error) {
       console.error('[Catalog] Failed to parse local catalog:', error);
     }
@@ -86,10 +170,7 @@ export async function getCatalog(): Promise<ProductCatalog> {
   return writeCatalog(defaultCatalog);
 }
 
-export async function createCategory(input: {
-  name: string;
-  description: string;
-}) {
+export async function createCategory(input: { name: string; description: string }) {
   const catalog = await getCatalog();
   const baseId = input.name
     .toLowerCase()
@@ -122,13 +203,48 @@ export async function deleteCategory(categoryId: string) {
   const catalog = await getCatalog();
 
   const nextCatalog = await writeCatalog({
+    ...catalog,
     categories: catalog.categories
       .filter((category) => category.id !== categoryId)
       .map((category, index) => ({ ...category, sortOrder: index + 1 })),
     products: catalog.products.filter((product) => product.categoryId !== categoryId),
+    settings: {
+      ...catalog.settings,
+      flashDealProductIds: catalog.settings.flashDealProductIds.filter(
+        (productId) => catalog.products.find((product) => product.id === productId)?.categoryId !== categoryId
+      ),
+    },
   });
 
   return nextCatalog;
+}
+
+async function resolveProductImage(input: {
+  imageUrl?: string;
+  imageDataUrl?: string;
+  imageFileName?: string;
+}) {
+  let image = input.imageUrl?.trim() || '';
+
+  if (!image && input.imageDataUrl && input.imageFileName) {
+    const dataUrlMatch = input.imageDataUrl.match(/^data:(.+?);base64,(.+)$/);
+    if (!dataUrlMatch) {
+      throw new Error('Image upload must be a valid data URL.');
+    }
+
+    const [, mimeType, base64Content] = dataUrlMatch;
+    const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, '-');
+    const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
+    const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, 'base64'), mimeType);
+
+    image = blob?.url || '';
+  }
+
+  if (!image) {
+    throw new Error('Provide an image URL or upload an image file.');
+  }
+
+  return image;
 }
 
 export async function createProduct(input: {
@@ -145,29 +261,7 @@ export async function createProduct(input: {
   isActive?: boolean;
 }) {
   const catalog = await getCatalog();
-
-  let image = input.imageUrl?.trim() || '';
-  if (!image && input.imageDataUrl && input.imageFileName) {
-    const dataUrlMatch = input.imageDataUrl.match(/^data:(.+?);base64,(.+)$/);
-    if (!dataUrlMatch) {
-      throw new Error('Image upload must be a valid data URL.');
-    }
-
-    const [, mimeType, base64Content] = dataUrlMatch;
-    const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, '-');
-    const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
-    const blob = await uploadPublicBlob(
-      pathname,
-      Buffer.from(base64Content, 'base64'),
-      mimeType
-    );
-
-    image = blob?.url || '';
-  }
-
-  if (!image) {
-    throw new Error('Provide an image URL or upload an image file.');
-  }
+  const image = await resolveProductImage(input);
 
   const baseId = input.name
     .toLowerCase()
@@ -202,13 +296,87 @@ export async function createProduct(input: {
   return { product, catalog: nextCatalog };
 }
 
+export async function updateProduct(input: {
+  productId: string;
+  name: string;
+  categoryId: string;
+  price: number;
+  imageUrl?: string;
+  imageDataUrl?: string;
+  imageFileName?: string;
+  description: string;
+  size?: string;
+  isBestSeller?: boolean;
+  isNew?: boolean;
+  isActive?: boolean;
+}) {
+  const catalog = await getCatalog();
+  const existingProduct = catalog.products.find((product) => product.id === input.productId);
+
+  if (!existingProduct) {
+    throw new Error('Product not found.');
+  }
+
+  const image = input.imageDataUrl || input.imageUrl?.trim()
+    ? await resolveProductImage(input)
+    : existingProduct.image;
+
+  const updatedProduct: Product = {
+    ...existingProduct,
+    name: input.name,
+    categoryId: input.categoryId,
+    price: input.price,
+    image,
+    description: input.description,
+    size: input.size?.trim() || undefined,
+    isBestSeller: Boolean(input.isBestSeller),
+    isNew: Boolean(input.isNew),
+    isActive: input.isActive ?? true,
+  };
+
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map((product) =>
+      product.id === input.productId ? updatedProduct : product
+    ),
+  });
+
+  return { product: updatedProduct, catalog: nextCatalog };
+}
+
 export async function deleteProduct(productId: string) {
   const catalog = await getCatalog();
 
   const nextCatalog = await writeCatalog({
     ...catalog,
     products: catalog.products.filter((product) => product.id !== productId),
+    settings: {
+      ...catalog.settings,
+      featuredStoryProductId:
+        catalog.settings.featuredStoryProductId === productId
+          ? catalog.products.find((product) => product.id !== productId)?.id || defaultSettings.featuredStoryProductId
+          : catalog.settings.featuredStoryProductId,
+      flashDealProductIds: catalog.settings.flashDealProductIds.filter((id) => id !== productId),
+    },
   });
 
   return nextCatalog;
+}
+
+export async function updateSiteSettings(input: {
+  featuredStoryProductId: string;
+  flashDealProductIds: string[];
+}) {
+  const catalog = await getCatalog();
+
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    settings: {
+      ...catalog.settings,
+      featuredStoryProductId: input.featuredStoryProductId,
+      flashDealProductIds: input.flashDealProductIds,
+    },
+  });
+
+  return nextCatalog.settings;
 }

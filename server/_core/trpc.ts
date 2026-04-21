@@ -10,6 +10,21 @@ const t = initTRPC.context<TrpcContext>().create({
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
+const requireAdminSession = t.middleware(async opts => {
+  const { ctx, next } = opts;
+
+  if (!ctx.isAdminSession) {
+    throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      isAdminSession: true,
+    },
+  });
+});
+
 const requireUser = t.middleware(async opts => {
   const { ctx, next } = opts;
 
@@ -43,3 +58,5 @@ export const adminProcedure = t.procedure.use(
     });
   }),
 );
+
+export const adminSessionProcedure = t.procedure.use(requireAdminSession);

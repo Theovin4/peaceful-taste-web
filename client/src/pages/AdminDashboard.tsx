@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,19 +14,22 @@ import {
   Mail,
   MessageCircle,
   Package,
+  Pencil,
   Plus,
   Receipt,
+  Save,
+  Sparkles,
   Trash2,
   Users,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { formatNaira } from '@/lib/format';
 import { fileToDataUrl } from '@/lib/orderReceipt';
 
-const ADMIN_PASSWORD = 'peaceful123';
-
 type ProductFormState = {
+  productId: string | null;
   name: string;
   categoryId: string;
   price: string;
@@ -40,6 +43,7 @@ type ProductFormState = {
 };
 
 const initialProductForm: ProductFormState = {
+  productId: null,
   name: '',
   categoryId: '',
   price: '',
@@ -58,14 +62,51 @@ export default function AdminDashboard() {
   const [showPassword, setShowPassword] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
   const [productForm, setProductForm] = useState<ProductFormState>(initialProductForm);
+  const [featuredStoryProductId, setFeaturedStoryProductId] = useState('');
+  const [flashDealProductIds, setFlashDealProductIds] = useState<string[]>([]);
+
+  const statusQuery = trpc.admin.status.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (typeof statusQuery.data?.isAuthenticated === 'boolean') {
+      setIsAuthenticated(statusQuery.data.isAuthenticated);
+    }
+  }, [statusQuery.data]);
 
   const summaryQuery = trpc.orders.dashboardSummary.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchOnWindowFocus: false,
   });
   const catalogQuery = trpc.catalog.getCatalog.useQuery(undefined, {
-    enabled: isAuthenticated,
+    enabled: true,
     refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (!catalogQuery.data?.settings) return;
+    setFeaturedStoryProductId(catalogQuery.data.settings.featuredStoryProductId);
+    setFlashDealProductIds(catalogQuery.data.settings.flashDealProductIds);
+  }, [catalogQuery.data?.settings]);
+
+  const loginMutation = trpc.admin.login.useMutation({
+    onSuccess: async () => {
+      await Promise.all([statusQuery.refetch(), summaryQuery.refetch(), catalogQuery.refetch()]);
+      setPassword('');
+      toast.success('Admin access granted');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const logoutMutation = trpc.admin.logout.useMutation({
+    onSuccess: async () => {
+      setIsAuthenticated(false);
+      setProductForm(initialProductForm);
+      await statusQuery.refetch();
+      toast.success('Logged out');
+    },
+    onError: (error) => toast.error(error.message),
   });
 
   const createCategoryMutation = trpc.catalog.createCategory.useMutation({
@@ -94,10 +135,27 @@ export default function AdminDashboard() {
     onError: (error) => toast.error(error.message),
   });
 
+  const updateProductMutation = trpc.catalog.updateProduct.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Product updated successfully.');
+      setProductForm(initialProductForm);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const deleteProductMutation = trpc.catalog.deleteProduct.useMutation({
     onSuccess: async () => {
       await catalogQuery.refetch();
       toast.success('Product removed.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const updateSiteSettingsMutation = trpc.catalog.updateSiteSettings.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Homepage story and flash deals updated.');
     },
     onError: (error) => toast.error(error.message),
   });
@@ -123,21 +181,14 @@ export default function AdminDashboard() {
     ];
   }, [summary]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      toast.success('Admin access granted');
-      setPassword('');
-    } else {
-      toast.error('Invalid password');
-      setPassword('');
-    }
+    await loginMutation.mutateAsync({ password });
   };
 
   const openDownload = (type: 'orders' | 'inquiries') => {
     const url = type === 'orders' ? '/api/admin/export/orders' : '/api/admin/export/inquiries';
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const submitCategory = async (e: React.FormEvent) => {
@@ -155,7 +206,7 @@ export default function AdminDashboard() {
       imageFileName = productForm.imageFile.name;
     }
 
-    await createProductMutation.mutateAsync({
+    const payload = {
       name: productForm.name,
       categoryId: productForm.categoryId,
       price: Number(productForm.price),
@@ -167,6 +218,62 @@ export default function AdminDashboard() {
       isBestSeller: productForm.isBestSeller,
       isNew: productForm.isNew,
       isActive: productForm.isActive,
+    };
+
+    if (productForm.productId) {
+      await updateProductMutation.mutateAsync({
+        productId: productForm.productId,
+        ...payload,
+      });
+      return;
+    }
+
+    await createProductMutation.mutateAsync(payload);
+  };
+
+  const beginEditProduct = (product: NonNullable<typeof catalog>['products'][number]) => {
+    setProductForm({
+      productId: product.id,
+      name: product.name,
+      categoryId: product.categoryId,
+      price: String(product.price),
+      description: product.description,
+      size: product.size ?? '',
+      imageUrl: product.image,
+      imageFile: null,
+      isBestSeller: Boolean(product.isBestSeller),
+      isNew: Boolean(product.isNew),
+      isActive: product.isActive !== false,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleFlashDeal = (productId: string) => {
+    setFlashDealProductIds((current) => {
+      if (current.includes(productId)) {
+        return current.filter((id) => id !== productId);
+      }
+      if (current.length >= 6) {
+        toast.error('Select up to 6 rotating flash deals.');
+        return current;
+      }
+      return [...current, productId];
+    });
+  };
+
+  const saveSettings = async () => {
+    if (!featuredStoryProductId) {
+      toast.error('Choose a featured story product.');
+      return;
+    }
+    if (flashDealProductIds.length === 0) {
+      toast.error('Choose at least one flash deal product.');
+      return;
+    }
+
+    await updateSiteSettingsMutation.mutateAsync({
+      featuredStoryProductId,
+      flashDealProductIds,
     });
   };
 
@@ -179,7 +286,7 @@ export default function AdminDashboard() {
               <Lock className="h-12 w-12 text-accent" />
             </div>
             <h1 className="mb-2 text-center text-3xl font-bold text-foreground">Admin Access</h1>
-            <p className="mb-6 text-center text-muted-foreground">Enter password to manage products, categories, receipts, and workbook exports.</p>
+            <p className="mb-6 text-center text-muted-foreground">Enter the admin password to manage products, homepage features, receipts, and workbook exports.</p>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
@@ -202,7 +309,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <Button type="submit" className="btn-primary w-full text-white">
+              <Button type="submit" disabled={loginMutation.isPending} className="btn-primary w-full text-white">
                 Access Dashboard
               </Button>
             </form>
@@ -215,14 +322,19 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container space-y-8">
-        <div>
-          <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-            Operations dashboard
-          </p>
-          <h1 className="text-4xl font-bold text-foreground">Manage products, receipts, and business records</h1>
-          <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
-            Use this page to create categories, upload new products, remove outdated items, review recent orders, and download Excel workbooks for analysis.
-          </p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+              Operations dashboard
+            </p>
+            <h1 className="text-4xl font-bold text-foreground">Manage products, receipts, and business records</h1>
+            <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
+              Create categories, add or edit products, choose the homepage featured story, control rotating flash deals, and download order workbooks.
+            </p>
+          </div>
+          <Button onClick={() => logoutMutation.mutate()} variant="outline" className="border-border text-foreground hover:bg-secondary">
+            Logout
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -261,12 +373,12 @@ export default function AdminDashboard() {
           <Card className="glass-panel border-0 p-6">
             <div className="mb-4 flex items-center gap-3">
               <Mail className="h-6 w-6 text-accent" />
-              <h2 className="text-2xl font-bold text-foreground">Notification status</h2>
+              <h2 className="text-2xl font-bold text-foreground">Receipt status</h2>
             </div>
             <div className="space-y-4 text-sm text-muted-foreground">
               <div className="rounded-3xl border border-border bg-background/60 p-4">
                 <p className="font-semibold text-foreground">Customer PDF receipts</p>
-                <p className="mt-1">Enabled. Every order generates a customer receipt with payment details and full line-item totals.</p>
+                <p className="mt-1">Enabled with branded bank details, logo area, contact information, social handles, and full delivery address.</p>
               </div>
               <div className="rounded-3xl border border-border bg-background/60 p-4">
                 <p className="flex items-center gap-2 font-semibold text-foreground"><MessageCircle className="h-4 w-4 text-emerald-400" /> WhatsApp business copy</p>
@@ -274,7 +386,7 @@ export default function AdminDashboard() {
               </div>
               <div className="rounded-3xl border border-border bg-background/60 p-4">
                 <p className="font-semibold text-foreground">Automatic email sending</p>
-                <p className="mt-1">Code is ready. Resend still needs an allowed sender domain before automatic email can go to customers.</p>
+                <p className="mt-1">Code is ready. Resend still needs an allowed sender domain before automatic email can go to all customers.</p>
               </div>
             </div>
           </Card>
@@ -283,31 +395,63 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Card className="glass-panel border-0 p-6">
             <div className="mb-5 flex items-center gap-3">
+              <Sparkles className="h-6 w-6 text-accent" />
+              <h2 className="text-2xl font-bold text-foreground">Homepage controls</h2>
+            </div>
+            <div className="space-y-5">
+              <div>
+                <Label htmlFor="featuredStoryProduct" className="mb-2 block font-semibold text-foreground">Featured story product</Label>
+                <select
+                  id="featuredStoryProduct"
+                  value={featuredStoryProductId}
+                  onChange={(e) => setFeaturedStoryProductId(e.target.value)}
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                >
+                  <option value="">Select a product</option>
+                  {(catalog?.products ?? []).map((product) => (
+                    <option key={product.id} value={product.id}>{product.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <Label className="mb-3 block font-semibold text-foreground">Rotating flash deals (30s slider)</Label>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {(catalog?.products ?? []).map((product) => {
+                    const checked = flashDealProductIds.includes(product.id);
+                    return (
+                      <label key={product.id} className="flex items-start gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
+                        <input type="checkbox" checked={checked} onChange={() => toggleFlashDeal(product.id)} />
+                        <span>
+                          <span className="block font-medium">{product.name}</span>
+                          <span className="block text-xs text-muted-foreground">{formatNaira(product.price)}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <Button onClick={saveSettings} disabled={updateSiteSettingsMutation.isPending} className="btn-primary text-white">
+                <Save className="mr-2 h-4 w-4" />
+                Save Homepage Settings
+              </Button>
+            </div>
+          </Card>
+
+          <Card className="glass-panel border-0 p-6">
+            <div className="mb-5 flex items-center gap-3">
               <Plus className="h-6 w-6 text-accent" />
               <h2 className="text-2xl font-bold text-foreground">Create category</h2>
             </div>
             <form onSubmit={submitCategory} className="space-y-4">
               <div>
                 <Label htmlFor="categoryName" className="mb-2 block font-semibold text-foreground">Category name</Label>
-                <Input
-                  id="categoryName"
-                  value={categoryForm.name}
-                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. Fresh Juices"
-                  className="bg-background"
-                  required
-                />
+                <Input id="categoryName" value={categoryForm.name} onChange={(e) => setCategoryForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Fresh Juices" className="bg-background" required />
               </div>
               <div>
                 <Label htmlFor="categoryDescription" className="mb-2 block font-semibold text-foreground">Description</Label>
-                <textarea
-                  id="categoryDescription"
-                  value={categoryForm.description}
-                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Short description shown on the shop page"
-                  className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
-                  required
-                />
+                <textarea id="categoryDescription" value={categoryForm.description} onChange={(e) => setCategoryForm((prev) => ({ ...prev, description: e.target.value }))} placeholder="Short description shown on the shop page" className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" required />
               </div>
               <Button type="submit" disabled={createCategoryMutation.isPending} className="btn-primary text-white">
                 Create Category
@@ -322,11 +466,7 @@ export default function AdminDashboard() {
                       <p className="font-semibold text-foreground">{category.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => deleteCategoryMutation.mutate({ categoryId: category.id })}
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    >
+                    <Button variant="ghost" onClick={() => deleteCategoryMutation.mutate({ categoryId: category.id })} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -334,39 +474,34 @@ export default function AdminDashboard() {
               ))}
             </div>
           </Card>
+        </div>
 
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Card className="glass-panel border-0 p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <ImagePlus className="h-6 w-6 text-accent" />
-              <h2 className="text-2xl font-bold text-foreground">Add product</h2>
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <ImagePlus className="h-6 w-6 text-accent" />
+                <h2 className="text-2xl font-bold text-foreground">{productForm.productId ? 'Edit product' : 'Add product'}</h2>
+              </div>
+              {productForm.productId && (
+                <Button variant="ghost" onClick={() => setProductForm(initialProductForm)} className="text-muted-foreground hover:text-foreground">
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel edit
+                </Button>
+              )}
             </div>
             <form onSubmit={submitProduct} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productName" className="mb-2 block font-semibold text-foreground">Product name</Label>
-                  <Input
-                    id="productName"
-                    value={productForm.name}
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g. Mango Yoghurt 35cl"
-                    className="bg-background"
-                    required
-                  />
+                  <Input id="productName" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Mango Yoghurt 35cl" className="bg-background" required />
                 </div>
                 <div>
                   <Label htmlFor="productCategory" className="mb-2 block font-semibold text-foreground">Category</Label>
-                  <select
-                    id="productCategory"
-                    value={productForm.categoryId}
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, categoryId: e.target.value }))}
-                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
-                    required
-                  >
+                  <select id="productCategory" value={productForm.categoryId} onChange={(e) => setProductForm((prev) => ({ ...prev, categoryId: e.target.value }))} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" required>
                     <option value="">Select category</option>
                     {(catalog?.categories ?? []).map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
+                      <option key={category.id} value={category.id}>{category.name}</option>
                     ))}
                   </select>
                 </div>
@@ -375,61 +510,27 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productPrice" className="mb-2 block font-semibold text-foreground">Price (NGN)</Label>
-                  <Input
-                    id="productPrice"
-                    type="number"
-                    min="1"
-                    value={productForm.price}
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, price: e.target.value }))}
-                    placeholder="3500"
-                    className="bg-background"
-                    required
-                  />
+                  <Input id="productPrice" type="number" min="1" value={productForm.price} onChange={(e) => setProductForm((prev) => ({ ...prev, price: e.target.value }))} placeholder="3500" className="bg-background" required />
                 </div>
                 <div>
                   <Label htmlFor="productSize" className="mb-2 block font-semibold text-foreground">Size or pack</Label>
-                  <Input
-                    id="productSize"
-                    value={productForm.size}
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, size: e.target.value }))}
-                    placeholder="35cl, 330ml, family pack"
-                    className="bg-background"
-                  />
+                  <Input id="productSize" value={productForm.size} onChange={(e) => setProductForm((prev) => ({ ...prev, size: e.target.value }))} placeholder="35cl, 330ml, 8 inch" className="bg-background" />
                 </div>
               </div>
 
               <div>
                 <Label htmlFor="productDescription" className="mb-2 block font-semibold text-foreground">Description</Label>
-                <textarea
-                  id="productDescription"
-                  value={productForm.description}
-                  onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Short clear description for customers"
-                  className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
-                  required
-                />
+                <textarea id="productDescription" value={productForm.description} onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))} placeholder="Short clear description for customers" className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" required />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productImageUrl" className="mb-2 block font-semibold text-foreground">Image URL</Label>
-                  <Input
-                    id="productImageUrl"
-                    value={productForm.imageUrl}
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                    placeholder="https://..."
-                    className="bg-background"
-                  />
+                  <Input id="productImageUrl" value={productForm.imageUrl} onChange={(e) => setProductForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="https://..." className="bg-background" />
                 </div>
                 <div>
                   <Label htmlFor="productImageFile" className="mb-2 block font-semibold text-foreground">Or upload image</Label>
-                  <input
-                    id="productImageFile"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProductForm((prev) => ({ ...prev, imageFile: e.target.files?.[0] ?? null }))}
-                    className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
-                  />
+                  <input id="productImageFile" type="file" accept="image/*" onChange={(e) => setProductForm((prev) => ({ ...prev, imageFile: e.target.files?.[0] ?? null }))} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" />
                 </div>
               </div>
 
@@ -443,26 +544,19 @@ export default function AdminDashboard() {
                     <input
                       type="checkbox"
                       checked={Boolean(productForm[option.key as keyof ProductFormState])}
-                      onChange={(e) =>
-                        setProductForm((prev) => ({
-                          ...prev,
-                          [option.key]: e.target.checked,
-                        }))
-                      }
+                      onChange={(e) => setProductForm((prev) => ({ ...prev, [option.key]: e.target.checked }))}
                     />
                     {option.label}
                   </label>
                 ))}
               </div>
 
-              <Button type="submit" disabled={createProductMutation.isPending} className="btn-primary text-white">
-                Upload Product
+              <Button type="submit" disabled={createProductMutation.isPending || updateProductMutation.isPending} className="btn-primary text-white">
+                {productForm.productId ? 'Save Product Changes' : 'Upload Product'}
               </Button>
             </form>
           </Card>
-        </div>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
           <Card className="glass-panel border-0 p-6">
             <h2 className="mb-4 text-2xl font-bold text-foreground">Current products</h2>
             <div className="space-y-3">
@@ -478,83 +572,78 @@ export default function AdminDashboard() {
                           <p className="text-sm text-accent">{formatNaira(product.price)}</p>
                           <p className="mt-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">
                             {category?.name ?? product.categoryId}
-                            {product.size ? ` â€¢ ${product.size}` : ''}
+                            {product.size ? ` • ${product.size}` : ''}
                           </p>
                           <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        onClick={() => deleteProductMutation.mutate({ productId: product.id })}
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" onClick={() => beginEditProduct(product)} className="text-accent hover:bg-accent/10 hover:text-accent">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" onClick={() => deleteProductMutation.mutate({ productId: product.id })} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
           </Card>
-
-          <div className="space-y-8">
-            <Card className="glass-panel border-0 p-6">
-              <h2 className="mb-4 text-2xl font-bold text-foreground">Recent orders</h2>
-              {summaryQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading order summary...</p>
-              ) : summary?.recentOrders?.length ? (
-                <div className="space-y-3">
-                  {summary.recentOrders.map((order) => (
-                    <div key={order.orderNumber} className="rounded-3xl border border-border bg-background/60 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-foreground">{order.customerName}</p>
-                          <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-foreground">{formatNaira(order.totalAmount)}</p>
-                          <p className="text-xs uppercase tracking-[0.2em] text-accent">{order.status || 'pending'}</p>
-                        </div>
-                      </div>
-                      <p className="mt-2 text-sm text-muted-foreground">{order.items}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No orders stored yet.</p>
-              )}
-            </Card>
-
-            <Card className="glass-panel border-0 p-6">
-              <h2 className="mb-4 text-2xl font-bold text-foreground">Recent inquiries</h2>
-              {summaryQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading inquiry summary...</p>
-              ) : summary?.recentInquiries?.length ? (
-                <div className="space-y-3">
-                  {summary.recentInquiries.map((inquiry, index) => (
-                    <div key={`${inquiry.email}-${index}`} className="rounded-3xl border border-border bg-background/60 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-foreground">{inquiry.name}</p>
-                          <p className="text-xs text-muted-foreground">{inquiry.email}</p>
-                        </div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-accent">{inquiry.inquiryType}</p>
-                      </div>
-                      <p className="mt-2 text-sm text-muted-foreground">{inquiry.subject}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No inquiries stored yet.</p>
-              )}
-            </Card>
-          </div>
         </div>
 
-        <div>
-          <Button onClick={() => setIsAuthenticated(false)} variant="outline" className="border-border text-foreground hover:bg-secondary">
-            Logout
-          </Button>
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+          <Card className="glass-panel border-0 p-6">
+            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent orders</h2>
+            {summaryQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading order summary...</p>
+            ) : summary?.recentOrders?.length ? (
+              <div className="space-y-3">
+                {summary.recentOrders.map((order) => (
+                  <div key={order.orderNumber} className="rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-foreground">{order.customerName}</p>
+                        <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-foreground">{formatNaira(order.totalAmount)}</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-accent">{order.status || 'pending'}</p>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{order.items}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No orders stored yet.</p>
+            )}
+          </Card>
+
+          <Card className="glass-panel border-0 p-6">
+            <h2 className="mb-4 text-2xl font-bold text-foreground">Recent inquiries</h2>
+            {summaryQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading inquiry summary...</p>
+            ) : summary?.recentInquiries?.length ? (
+              <div className="space-y-3">
+                {summary.recentInquiries.map((inquiry, index) => (
+                  <div key={`${inquiry.email}-${index}`} className="rounded-3xl border border-border bg-background/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-foreground">{inquiry.name}</p>
+                        <p className="text-xs text-muted-foreground">{inquiry.email}</p>
+                      </div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-accent">{inquiry.inquiryType}</p>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">{inquiry.subject}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No inquiries stored yet.</p>
+            )}
+          </Card>
         </div>
       </div>
     </div>

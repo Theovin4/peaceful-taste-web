@@ -28,6 +28,8 @@ export interface OrderWorkbookRow {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  deliveryLocation: string;
+  deliveryAddress: string;
   items: string;
   subtotal: number;
   shippingCost: number;
@@ -174,6 +176,8 @@ async function buildOrdersWorkbookFile() {
     { header: 'Customer Name', key: 'customerName', width: 25 },
     { header: 'Email', key: 'customerEmail', width: 30 },
     { header: 'Phone', key: 'customerPhone', width: 15 },
+    { header: 'Delivery Location', key: 'deliveryLocation', width: 20 },
+    { header: 'Delivery Address', key: 'deliveryAddress', width: 40 },
     { header: 'Items', key: 'items', width: 40 },
     { header: 'Subtotal (Naira)', key: 'subtotal', width: 15 },
     { header: 'Shipping (Naira)', key: 'shippingCost', width: 15 },
@@ -232,6 +236,8 @@ export async function addOrderToExcel(orderData: {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  deliveryLocation: string;
+  deliveryAddress: string;
   items: { name: string; quantity: number }[] | unknown;
   subtotal: number;
   shippingCost: number;
@@ -252,6 +258,8 @@ export async function addOrderToExcel(orderData: {
     customerName: orderData.customerName,
     customerEmail: orderData.customerEmail,
     customerPhone: orderData.customerPhone || 'N/A',
+    deliveryLocation: orderData.deliveryLocation,
+    deliveryAddress: orderData.deliveryAddress,
     items: itemsString,
     subtotal: orderData.subtotal,
     shippingCost: orderData.shippingCost,

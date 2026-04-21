@@ -2,11 +2,16 @@ export const PEACEFUL_TASTE_CONTACT = {
   phone: "+234 902 262 1323",
   whatsappNumber: "2349022621323",
   email: "queenofpeace323@gmail.com",
-  bankName: "Monie Point Bank",
-  accountName: "Vincent Theophilus",
-  accountNumber: "8139171125",
+  bankName: "Providus Bank",
+  accountName: "ELYSIUM ENT (PEACEFUL TASTE)",
+  accountNumber: "1104428705",
   siteUrl: "https://peacefultaste.vercel.app",
   address: "Lagos-Ibadan Expressway, Nigeria",
+  instagram: "@peacefultaste",
+  facebook: "peacefultaste",
+  tiktok: "@peacefultaste_",
+  logoUrl:
+    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful-taste-logo_09e2b0c8.jpg",
 } as const;
 
 export interface OrderReceiptItem {
@@ -21,6 +26,7 @@ export interface OrderReceiptPayload {
   customerEmail: string;
   customerPhone?: string;
   deliveryLocation: string;
+  deliveryAddress: string;
   createdAt: string;
   items: OrderReceiptItem[];
   subtotal: number;
@@ -50,6 +56,7 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Customer Email: ${payload.customerEmail}`,
     `Customer Phone: ${payload.customerPhone || "N/A"}`,
     `Delivery Location: ${payload.deliveryLocation}`,
+    `Full Delivery Address: ${payload.deliveryAddress}`,
     `Payment Method: Bank Transfer`,
     `Payment Status: Awaiting confirmation`,
     "",
@@ -67,6 +74,11 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`,
     `Transfer Amount: ${formatNairaAmount(payload.totalAmount)}`,
     `Payment Reference: ${payload.orderNumber}`,
+    "",
+    "Brand Contacts:",
+    `Instagram: ${PEACEFUL_TASTE_CONTACT.instagram}`,
+    `Facebook: ${PEACEFUL_TASTE_CONTACT.facebook}`,
+    `TikTok: ${PEACEFUL_TASTE_CONTACT.tiktok}`,
     "",
     `WhatsApp: https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}`,
     `Email: ${PEACEFUL_TASTE_CONTACT.email}`,

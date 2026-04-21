@@ -15,13 +15,13 @@ export const DELIVERY_LOCATIONS: DeliveryLocation[] = [
   {
     id: 'magboro',
     name: 'Magboro',
-    cost: 3500,
+    cost: 2500,
     description: 'Magboro and surrounding areas',
   },
   {
     id: 'ibafo',
     name: 'Ibafo',
-    cost: 3500,
+    cost: 3000,
     description: 'Ibafo and surrounding areas',
   },
   {

@@ -1,3 +1,5 @@
+import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
+
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://peacefultaste.vercel.app';
 
 export function OrganizationSchema() {
@@ -134,7 +136,7 @@ export function FAQSchema() {
         "name": "What delivery areas do you serve?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We deliver to Lagos (NGN 5,000), Magboro (NGN 3,500), Ibafo (NGN 3,500), and Mowe (NGN 3,500). Same-day delivery is available for orders placed before 2 PM."
+          "text": "We deliver to Lagos (NGN 5,000), Magboro (NGN 2,500), Ibafo (NGN 3,000), and Mowe (NGN 3,500). Same-day delivery is available for orders placed before 2 PM."
         }
       },
       {
@@ -150,7 +152,7 @@ export function FAQSchema() {
         "name": "What payment methods do you accept?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We accept bank transfers to Monie Point Bank (8139171125). Payment receipt upload is required for order confirmation."
+          "text": `We accept bank transfers to ${PEACEFUL_TASTE_CONTACT.bankName} (${PEACEFUL_TASTE_CONTACT.accountNumber}). Payment receipt upload is required for order confirmation.`
         }
       },
       {

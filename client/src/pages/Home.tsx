@@ -5,13 +5,18 @@ import ProductCard from '@/components/ProductCard';
 import LimitedTimeOffers from '@/components/LimitedTimeOffers';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useCatalog } from '@/hooks/useCatalog';
+import { formatNaira } from '@/lib/format';
 
-const PARFAIT_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
+const FALLBACK_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const { products } = useCatalog();
+  const { products, settings } = useCatalog();
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
+  const featuredProduct =
+    products.find((product) => product.id === settings?.featuredStoryProductId) ||
+    bestSellers[0] ||
+    products[0];
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,33 +29,46 @@ export default function Home() {
                 Fresh daily in Lagos
               </p>
               <h1 className="text-display mb-6 max-w-xl text-foreground">
-                Rich Nigerian treats with a darker, more premium feel.
+                Order irresistible Nigerian food, drinks, and desserts customers want to buy again.
               </h1>
               <p className="mb-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Discover handcrafted parfaits, pastries, chin-chin, and puff-puff made in small batches and delivered with care. Peaceful Taste now opens with a faster, cleaner storefront experience.
+                Fast ordering, premium presentation, and handcrafted products that turn first-time visitors into repeat customers. Peaceful Taste is built for cravings, gifting, and event orders.
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <Button
-                  onClick={() => setLocation('/shop')}
-                  className="btn-primary gap-2 text-white"
-                >
-                  Shop Now <ArrowRight className="h-4 w-4" />
+              <div className="mb-8 flex flex-col gap-4 sm:flex-row">
+                <Button onClick={() => setLocation('/shop')} className="btn-primary gap-2 text-white">
+                  Shop Best Sellers <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={() => setLocation('/services')}
                   variant="outline"
                   className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
                 >
-                  Explore Services
+                  Request Catering
                 </Button>
               </div>
+
+              {featuredProduct && (
+                <div className="glass-panel max-w-xl rounded-3xl p-5">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.26em] text-accent">Featured story</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">{featuredProduct.name}</h2>
+                      <p className="mt-2 text-sm leading-6 text-muted-foreground">{featuredProduct.description}</p>
+                    </div>
+                    <div className="rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3 text-right">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">From</p>
+                      <p className="text-xl font-black text-foreground">{formatNaira(featuredProduct.price)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
                 <img
-                  src={PARFAIT_IMAGE}
-                  alt="Fresh parfait from Peaceful Taste"
+                  src={featuredProduct?.image || FALLBACK_IMAGE}
+                  alt={featuredProduct?.name || 'Fresh product from Peaceful Taste'}
                   className="w-full rounded-2xl object-cover"
                   loading="eager"
                   fetchPriority="high"
@@ -58,8 +76,8 @@ export default function Home() {
                   style={{ boxShadow: '0 30px 60px rgba(0, 0, 0, 0.35)' }}
                 />
                 <div className="glass-panel absolute -bottom-6 -left-6 max-w-xs rounded-2xl p-4 text-foreground">
-                  <p className="mb-1 font-semibold">100% Fresh Daily</p>
-                  <p className="text-sm text-muted-foreground">Premium ingredients, balanced sweetness, same-day delivery support.</p>
+                  <p className="mb-1 font-semibold">Same-day ready support</p>
+                  <p className="text-sm text-muted-foreground">Strong visual presentation, clear pricing, and a faster checkout journey for customers.</p>
                 </div>
               </div>
             </div>
@@ -77,25 +95,25 @@ export default function Home() {
               <div>
                 <h3 className="mb-2 font-semibold text-foreground">Premium Ingredients</h3>
                 <p className="text-sm text-muted-foreground">
-                  We source only the freshest ingredients so every order tastes bright and balanced.
+                  Fresh ingredients and strong finishing keep every order appealing online and in person.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <Shield className="mt-1 h-8 w-8 flex-shrink-0 text-accent" />
               <div>
-                <h3 className="mb-2 font-semibold text-foreground">Clean Preparation</h3>
+                <h3 className="mb-2 font-semibold text-foreground">Clear Delivery Process</h3>
                 <p className="text-sm text-muted-foreground">
-                  Our kitchen workflow is built for consistency, hygiene, and dependable delivery quality.
+                  Customers see transparent pricing, exact delivery details, and clear payment instructions.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <Sparkles className="mt-1 h-8 w-8 flex-shrink-0 text-accent" />
               <div>
-                <h3 className="mb-2 font-semibold text-foreground">Handcrafted Daily</h3>
+                <h3 className="mb-2 font-semibold text-foreground">Built to Convert</h3>
                 <p className="text-sm text-muted-foreground">
-                  Every tray, cup, and box is prepared fresh with care instead of mass-produced.
+                  Better product focus, stronger pricing visibility, and rotating offers keep the storefront active.
                 </p>
               </div>
             </div>
@@ -114,21 +132,14 @@ export default function Home() {
 
           <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {bestSellers.map((product, index) => (
-              <div
-                key={product.id}
-                className="animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <div key={product.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
 
           <div className="text-center">
-            <Button
-              onClick={() => setLocation('/shop')}
-              className="btn-primary gap-2 text-white"
-            >
+            <Button onClick={() => setLocation('/shop')} className="btn-primary gap-2 text-white">
               View All Products <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -149,32 +160,26 @@ export default function Home() {
               {
                 name: 'Chioma Okafor',
                 location: 'Lagos',
-                text: 'The Berry Bliss Parfait is absolutely delicious. Fresh ingredients and perfect portions. I order every week now.',
+                text: 'The parfaits feel premium, the delivery details are clear, and ordering is much easier now.',
                 rating: 5,
               },
               {
                 name: 'Tunde Adeyemi',
                 location: 'Ibadan',
-                text: 'Best puff-puff I have ever had. Fluffy, fresh, and delivered quickly. Highly recommended for parties.',
+                text: 'The puff-puff and chin-chin always look fresh and the checkout process is very straightforward.',
                 rating: 5,
               },
               {
                 name: 'Zainab Hassan',
                 location: 'Abuja',
-                text: 'The croissants are buttery and flaky. Perfect for breakfast, and the overall quality feels premium.',
+                text: 'The presentation, receipts, and WhatsApp follow-up make the brand feel more trustworthy.',
                 rating: 5,
               },
             ].map((testimonial, index) => (
-              <div
-                key={testimonial.name}
-                className="glass-panel rounded-2xl p-6"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <div key={testimonial.name} className="glass-panel rounded-2xl p-6" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="mb-4 flex gap-1">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <span key={i} className="text-lg text-accent">
-                      ★
-                    </span>
+                    <span key={i} className="text-lg text-accent">?</span>
                   ))}
                 </div>
                 <p className="mb-4 font-medium leading-relaxed text-card-foreground">{testimonial.text}</p>
@@ -207,10 +212,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Button
-                onClick={() => setLocation('/services')}
-                className="btn-primary gap-2 text-white"
-              >
+              <Button onClick={() => setLocation('/services')} className="btn-primary gap-2 text-white">
                 Request a Quote <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -234,12 +236,9 @@ export default function Home() {
           <div className="glass-panel rounded-3xl px-6 py-10 text-center md:px-12">
             <h2 className="text-heading mb-4 text-foreground">Ready to Order?</h2>
             <p className="mb-6 text-lg text-muted-foreground">
-              Browse the full collection and place your order today. Fresh treats, darker premium styling, and a faster storefront experience.
+              Browse the full collection and place your order today. Clear pricing, premium presentation, and a faster storefront experience.
             </p>
-            <Button
-              onClick={() => setLocation('/shop')}
-              className="btn-primary gap-2 text-white"
-            >
+            <Button onClick={() => setLocation('/shop')} className="btn-primary gap-2 text-white">
               Shop Now <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

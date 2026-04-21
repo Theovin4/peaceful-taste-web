@@ -345,7 +345,7 @@ var require_bytes = __commonJS({
     "use strict";
     module2.exports = bytes2;
     module2.exports.format = format;
-    module2.exports.parse = parse2;
+    module2.exports.parse = parse3;
     var formatThousandsRegExp = /\B(?=(\d{3})+(?!\d))/g;
     var formatDecimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
     var map2 = {
@@ -359,7 +359,7 @@ var require_bytes = __commonJS({
     var parseRegExp2 = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb|pb)$/i;
     function bytes2(value, options) {
       if (typeof value === "string") {
-        return parse2(value);
+        return parse3(value);
       }
       if (typeof value === "number") {
         return format(value, options);
@@ -403,7 +403,7 @@ var require_bytes = __commonJS({
       }
       return str + unitSeparator + unit;
     }
-    function parse2(val) {
+    function parse3(val) {
       if (typeof val === "number" && !isNaN(val)) {
         return val;
       }
@@ -439,7 +439,7 @@ var require_content_type = __commonJS({
     var QUOTE_REGEXP = /([\\"])/g;
     var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
     exports2.format = format;
-    exports2.parse = parse2;
+    exports2.parse = parse3;
     function format(obj2) {
       if (!obj2 || typeof obj2 !== "object") {
         throw new TypeError("argument obj is required");
@@ -463,7 +463,7 @@ var require_content_type = __commonJS({
       }
       return string;
     }
-    function parse2(string) {
+    function parse3(string) {
       if (!string) {
         throw new TypeError("argument string is required");
       }
@@ -929,7 +929,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse2(val);
+        return parse3(val);
       } else if (type === "number" && isNaN(val) === false) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -937,7 +937,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse2(str) {
+    function parse3(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -5255,7 +5255,7 @@ var require_read = __commonJS({
     var unpipe = require_unpipe();
     var zlib = require("zlib");
     module2.exports = read;
-    function read(req, res, next, parse2, debug2, options) {
+    function read(req, res, next, parse3, debug2, options) {
       var length;
       var opts = options;
       var stream;
@@ -5314,7 +5314,7 @@ var require_read = __commonJS({
         try {
           debug2("parse body");
           str = typeof body !== "string" && encoding !== null ? iconv.decode(body, encoding) : body;
-          req.body = parse2(str);
+          req.body = parse3(str);
         } catch (err) {
           next(createError(400, err, {
             body: str,
@@ -5382,7 +5382,7 @@ var require_media_typer = __commonJS({
     var typeNameRegExp = /^[A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126}$/;
     var typeRegExp = /^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})\/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$/;
     exports2.format = format;
-    exports2.parse = parse2;
+    exports2.parse = parse3;
     function format(obj2) {
       if (!obj2 || typeof obj2 !== "object") {
         throw new TypeError("argument obj is required");
@@ -5417,7 +5417,7 @@ var require_media_typer = __commonJS({
       }
       return string;
     }
-    function parse2(string) {
+    function parse3(string) {
       if (!string) {
         throw new TypeError("argument string is required");
       }
@@ -14247,7 +14247,7 @@ var require_json = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse2(body) {
+      function parse3(body) {
         if (body.length === 0) {
           return {};
         }
@@ -14295,7 +14295,7 @@ var require_json = __commonJS({
           }));
           return;
         }
-        read(req, res, next, parse2, debug2, {
+        read(req, res, next, parse3, debug2, {
           encoding: charset,
           inflate,
           limit,
@@ -14374,7 +14374,7 @@ var require_raw = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse2(buf) {
+      function parse3(buf) {
         return buf;
       }
       return function rawParser(req, res, next) {
@@ -14395,7 +14395,7 @@ var require_raw = __commonJS({
           next();
           return;
         }
-        read(req, res, next, parse2, debug2, {
+        read(req, res, next, parse3, debug2, {
           encoding: null,
           inflate,
           limit,
@@ -14432,7 +14432,7 @@ var require_text = __commonJS({
         throw new TypeError("option verify must be function");
       }
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse2(buf) {
+      function parse3(buf) {
         return buf;
       }
       return function textParser(req, res, next) {
@@ -14454,7 +14454,7 @@ var require_text = __commonJS({
           return;
         }
         var charset = getCharset(req) || defaultCharset;
-        read(req, res, next, parse2, debug2, {
+        read(req, res, next, parse3, debug2, {
           encoding: charset,
           inflate,
           limit,
@@ -16846,11 +16846,11 @@ var require_lib2 = __commonJS({
   "node_modules/.pnpm/qs@6.13.0/node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify2 = require_stringify();
-    var parse2 = require_parse();
+    var parse3 = require_parse();
     var formats = require_formats();
     module2.exports = {
       formats,
-      parse: parse2,
+      parse: parse3,
       stringify: stringify2
     };
   }
@@ -16885,7 +16885,7 @@ var require_urlencoded = __commonJS({
       }
       var queryparse = extended ? extendedparser(opts) : simpleparser(opts);
       var shouldParse = typeof type !== "function" ? typeChecker(type) : type;
-      function parse2(body) {
+      function parse3(body) {
         return body.length ? queryparse(body) : {};
       }
       return function urlencodedParser(req, res, next) {
@@ -16915,7 +16915,7 @@ var require_urlencoded = __commonJS({
           }));
           return;
         }
-        read(req, res, next, parse2, debug2, {
+        read(req, res, next, parse3, debug2, {
           debug: debug2,
           encoding: charset,
           inflate,
@@ -16928,7 +16928,7 @@ var require_urlencoded = __commonJS({
     function extendedparser(options) {
       var parameterLimit = options.parameterLimit !== void 0 ? options.parameterLimit : 1e3;
       var depth = typeof options.depth !== "number" ? Number(options.depth || 32) : options.depth;
-      var parse2 = parser("qs");
+      var parse3 = parser("qs");
       if (isNaN(parameterLimit) || parameterLimit < 1) {
         throw new TypeError("option parameterLimit must be a positive number");
       }
@@ -16949,7 +16949,7 @@ var require_urlencoded = __commonJS({
         var arrayLimit = Math.max(100, paramCount);
         debug2("parse extended urlencoding");
         try {
-          return parse2(body, {
+          return parse3(body, {
             allowPrototypes: true,
             arrayLimit,
             depth,
@@ -17004,7 +17004,7 @@ var require_urlencoded = __commonJS({
     }
     function simpleparser(options) {
       var parameterLimit = options.parameterLimit !== void 0 ? options.parameterLimit : 1e3;
-      var parse2 = parser("querystring");
+      var parse3 = parser("querystring");
       if (isNaN(parameterLimit) || parameterLimit < 1) {
         throw new TypeError("option parameterLimit must be a positive number");
       }
@@ -17020,7 +17020,7 @@ var require_urlencoded = __commonJS({
           });
         }
         debug2("parse urlencoding");
-        return parse2(body, void 0, void 0, { maxKeys: parameterLimit });
+        return parse3(body, void 0, void 0, { maxKeys: parameterLimit });
       };
     }
     function typeChecker(type) {
@@ -17202,7 +17202,7 @@ var require_parseurl = __commonJS({
   "node_modules/.pnpm/parseurl@1.3.3/node_modules/parseurl/index.js"(exports2, module2) {
     "use strict";
     var url = require("url");
-    var parse2 = url.parse;
+    var parse3 = url.parse;
     var Url = url.Url;
     module2.exports = parseurl;
     module2.exports.original = originalurl;
@@ -17234,7 +17234,7 @@ var require_parseurl = __commonJS({
     }
     function fastparse(str) {
       if (typeof str !== "string" || str.charCodeAt(0) !== 47) {
-        return parse2(str);
+        return parse3(str);
       }
       var pathname = str;
       var query = null;
@@ -17262,7 +17262,7 @@ var require_parseurl = __commonJS({
           /* #  */
           case 160:
           case 65279:
-            return parse2(str);
+            return parse3(str);
         }
       }
       var url2 = Url !== void 0 ? new Url() : {};
@@ -18413,7 +18413,7 @@ var require_content_disposition = __commonJS({
   "node_modules/.pnpm/content-disposition@0.5.4/node_modules/content-disposition/index.js"(exports2, module2) {
     "use strict";
     module2.exports = contentDisposition;
-    module2.exports.parse = parse2;
+    module2.exports.parse = parse3;
     var basename = require("path").basename;
     var Buffer2 = require_safe_buffer().Buffer;
     var ENCODE_URL_ATTR_CHAR_REGEXP = /[\x00-\x20"'()*,/:;<=>?@[\\\]{}\x7f]/g;
@@ -18504,7 +18504,7 @@ var require_content_disposition = __commonJS({
     function getlatin1(val) {
       return String(val).replace(NON_LATIN1_REGEXP, "?");
     }
-    function parse2(string) {
+    function parse3(string) {
       if (!string || typeof string !== "string") {
         throw new TypeError("argument string is required");
       }
@@ -18590,14 +18590,14 @@ var require_etag = __commonJS({
   "node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto4 = require("crypto");
+    var crypto5 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto4.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto5.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -18774,7 +18774,7 @@ var require_ms2 = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse2(val);
+        return parse3(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -18782,7 +18782,7 @@ var require_ms2 = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse2(str) {
+    function parse3(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -19512,7 +19512,7 @@ var require_forwarded = __commonJS({
       if (!req) {
         throw new TypeError("argument req is required");
       }
-      var proxyAddrs = parse2(req.headers["x-forwarded-for"] || "");
+      var proxyAddrs = parse3(req.headers["x-forwarded-for"] || "");
       var socketAddr = getSocketAddr(req);
       var addrs = [socketAddr].concat(proxyAddrs);
       return addrs;
@@ -19520,7 +19520,7 @@ var require_forwarded = __commonJS({
     function getSocketAddr(req) {
       return req.socket ? req.socket.remoteAddress : req.connection.remoteAddress;
     }
-    function parse2(header) {
+    function parse3(header) {
       var end = header.length;
       var list2 = [];
       var start = header.length;
@@ -21333,7 +21333,7 @@ var require_request = __commonJS({
     var http = require("http");
     var fresh = require_fresh();
     var parseRange = require_range_parser();
-    var parse2 = require_parseurl();
+    var parse3 = require_parseurl();
     var proxyaddr = require_proxy_addr();
     var req = Object.create(http.IncomingMessage.prototype);
     module2.exports = req;
@@ -21438,7 +21438,7 @@ var require_request = __commonJS({
       return subdomains2.slice(offset);
     });
     defineGetter(req, "path", function path2() {
-      return parse2(this).pathname;
+      return parse3(this).pathname;
     });
     defineGetter(req, "hostname", function hostname() {
       var trust = this.app.get("trust proxy fn");
@@ -21489,11 +21489,11 @@ var require_request = __commonJS({
 // node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports2) {
-    var crypto4 = require("crypto");
+    var crypto5 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto4.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto5.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21502,7 +21502,7 @@ var require_cookie_signature = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto4.createHash("sha1").update(str).digest("hex");
+      return crypto5.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -21511,14 +21511,14 @@ var require_cookie_signature = __commonJS({
 var require_cookie = __commonJS({
   "node_modules/.pnpm/cookie@0.7.1/node_modules/cookie/index.js"(exports2) {
     "use strict";
-    exports2.parse = parse2;
+    exports2.parse = parse3;
     exports2.serialize = serialize;
     var __toString = Object.prototype.toString;
     var cookieNameRegExp = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
     var cookieValueRegExp = /^("?)[\u0021\u0023-\u002B\u002D-\u003A\u003C-\u005B\u005D-\u007E]*\1$/;
     var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
     var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
-    function parse2(str, opt) {
+    function parse3(str, opt) {
       if (typeof str !== "string") {
         throw new TypeError("argument str must be a string");
       }
@@ -21686,7 +21686,7 @@ var require_vary = __commonJS({
       if (!field) {
         throw new TypeError("field argument is required");
       }
-      var fields = !Array.isArray(field) ? parse2(String(field)) : field;
+      var fields = !Array.isArray(field) ? parse3(String(field)) : field;
       for (var j = 0; j < fields.length; j++) {
         if (!FIELD_NAME_REGEXP.test(fields[j])) {
           throw new TypeError("field argument contains an invalid header name");
@@ -21696,7 +21696,7 @@ var require_vary = __commonJS({
         return header;
       }
       var val = header;
-      var vals = parse2(header.toLowerCase());
+      var vals = parse3(header.toLowerCase());
       if (fields.indexOf("*") !== -1 || vals.indexOf("*") !== -1) {
         return "*";
       }
@@ -21709,7 +21709,7 @@ var require_vary = __commonJS({
       }
       return val;
     }
-    function parse2(header) {
+    function parse3(header) {
       var end = 0;
       var list2 = [];
       var start = 0;
@@ -21765,7 +21765,7 @@ var require_response = __commonJS({
     var normalizeType = require_utils2().normalizeType;
     var normalizeTypes = require_utils2().normalizeTypes;
     var setCharset = require_utils2().setCharset;
-    var cookie = require_cookie();
+    var cookie2 = require_cookie();
     var send = require_send();
     var extname = path2.extname;
     var mime = send.mime;
@@ -22128,7 +22128,7 @@ var require_response = __commonJS({
       if (opts.path == null) {
         opts.path = "/";
       }
-      this.append("Set-Cookie", cookie.serialize(name, String(val), opts));
+      this.append("Set-Cookie", cookie2.serialize(name, String(val), opts));
       return this;
     };
     res.location = function location(url) {
@@ -22466,6 +22466,255 @@ var require_express2 = __commonJS({
   "node_modules/.pnpm/express@4.21.2/node_modules/express/index.js"(exports2, module2) {
     "use strict";
     module2.exports = require_express();
+  }
+});
+
+// node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js
+var require_dist = __commonJS({
+  "node_modules/.pnpm/cookie@1.1.1/node_modules/cookie/dist/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.parseCookie = parseCookie;
+    exports2.parse = parseCookie;
+    exports2.stringifyCookie = stringifyCookie;
+    exports2.stringifySetCookie = stringifySetCookie;
+    exports2.serialize = stringifySetCookie;
+    exports2.parseSetCookie = parseSetCookie;
+    exports2.stringifySetCookie = stringifySetCookie;
+    exports2.serialize = stringifySetCookie;
+    var cookieNameRegExp = /^[\u0021-\u003A\u003C\u003E-\u007E]+$/;
+    var cookieValueRegExp = /^[\u0021-\u003A\u003C-\u007E]*$/;
+    var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+    var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
+    var maxAgeRegExp = /^-?\d+$/;
+    var __toString = Object.prototype.toString;
+    var NullObject = /* @__PURE__ */ (() => {
+      const C = function() {
+      };
+      C.prototype = /* @__PURE__ */ Object.create(null);
+      return C;
+    })();
+    function parseCookie(str, options) {
+      const obj2 = new NullObject();
+      const len = str.length;
+      if (len < 2)
+        return obj2;
+      const dec = options?.decode || decode;
+      let index = 0;
+      do {
+        const eqIdx = eqIndex(str, index, len);
+        if (eqIdx === -1)
+          break;
+        const endIdx = endIndex(str, index, len);
+        if (eqIdx > endIdx) {
+          index = str.lastIndexOf(";", eqIdx - 1) + 1;
+          continue;
+        }
+        const key = valueSlice(str, index, eqIdx);
+        if (obj2[key] === void 0) {
+          obj2[key] = dec(valueSlice(str, eqIdx + 1, endIdx));
+        }
+        index = endIdx + 1;
+      } while (index < len);
+      return obj2;
+    }
+    function stringifyCookie(cookie2, options) {
+      const enc = options?.encode || encodeURIComponent;
+      const cookieStrings = [];
+      for (const name of Object.keys(cookie2)) {
+        const val = cookie2[name];
+        if (val === void 0)
+          continue;
+        if (!cookieNameRegExp.test(name)) {
+          throw new TypeError(`cookie name is invalid: ${name}`);
+        }
+        const value = enc(val);
+        if (!cookieValueRegExp.test(value)) {
+          throw new TypeError(`cookie val is invalid: ${val}`);
+        }
+        cookieStrings.push(`${name}=${value}`);
+      }
+      return cookieStrings.join("; ");
+    }
+    function stringifySetCookie(_name, _val, _opts) {
+      const cookie2 = typeof _name === "object" ? _name : { ..._opts, name: _name, value: String(_val) };
+      const options = typeof _val === "object" ? _val : _opts;
+      const enc = options?.encode || encodeURIComponent;
+      if (!cookieNameRegExp.test(cookie2.name)) {
+        throw new TypeError(`argument name is invalid: ${cookie2.name}`);
+      }
+      const value = cookie2.value ? enc(cookie2.value) : "";
+      if (!cookieValueRegExp.test(value)) {
+        throw new TypeError(`argument val is invalid: ${cookie2.value}`);
+      }
+      let str = cookie2.name + "=" + value;
+      if (cookie2.maxAge !== void 0) {
+        if (!Number.isInteger(cookie2.maxAge)) {
+          throw new TypeError(`option maxAge is invalid: ${cookie2.maxAge}`);
+        }
+        str += "; Max-Age=" + cookie2.maxAge;
+      }
+      if (cookie2.domain) {
+        if (!domainValueRegExp.test(cookie2.domain)) {
+          throw new TypeError(`option domain is invalid: ${cookie2.domain}`);
+        }
+        str += "; Domain=" + cookie2.domain;
+      }
+      if (cookie2.path) {
+        if (!pathValueRegExp.test(cookie2.path)) {
+          throw new TypeError(`option path is invalid: ${cookie2.path}`);
+        }
+        str += "; Path=" + cookie2.path;
+      }
+      if (cookie2.expires) {
+        if (!isDate(cookie2.expires) || !Number.isFinite(cookie2.expires.valueOf())) {
+          throw new TypeError(`option expires is invalid: ${cookie2.expires}`);
+        }
+        str += "; Expires=" + cookie2.expires.toUTCString();
+      }
+      if (cookie2.httpOnly) {
+        str += "; HttpOnly";
+      }
+      if (cookie2.secure) {
+        str += "; Secure";
+      }
+      if (cookie2.partitioned) {
+        str += "; Partitioned";
+      }
+      if (cookie2.priority) {
+        const priority = typeof cookie2.priority === "string" ? cookie2.priority.toLowerCase() : void 0;
+        switch (priority) {
+          case "low":
+            str += "; Priority=Low";
+            break;
+          case "medium":
+            str += "; Priority=Medium";
+            break;
+          case "high":
+            str += "; Priority=High";
+            break;
+          default:
+            throw new TypeError(`option priority is invalid: ${cookie2.priority}`);
+        }
+      }
+      if (cookie2.sameSite) {
+        const sameSite = typeof cookie2.sameSite === "string" ? cookie2.sameSite.toLowerCase() : cookie2.sameSite;
+        switch (sameSite) {
+          case true:
+          case "strict":
+            str += "; SameSite=Strict";
+            break;
+          case "lax":
+            str += "; SameSite=Lax";
+            break;
+          case "none":
+            str += "; SameSite=None";
+            break;
+          default:
+            throw new TypeError(`option sameSite is invalid: ${cookie2.sameSite}`);
+        }
+      }
+      return str;
+    }
+    function parseSetCookie(str, options) {
+      const dec = options?.decode || decode;
+      const len = str.length;
+      const endIdx = endIndex(str, 0, len);
+      const eqIdx = eqIndex(str, 0, endIdx);
+      const setCookie = eqIdx === -1 ? { name: "", value: dec(valueSlice(str, 0, endIdx)) } : {
+        name: valueSlice(str, 0, eqIdx),
+        value: dec(valueSlice(str, eqIdx + 1, endIdx))
+      };
+      let index = endIdx + 1;
+      while (index < len) {
+        const endIdx2 = endIndex(str, index, len);
+        const eqIdx2 = eqIndex(str, index, endIdx2);
+        const attr = eqIdx2 === -1 ? valueSlice(str, index, endIdx2) : valueSlice(str, index, eqIdx2);
+        const val = eqIdx2 === -1 ? void 0 : valueSlice(str, eqIdx2 + 1, endIdx2);
+        switch (attr.toLowerCase()) {
+          case "httponly":
+            setCookie.httpOnly = true;
+            break;
+          case "secure":
+            setCookie.secure = true;
+            break;
+          case "partitioned":
+            setCookie.partitioned = true;
+            break;
+          case "domain":
+            setCookie.domain = val;
+            break;
+          case "path":
+            setCookie.path = val;
+            break;
+          case "max-age":
+            if (val && maxAgeRegExp.test(val))
+              setCookie.maxAge = Number(val);
+            break;
+          case "expires":
+            if (!val)
+              break;
+            const date = new Date(val);
+            if (Number.isFinite(date.valueOf()))
+              setCookie.expires = date;
+            break;
+          case "priority":
+            if (!val)
+              break;
+            const priority = val.toLowerCase();
+            if (priority === "low" || priority === "medium" || priority === "high") {
+              setCookie.priority = priority;
+            }
+            break;
+          case "samesite":
+            if (!val)
+              break;
+            const sameSite = val.toLowerCase();
+            if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") {
+              setCookie.sameSite = sameSite;
+            }
+            break;
+        }
+        index = endIdx2 + 1;
+      }
+      return setCookie;
+    }
+    function endIndex(str, min, len) {
+      const index = str.indexOf(";", min);
+      return index === -1 ? len : index;
+    }
+    function eqIndex(str, min, max) {
+      const index = str.indexOf("=", min);
+      return index < max ? index : -1;
+    }
+    function valueSlice(str, min, max) {
+      let start = min;
+      let end = max;
+      do {
+        const code = str.charCodeAt(start);
+        if (code !== 32 && code !== 9)
+          break;
+      } while (++start < end);
+      while (end > start) {
+        const code = str.charCodeAt(end - 1);
+        if (code !== 32 && code !== 9)
+          break;
+        end--;
+      }
+      return str.slice(start, end);
+    }
+    function decode(str) {
+      if (str.indexOf("%") === -1)
+        return str;
+      try {
+        return decodeURIComponent(str);
+      } catch (e) {
+        return str;
+      }
+    }
+    function isDate(val) {
+      return __toString.call(val) === "[object Date]";
+    }
   }
 });
 
@@ -25338,7 +25587,7 @@ var require_data_validations = __commonJS({
 var require_encryptor = __commonJS({
   "node_modules/.pnpm/exceljs@4.4.0/node_modules/exceljs/lib/utils/encryptor.js"(exports2, module2) {
     "use strict";
-    var crypto4 = require("crypto");
+    var crypto5 = require("crypto");
     var Encryptor = {
       /**
        * Calculate a hash of the concatenated buffers with the given algorithm.
@@ -25346,7 +25595,7 @@ var require_encryptor = __commonJS({
        * @returns {Buffer} The hash
        */
       hash(algorithm, ...buffers) {
-        const hash = crypto4.createHash(algorithm);
+        const hash = crypto5.createHash(algorithm);
         hash.update(Buffer.concat(buffers));
         return hash.digest();
       },
@@ -25362,7 +25611,7 @@ var require_encryptor = __commonJS({
        */
       convertPasswordToHash(password, hashAlgorithm, saltValue, spinCount) {
         hashAlgorithm = hashAlgorithm.toLowerCase();
-        const hashes = crypto4.getHashes();
+        const hashes = crypto5.getHashes();
         if (hashes.indexOf(hashAlgorithm) < 0) {
           throw new Error(`Hash algorithm '${hashAlgorithm}' not supported!`);
         }
@@ -25380,7 +25629,7 @@ var require_encryptor = __commonJS({
        * @param size The size argument is a number indicating the number of bytes to generate.
        */
       randomBytes(size) {
-        return crypto4.randomBytes(size);
+        return crypto5.randomBytes(size);
       }
     };
     module2.exports = Encryptor;
@@ -47903,7 +48152,7 @@ var init_v1 = __esm({
 });
 
 // node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/parse.js
-function parse(uuid) {
+function parse2(uuid) {
   if (!validate_default(uuid)) {
     throw TypeError("Invalid UUID");
   }
@@ -47931,7 +48180,7 @@ var parse_default;
 var init_parse = __esm({
   "node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/parse.js"() {
     init_validate();
-    parse_default = parse;
+    parse_default = parse2;
   }
 });
 
@@ -61548,9 +61797,9 @@ var require_minimatch2 = __commonJS({
         throw new TypeError("pattern is too long");
       }
     };
-    Minimatch.prototype.parse = parse2;
+    Minimatch.prototype.parse = parse3;
     var SUBPARSE = {};
-    function parse2(pattern, isSub) {
+    function parse3(pattern, isSub) {
       assertValidPattern(pattern);
       var options = this.options;
       if (pattern === "**") {
@@ -69170,7 +69419,7 @@ var require_binary = __commonJS({
       });
       return stream;
     };
-    exports2.parse = function parse2(buffer) {
+    exports2.parse = function parse3(buffer) {
       var self2 = words(function(bytes2, cb) {
         return function(name) {
           if (offset + bytes2 <= buffer.length) {
@@ -78447,7 +78696,7 @@ var require_tmp = __commonJS({
     var fs3 = require("fs");
     var os2 = require("os");
     var path2 = require("path");
-    var crypto4 = require("crypto");
+    var crypto5 = require("crypto");
     var _c = { fs: fs3.constants, os: os2.constants };
     var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var TEMPLATE_PATTERN = /XXXXXX/;
@@ -78627,9 +78876,9 @@ var require_tmp = __commonJS({
     function _randomChars(howMany) {
       let value = [], rnd = null;
       try {
-        rnd = crypto4.randomBytes(howMany);
+        rnd = crypto5.randomBytes(howMany);
       } catch (e) {
-        rnd = crypto4.pseudoRandomBytes(howMany);
+        rnd = crypto5.pseudoRandomBytes(howMany);
       }
       for (let i = 0; i < howMany; i++) {
         value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
@@ -83624,11 +83873,11 @@ var require_util6 = __commonJS({
     var { isUint8Array } = require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto4;
+    var crypto5;
     try {
-      crypto4 = require("node:crypto");
+      crypto5 = require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto4.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
+      supportedHashes = crypto5.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
     } catch {
     }
     function responseURL(response) {
@@ -83901,7 +84150,7 @@ var require_util6 = __commonJS({
       }
     }
     function bytesMatch(bytes2, metadataList) {
-      if (crypto4 === void 0) {
+      if (crypto5 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -83916,7 +84165,7 @@ var require_util6 = __commonJS({
       for (const item of metadata) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto4.createHash(algorithm).update(bytes2).digest("base64");
+        let actualValue = crypto5.createHash(algorithm).update(bytes2).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -84980,8 +85229,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto4 = require("node:crypto");
-      random = (max) => crypto4.randomInt(0, max);
+      const crypto5 = require("node:crypto");
+      random = (max) => crypto5.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -91445,8 +91694,8 @@ var require_headers2 = __commonJS({
         if (this[kHeadersMap].size !== 0) {
           for (const { 0: lowerName, 1: { name, value } } of this[kHeadersMap]) {
             if (lowerName === "set-cookie") {
-              for (const cookie of this.cookies) {
-                headers.push([name, cookie]);
+              for (const cookie2 of this.cookies) {
+                headers.push([name, cookie2]);
               }
             } else {
               headers.push([name, value]);
@@ -95543,46 +95792,46 @@ var require_util10 = __commonJS({
         throw new Error("Invalid cookie max-age");
       }
     }
-    function stringify2(cookie) {
-      if (cookie.name.length === 0) {
+    function stringify2(cookie2) {
+      if (cookie2.name.length === 0) {
         return null;
       }
-      validateCookieName(cookie.name);
-      validateCookieValue(cookie.value);
-      const out = [`${cookie.name}=${cookie.value}`];
-      if (cookie.name.startsWith("__Secure-")) {
-        cookie.secure = true;
+      validateCookieName(cookie2.name);
+      validateCookieValue(cookie2.value);
+      const out = [`${cookie2.name}=${cookie2.value}`];
+      if (cookie2.name.startsWith("__Secure-")) {
+        cookie2.secure = true;
       }
-      if (cookie.name.startsWith("__Host-")) {
-        cookie.secure = true;
-        cookie.domain = null;
-        cookie.path = "/";
+      if (cookie2.name.startsWith("__Host-")) {
+        cookie2.secure = true;
+        cookie2.domain = null;
+        cookie2.path = "/";
       }
-      if (cookie.secure) {
+      if (cookie2.secure) {
         out.push("Secure");
       }
-      if (cookie.httpOnly) {
+      if (cookie2.httpOnly) {
         out.push("HttpOnly");
       }
-      if (typeof cookie.maxAge === "number") {
-        validateCookieMaxAge(cookie.maxAge);
-        out.push(`Max-Age=${cookie.maxAge}`);
+      if (typeof cookie2.maxAge === "number") {
+        validateCookieMaxAge(cookie2.maxAge);
+        out.push(`Max-Age=${cookie2.maxAge}`);
       }
-      if (cookie.domain) {
-        validateCookieDomain(cookie.domain);
-        out.push(`Domain=${cookie.domain}`);
+      if (cookie2.domain) {
+        validateCookieDomain(cookie2.domain);
+        out.push(`Domain=${cookie2.domain}`);
       }
-      if (cookie.path) {
-        validateCookiePath(cookie.path);
-        out.push(`Path=${cookie.path}`);
+      if (cookie2.path) {
+        validateCookiePath(cookie2.path);
+        out.push(`Path=${cookie2.path}`);
       }
-      if (cookie.expires && cookie.expires.toString() !== "Invalid Date") {
-        out.push(`Expires=${toIMFDate(cookie.expires)}`);
+      if (cookie2.expires && cookie2.expires.toString() !== "Invalid Date") {
+        out.push(`Expires=${toIMFDate(cookie2.expires)}`);
       }
-      if (cookie.sameSite) {
-        out.push(`SameSite=${cookie.sameSite}`);
+      if (cookie2.sameSite) {
+        out.push(`SameSite=${cookie2.sameSite}`);
       }
-      for (const part of cookie.unparsed) {
+      for (const part of cookie2.unparsed) {
         if (!part.includes("=")) {
           throw new Error("Invalid unparsed");
         }
@@ -95753,12 +96002,12 @@ var require_cookies = __commonJS({
     function getCookies(headers) {
       webidl.argumentLengthCheck(arguments, 1, "getCookies");
       webidl.brandCheck(headers, Headers2, { strict: false });
-      const cookie = headers.get("cookie");
+      const cookie2 = headers.get("cookie");
       const out = {};
-      if (!cookie) {
+      if (!cookie2) {
         return out;
       }
-      for (const piece of cookie.split(";")) {
+      for (const piece of cookie2.split(";")) {
         const [name, ...value] = piece.split("=");
         out[name.trim()] = value.join("=");
       }
@@ -95786,11 +96035,11 @@ var require_cookies = __commonJS({
       }
       return cookies.map((pair) => parseSetCookie(pair));
     }
-    function setCookie(headers, cookie) {
+    function setCookie(headers, cookie2) {
       webidl.argumentLengthCheck(arguments, 2, "setCookie");
       webidl.brandCheck(headers, Headers2, { strict: false });
-      cookie = webidl.converters.Cookie(cookie);
-      const str = stringify2(cookie);
+      cookie2 = webidl.converters.Cookie(cookie2);
+      const str = stringify2(cookie2);
       if (str) {
         headers.append("Set-Cookie", str);
       }
@@ -96390,13 +96639,13 @@ var require_frame = __commonJS({
     "use strict";
     var { maxUnsigned16Bit } = require_constants7();
     var BUFFER_SIZE = 16386;
-    var crypto4;
+    var crypto5;
     var buffer = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto4 = require("node:crypto");
+      crypto5 = require("node:crypto");
     } catch {
-      crypto4 = {
+      crypto5 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer2, _offset, _size) {
           for (let i = 0; i < buffer2.length; ++i) {
@@ -96409,7 +96658,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto4.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto5.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++]];
     }
@@ -96481,9 +96730,9 @@ var require_connection = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers2();
     var { getDecodeSplit } = require_util6();
     var { WebsocketFrameSend } = require_frame();
-    var crypto4;
+    var crypto5;
     try {
-      crypto4 = require("node:crypto");
+      crypto5 = require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url, protocols, client, ws, onEstablish, options) {
@@ -96503,7 +96752,7 @@ var require_connection = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto4.randomBytes(16).toString("base64");
+      const keyValue = crypto5.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue);
       request.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -96533,7 +96782,7 @@ var require_connection = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto4.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto5.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -98285,6 +98534,62 @@ module.exports = __toCommonJS(vercel_admin_export_exports);
 var import_express = __toESM(require_express2(), 1);
 var import_node_fs = __toESM(require("node:fs"), 1);
 
+// server/_core/adminSession.ts
+var import_node_crypto = __toESM(require("node:crypto"), 1);
+var cookie = __toESM(require_dist(), 1);
+
+// server/_core/env.ts
+var ENV = {
+  appId: process.env.VITE_APP_ID ?? "",
+  cookieSecret: process.env.JWT_SECRET ?? "",
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
+  ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
+  ownerEmail: process.env.OWNER_EMAIL ?? "queenofpeace323@gmail.com",
+  isProduction: process.env.NODE_ENV === "production",
+  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  resendFromEmail: process.env.RESEND_FROM_EMAIL ?? ""
+};
+
+// server/_core/adminSession.ts
+var ADMIN_COOKIE_NAME = "peaceful_taste_admin";
+var ADMIN_SESSION_DURATION_MS = 1e3 * 60 * 60 * 8;
+function getAdminPassword() {
+  return process.env.ADMIN_PASSWORD ?? "peaceful123";
+}
+function getSigningSecret() {
+  return ENV.cookieSecret || getAdminPassword();
+}
+function signValue(value) {
+  return import_node_crypto.default.createHmac("sha256", getSigningSecret()).update(value).digest("hex");
+}
+function verifyAdminSessionToken(token) {
+  if (!token) return false;
+  const [encoded, signature] = token.split(".");
+  if (!encoded || !signature) return false;
+  const expectedSignature = signValue(encoded);
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+  if (!import_node_crypto.default.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+    return false;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    return payload.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+function readAdminSessionFromRequest(req) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return false;
+  const cookies = cookie.parse(cookieHeader);
+  return verifyAdminSessionToken(cookies[ADMIN_COOKIE_NAME]);
+}
+
 // server/excel-storage.ts
 var import_exceljs = __toESM(require_excel(), 1);
 var fs = __toESM(require("node:fs"), 1);
@@ -99904,6 +100209,8 @@ async function buildOrdersWorkbookFile() {
     { header: "Customer Name", key: "customerName", width: 25 },
     { header: "Email", key: "customerEmail", width: 30 },
     { header: "Phone", key: "customerPhone", width: 15 },
+    { header: "Delivery Location", key: "deliveryLocation", width: 20 },
+    { header: "Delivery Address", key: "deliveryAddress", width: 40 },
     { header: "Items", key: "items", width: 40 },
     { header: "Subtotal (Naira)", key: "subtotal", width: 15 },
     { header: "Shipping (Naira)", key: "shippingCost", width: 15 },
@@ -99959,6 +100266,10 @@ async function prepareInquiriesWorkbookDownload() {
 // server/vercel-admin-export.ts
 var app = (0, import_express.default)();
 app.get("*", async (req, res) => {
+  if (!readAdminSessionFromRequest(req)) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
   const sheet = req.path.split("/").filter(Boolean).pop();
   if (sheet === "orders") {
     const ordersFile = await prepareOrdersWorkbookDownload();

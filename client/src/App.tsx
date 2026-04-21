@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -59,16 +59,19 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const isAdminRoute = location.startsWith("/admin");
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <CartProvider>
           <TooltipProvider>
             <Toaster />
-            <Header />
+            {!isAdminRoute && <Header />}
             <Router />
-            <Footer />
-            <WhatsAppButton />
+            {!isAdminRoute && <Footer />}
+            {!isAdminRoute && <WhatsAppButton />}
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>
