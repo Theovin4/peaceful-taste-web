@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { formatNaira } from '@/lib/format';
+import ProductVisual from '@/components/ProductVisual';
 
 interface ProductCardProps {
   product: Product;
@@ -23,15 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="product-card overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       <div className="relative h-64 overflow-hidden bg-secondary">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-full w-full object-cover hover:scale-105"
-          loading="lazy"
-          decoding="async"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}
-        />
+        <ProductVisual product={product} className="h-full w-full rounded-none border-0" />
 
         <div className="absolute left-4 top-4 flex gap-2">
           {product.isBestSeller && (

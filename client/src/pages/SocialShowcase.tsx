@@ -2,6 +2,7 @@ import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useCatalog } from '@/hooks/useCatalog';
+import ProductVisual from '@/components/ProductVisual';
 
 function BrandIcon({ brand, className = 'h-12 w-12' }: { brand: 'instagram' | 'facebook' | 'whatsapp' | 'tiktok'; className?: string }) {
   const paths = {
@@ -35,7 +36,6 @@ export default function SocialShowcase() {
     description: `Short-form feature ${index + 1} focused on ${product.name.toLowerCase()} and how it is prepared or served.`,
     views: `${10 + index * 3}.2K`,
     likes: `${1.4 + index * 0.8}K`,
-    image: product.image,
   }));
 
   return (
@@ -85,7 +85,7 @@ export default function SocialShowcase() {
             {socialProducts.map((product, index) => (
               <div key={product.id} className="glass-panel overflow-hidden rounded-3xl">
                 <div className="h-64 overflow-hidden bg-secondary">
-                  <img src={product.image} alt={product.name} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  <ProductVisual product={product} className="h-full w-full rounded-none border-0" />
                 </div>
                 <div className="p-4">
                   <p className="mb-2 text-sm font-semibold text-foreground">{product.name}</p>
@@ -117,24 +117,29 @@ export default function SocialShowcase() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {tiktokStories.map((video) => (
-              <div key={video.id} className="glass-panel overflow-hidden rounded-3xl">
-                <div className="h-64 overflow-hidden bg-secondary">
-                  <img src={video.image} alt={video.title} className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                </div>
-                <div className="p-4">
-                  <h3 className="mb-2 font-semibold text-foreground">{video.title}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{video.description}</p>
-                  <div className="flex items-center justify-between border-t border-border pt-4 text-sm text-muted-foreground">
-                    <span>{video.views} views</span>
-                    <div className="flex items-center gap-2">
-                      <Heart className="h-4 w-4" />
-                      <span>{video.likes}</span>
+            {tiktokStories.map((video) => {
+              const product = products.find((item) => item.id === video.id) ?? products[0];
+              if (!product) return null;
+
+              return (
+                <div key={video.id} className="glass-panel overflow-hidden rounded-3xl">
+                  <div className="h-64 overflow-hidden bg-secondary">
+                    <ProductVisual product={product} className="h-full w-full rounded-none border-0" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="mb-2 font-semibold text-foreground">{video.title}</h3>
+                    <p className="mb-4 text-sm text-muted-foreground">{video.description}</p>
+                    <div className="flex items-center justify-between border-t border-border pt-4 text-sm text-muted-foreground">
+                      <span>{video.views} views</span>
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        <span>{video.likes}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

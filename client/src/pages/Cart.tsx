@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { formatNaira } from '@/lib/format';
+import ProductVisual from '@/components/ProductVisual';
 
 export default function Cart() {
   const [, setLocation] = useLocation();
@@ -64,12 +65,10 @@ export default function Cart() {
                     {items.map((item) => (
                       <div key={item.product.id} className="flex gap-4 px-6 py-6">
                         <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-secondary">
-                          <img
-                            src={item.product.image}
-                            alt={item.product.name}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                            decoding="async"
+                          <ProductVisual
+                            product={item.product}
+                            variant="compact"
+                            className="h-full w-full rounded-none border-0"
                           />
                         </div>
 

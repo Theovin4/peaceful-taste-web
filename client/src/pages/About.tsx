@@ -1,6 +1,9 @@
 import { Check, Package2 } from 'lucide-react';
+import ProductVisual from '@/components/ProductVisual';
+import { defaultProducts } from '@/lib/products';
 
-const YOGHURT_SHOWCASE_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/yoghurt-plain-sweetened-sticker-CxWrEpqLqiZZrsmzMN6CQV.webp';
+const yoghurtShowcaseProduct =
+  defaultProducts.find((product) => product.id === 'yoghurt-1') ?? defaultProducts[0];
 
 export default function About() {
   return (
@@ -100,12 +103,10 @@ export default function About() {
                 Featured bottle label
               </p>
               <div className="overflow-hidden rounded-3xl border border-border bg-background/60">
-                <img
-                  src={YOGHURT_SHOWCASE_IMAGE}
-                  alt="Plain Sweetened Yoghurt 35cl branded bottle concept"
-                  className="h-[360px] w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
+                <ProductVisual
+                  product={yoghurtShowcaseProduct}
+                  variant="hero"
+                  className="h-[360px] min-h-0 rounded-none border-0"
                 />
               </div>
               <div className="mt-5 rounded-2xl border border-border bg-background/60 p-4">

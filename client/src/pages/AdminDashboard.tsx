@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { formatNaira } from '@/lib/format';
 import { fileToDataUrl } from '@/lib/orderReceipt';
+import ProductVisual from '@/components/ProductVisual';
 
 type ProductFormState = {
   productId: string | null;
@@ -566,13 +567,13 @@ export default function AdminDashboard() {
                   <div key={product.id} className="rounded-3xl border border-border bg-background/60 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4">
-                        <img src={product.image} alt={product.name} className="h-20 w-20 rounded-2xl object-cover" />
+                        <ProductVisual product={product} variant="compact" className="h-20 w-20 border-0" />
                         <div>
                           <p className="font-semibold text-foreground">{product.name}</p>
                           <p className="text-sm text-accent">{formatNaira(product.price)}</p>
                           <p className="mt-1 text-xs uppercase tracking-[0.22em] text-muted-foreground">
                             {category?.name ?? product.categoryId}
-                            {product.size ? ` • ${product.size}` : ''}
+                            {product.size ? ` â€¢ ${product.size}` : ''}
                           </p>
                           <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>
                         </div>

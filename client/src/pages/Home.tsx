@@ -6,8 +6,7 @@ import LimitedTimeOffers from '@/components/LimitedTimeOffers';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { useCatalog } from '@/hooks/useCatalog';
 import { formatNaira } from '@/lib/format';
-
-const FALLBACK_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-1_a50b4f59.jpg';
+import ProductVisual from '@/components/ProductVisual';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -66,15 +65,13 @@ export default function Home() {
 
             <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
-                <img
-                  src={featuredProduct?.image || FALLBACK_IMAGE}
-                  alt={featuredProduct?.name || 'Fresh product from Peaceful Taste'}
-                  className="w-full rounded-2xl object-cover"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  style={{ boxShadow: '0 30px 60px rgba(0, 0, 0, 0.35)' }}
-                />
+                {featuredProduct ? (
+                  <ProductVisual product={featuredProduct} variant="hero" className="w-full" />
+                ) : (
+                  <div className="glass-panel flex min-h-[420px] items-center justify-center rounded-2xl text-center text-muted-foreground">
+                    Product visuals are loading...
+                  </div>
+                )}
                 <div className="glass-panel absolute -bottom-6 -left-6 max-w-xs rounded-2xl p-4 text-foreground">
                   <p className="mb-1 font-semibold">Same-day ready support</p>
                   <p className="text-sm text-muted-foreground">Strong visual presentation, clear pricing, and a faster checkout journey for customers.</p>
@@ -179,7 +176,7 @@ export default function Home() {
               <div key={testimonial.name} className="glass-panel rounded-2xl p-6" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="mb-4 flex gap-1">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <span key={i} className="text-lg text-accent">?</span>
+                    <span key={i} className="text-lg text-accent">★</span>
                   ))}
                 </div>
                 <p className="mb-4 font-medium leading-relaxed text-card-foreground">{testimonial.text}</p>

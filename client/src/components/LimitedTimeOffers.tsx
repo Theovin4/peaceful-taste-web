@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { formatNaira } from '@/lib/format';
 import { useCatalog } from '@/hooks/useCatalog';
+import ProductVisual from '@/components/ProductVisual';
 
 export default function LimitedTimeOffers() {
   const [, setLocation] = useLocation();
@@ -87,15 +88,7 @@ export default function LimitedTimeOffers() {
 
           <div className="flex min-w-64 flex-1 justify-center">
             <div className="relative w-full max-w-xs">
-              <img
-                key={activeDeal.id}
-                src={activeDeal.image}
-                alt={activeDeal.name}
-                className="h-auto w-full rounded-2xl object-cover animate-fade-in-up"
-                loading="lazy"
-                decoding="async"
-                style={{ boxShadow: '0 18px 36px rgba(0, 0, 0, 0.35)' }}
-              />
+              <ProductVisual key={activeDeal.id} product={activeDeal} className="animate-fade-in-up" />
               <div className="absolute -right-4 -top-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-600 text-center text-white">
                 <div>
                   <div className="text-[10px] font-bold">SAVE</div>
