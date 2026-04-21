@@ -1,4 +1,6 @@
-import { Check } from 'lucide-react';
+import { Check, Package2 } from 'lucide-react';
+
+const YOGHURT_SHOWCASE_IMAGE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/yoghurt-plain-sweetened-sticker-CxWrEpqLqiZZrsmzMN6CQV.webp';
 
 export default function About() {
   return (
@@ -65,6 +67,53 @@ export default function About() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="glass-panel rounded-3xl p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <Package2 className="h-6 w-6 text-accent" />
+                <h2 className="text-2xl font-bold text-foreground">Packaging Direction</h2>
+              </div>
+              <p className="mb-4 text-lg leading-relaxed text-muted-foreground">
+                We are building a more premium branded packaging system that keeps every bottle, snack pack, and food tray visually consistent with the Peaceful Taste identity.
+              </p>
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <p className="font-semibold text-foreground">First live concept</p>
+                  <p className="mt-2">Plain Sweetened Yoghurt 35cl bottle label with cream, deep green, and refined premium catering branding.</p>
+                </div>
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <p className="font-semibold text-foreground">Design goals</p>
+                  <p className="mt-2">Stronger shelf appeal, clearer product naming, premium brand recall, and better consistency across drinks, snacks, and food packaging.</p>
+                </div>
+                <div className="rounded-2xl border border-border bg-background/60 p-4">
+                  <p className="font-semibold text-foreground">Print direction</p>
+                  <p className="mt-2">Matte waterproof label finish, high-contrast typography, and a clean layout that stays readable on Nigerian takeaway packaging.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-panel rounded-3xl p-8">
+              <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                Featured bottle label
+              </p>
+              <div className="overflow-hidden rounded-3xl border border-border bg-background/60">
+                <img
+                  src={YOGHURT_SHOWCASE_IMAGE}
+                  alt="Plain Sweetened Yoghurt 35cl branded bottle concept"
+                  className="h-[360px] w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="mt-5 rounded-2xl border border-border bg-background/60 p-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-accent">Current focus</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Plain Sweetened Yoghurt 35cl is the first product in the refreshed branded packaging rollout now reflected on the site.
+                </p>
+              </div>
             </div>
           </div>
 

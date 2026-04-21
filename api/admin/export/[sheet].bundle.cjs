@@ -98557,7 +98557,7 @@ var ENV = {
 var ADMIN_COOKIE_NAME = "peaceful_taste_admin";
 var ADMIN_SESSION_DURATION_MS = 1e3 * 60 * 60 * 8;
 function getAdminPassword() {
-  return process.env.ADMIN_PASSWORD ?? "peaceful123";
+  return (process.env.ADMIN_PASSWORD ?? "peaceful123").trim();
 }
 function getSigningSecret() {
   return ENV.cookieSecret || getAdminPassword();

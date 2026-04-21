@@ -11,7 +11,7 @@ type AdminSessionPayload = {
 };
 
 function getAdminPassword() {
-  return process.env.ADMIN_PASSWORD ?? "peaceful123";
+  return (process.env.ADMIN_PASSWORD ?? "peaceful123").trim();
 }
 
 function getSigningSecret() {
