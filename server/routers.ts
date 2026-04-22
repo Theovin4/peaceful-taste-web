@@ -30,6 +30,7 @@ import path from 'node:path';
 import { uploadPrivateBlob } from './blob-storage';
 import { enforceRateLimit } from './_core/rateLimit';
 import {
+  clearAllProductImages,
   createCategory,
   createProduct,
   deleteCategory,
@@ -196,6 +197,18 @@ export const appRouter = router({
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: error instanceof Error ? error.message : 'Failed to delete product',
+          });
+        }
+      }),
+
+    clearAllProductImages: adminSessionProcedure
+      .mutation(async () => {
+        try {
+          return await clearAllProductImages();
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to clear product images',
           });
         }
       }),

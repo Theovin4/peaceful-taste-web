@@ -285,10 +285,6 @@ async function resolveProductImage(input: {
     image = blob?.url || input.imageDataUrl;
   }
 
-  if (!image) {
-    throw new Error('Provide an image URL or upload an image file.');
-  }
-
   return image;
 }
 
@@ -369,10 +365,6 @@ export async function updateProduct(input: {
     ? await resolveProductImage(input)
     : existingProduct?.image;
 
-  if (!image) {
-    throw new Error('Provide an image URL or upload an image file.');
-  }
-
   const updatedProduct: Product = {
     ...(existingProduct ?? {
       id: input.productId,
@@ -380,7 +372,7 @@ export async function updateProduct(input: {
     name: input.name,
     categoryId: input.categoryId,
     price: input.price,
-    image,
+    image: image ?? '',
     description: input.description,
     size: input.size?.trim() || undefined,
     isBestSeller: Boolean(input.isBestSeller),
@@ -448,4 +440,18 @@ export async function updateSiteSettings(input: {
   });
 
   return nextCatalog.settings;
+}
+
+export async function clearAllProductImages() {
+  const catalog = await getCatalog();
+
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map((product) => ({
+      ...product,
+      image: '',
+    })),
+  });
+
+  return nextCatalog;
 }

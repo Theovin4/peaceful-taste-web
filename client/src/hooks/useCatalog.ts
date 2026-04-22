@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { trpc } from '@/lib/trpc';
 import type { ProductCatalog } from '../../../server/catalog-storage';
 
-const CATALOG_CACHE_KEY = 'peaceful-taste-catalog-cache-v1';
+const CATALOG_CACHE_KEY = 'peaceful-taste-catalog-cache-v2';
 const CATALOG_CACHE_TTL = 1000 * 60 * 30;
 
 function readCachedCatalog(): ProductCatalog | undefined {

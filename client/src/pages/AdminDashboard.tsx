@@ -154,6 +154,14 @@ export default function AdminDashboard() {
     onError: (error) => toast.error(error.message),
   });
 
+  const clearAllProductImagesMutation = trpc.catalog.clearAllProductImages.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('All current product images have been removed. Upload your own images from this dashboard.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
   const updateSiteSettingsMutation = trpc.catalog.updateSiteSettings.useMutation({
     onSuccess: async () => {
       await catalogQuery.refetch();
@@ -497,12 +505,24 @@ export default function AdminDashboard() {
                 <ImagePlus className="h-6 w-6 text-accent" />
                 <h2 className="text-2xl font-bold text-foreground">{productForm.productId ? 'Edit product' : 'Add product'}</h2>
               </div>
-              {productForm.productId && (
-                <Button variant="ghost" onClick={() => setProductForm(initialProductForm)} className="text-muted-foreground hover:text-foreground">
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel edit
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => clearAllProductImagesMutation.mutate()}
+                  disabled={clearAllProductImagesMutation.isPending}
+                  className="border-destructive/40 bg-destructive/5 text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remove All Site Images
                 </Button>
-              )}
+                {productForm.productId && (
+                  <Button variant="ghost" onClick={() => setProductForm(initialProductForm)} className="text-muted-foreground hover:text-foreground">
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel edit
+                  </Button>
+                )}
+              </div>
             </div>
             <form onSubmit={submitProduct} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -540,13 +560,16 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productImageUrl" className="mb-2 block font-semibold text-foreground">Image URL</Label>
-                  <Input id="productImageUrl" value={productForm.imageUrl} onChange={(e) => setProductForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="https://..." className="bg-background" />
+                  <Input id="productImageUrl" value={productForm.imageUrl} onChange={(e) => setProductForm((prev) => ({ ...prev, imageUrl: e.target.value }))} placeholder="Optional external image URL" className="bg-background" />
                 </div>
                 <div>
-                  <Label htmlFor="productImageFile" className="mb-2 block font-semibold text-foreground">Or upload image</Label>
+                  <Label htmlFor="productImageFile" className="mb-2 block font-semibold text-foreground">Upload your image</Label>
                   <input id="productImageFile" type="file" accept="image/*" onChange={(e) => setProductForm((prev) => ({ ...prev, imageFile: e.target.files?.[0] ?? null }))} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" />
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Uploaded images are now shown directly on the website. If you leave both fields empty, the product will show a clean placeholder until you upload your own photo.
+              </p>
 
               <div className="grid gap-3 md:grid-cols-3">
                 {[

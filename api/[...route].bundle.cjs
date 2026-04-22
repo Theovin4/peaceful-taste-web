@@ -167365,7 +167365,7 @@ var defaultProducts = [
     name: "Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-plain-fruit-sticker-RwC2BsoncfSGTeEgmVkN92.webp",
+    image: "",
     description: "Creamy fruit parfait layered with berries and crunchy granola.",
     size: "330ml",
     isBestSeller: true,
@@ -167376,7 +167376,7 @@ var defaultProducts = [
     name: "Cake Parfait 330ml",
     categoryId: "parfait",
     price: 3900,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-cake-sticker-NpSP9LxRGxUMBpd8aoKQYP.webp",
+    image: "",
     description: "Vanilla cake layers, whipped cream, and chocolate shavings in a chilled cup.",
     size: "330ml",
     isNew: true,
@@ -167387,7 +167387,7 @@ var defaultProducts = [
     name: "Strawberry Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-strawberry-sticker-ZUuz5AytiW9mYuKGJzZAbX.webp",
+    image: "",
     description: "Strawberry-flavored parfait finished with fresh fruit notes and granola.",
     size: "330ml",
     isActive: true
@@ -167397,7 +167397,7 @@ var defaultProducts = [
     name: "Banana Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-banana-sticker-4SnP4L7nS57YoKavxn8S7R.webp",
+    image: "",
     description: "Banana parfait with smooth cream layers and a balanced sweetness.",
     size: "330ml",
     isActive: true
@@ -167407,7 +167407,7 @@ var defaultProducts = [
     name: "Vanilla Fruit Parfait 330ml",
     categoryId: "parfait",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/parfait-vanilla-sticker-jg9ouoCCfoBQRpdpRnr2fe.webp",
+    image: "",
     description: "Vanilla parfait with mixed berries and honey granola.",
     size: "330ml",
     isActive: true
@@ -167417,7 +167417,7 @@ var defaultProducts = [
     name: "Plain Sweetened Yoghurt 35cl",
     categoryId: "yoghurt",
     price: 2500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/yoghurt-plain-sweetened-sticker-CxWrEpqLqiZZrsmzMN6CQV.webp",
+    image: "",
     description: "Smooth bottled yoghurt with a clean, creamy finish.",
     size: "35cl",
     isActive: true
@@ -167427,7 +167427,7 @@ var defaultProducts = [
     name: "Chin-Chin Pack",
     categoryId: "pastries",
     price: 1500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
+    image: "",
     description: "Crunchy chin-chin with the rich golden finish customers expect.",
     isBestSeller: true,
     isActive: true
@@ -167437,7 +167437,7 @@ var defaultProducts = [
     name: "Fish Pie",
     categoryId: "pastries",
     price: 2e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
+    image: "",
     description: "Flaky fish pie baked with a savory Nigerian-style filling.",
     isActive: true
   },
@@ -167446,7 +167446,7 @@ var defaultProducts = [
     name: "Meat Pie",
     categoryId: "pastries",
     price: 2e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-sticker-jYnFRiFeRf22VwuRZ3kHHu.webp",
+    image: "",
     description: "Classic meat pie with a buttery crust and seasoned filling.",
     isActive: true
   },
@@ -167455,7 +167455,7 @@ var defaultProducts = [
     name: "Chicken Pie",
     categoryId: "pastries",
     price: 2e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
+    image: "",
     description: "Tender chicken pie with a flaky, golden pastry shell.",
     isActive: true
   },
@@ -167464,7 +167464,7 @@ var defaultProducts = [
     name: "Doughnut",
     categoryId: "pastries",
     price: 1500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
+    image: "",
     description: "Soft doughnut with a clean finish and light sugar coating.",
     isActive: true
   },
@@ -167473,7 +167473,7 @@ var defaultProducts = [
     name: "Puff-Puff Pack",
     categoryId: "pastries",
     price: 1500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
+    image: "",
     description: "Soft, airy puff-puff with the golden look common in Nigerian snack spots.",
     isBestSeller: true,
     isActive: true
@@ -167483,7 +167483,7 @@ var defaultProducts = [
     name: "Shawarma",
     categoryId: "pastries",
     price: 2500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/pastries-assorted-ZZuQdsLFWJAeVepJrUMhQD.webp",
+    image: "",
     description: "Loaded shawarma with grilled filling, vegetables, and creamy sauce.",
     isActive: true
   },
@@ -167492,7 +167492,7 @@ var defaultProducts = [
     name: "Vanilla Buttercream Cake",
     categoryId: "cakes",
     price: 45e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-sticker-UBtgsBfBka9yAbjJsXGyMq.webp",
+    image: "",
     description: "Premium 8-inch vanilla buttercream cake for birthdays and intimate celebrations.",
     size: "8 inch",
     isBestSeller: true,
@@ -167503,7 +167503,7 @@ var defaultProducts = [
     name: "Chocolate Celebration Cake",
     categoryId: "cakes",
     price: 5e4,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-fpHHGRZCjgFBZLXMAVy6ZX.webp",
+    image: "",
     description: "Premium chocolate cake styled for Lagos event gifting and small celebrations.",
     size: "8 inch",
     isActive: true
@@ -167513,7 +167513,7 @@ var defaultProducts = [
     name: "Red Velvet Cream Cheese Cake",
     categoryId: "cakes",
     price: 78e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/cake-vanilla-fpHHGRZCjgFBZLXMAVy6ZX.webp",
+    image: "",
     description: "Luxury red velvet celebration cake with cream cheese styling, priced in line with premium Lekki and Ikoyi cake positioning.",
     size: "8 inch",
     isNew: true,
@@ -167524,7 +167524,7 @@ var defaultProducts = [
     name: "Zobo Drink 35cl",
     categoryId: "zobo",
     price: 1500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-sticker-bFuXKBRaP2omb5p5MJz9zg.webp",
+    image: "",
     description: "Fresh hibiscus zobo in a bottle with a bold Nigerian taste profile.",
     size: "35cl",
     isActive: true
@@ -167534,7 +167534,7 @@ var defaultProducts = [
     name: "Zobo Drink 30cl",
     categoryId: "zobo",
     price: 1200,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-jYEddzskMqGkKr6KaAoWP2.webp",
+    image: "",
     description: "Compact zobo bottle for quick refreshment and easy delivery.",
     size: "30cl",
     isActive: true
@@ -167544,7 +167544,7 @@ var defaultProducts = [
     name: "Tiger Nut Drink 35cl",
     categoryId: "tiger-nut",
     price: 2e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/tiger-nut-drink-sticker-U2VPLDvKC2LWYg5eJKETQZ.webp",
+    image: "",
     description: "Creamy tiger nut drink with the rich texture people expect from local premium vendors.",
     size: "35cl",
     isActive: true
@@ -167554,7 +167554,7 @@ var defaultProducts = [
     name: "Tiger Nut Drink 30cl",
     categoryId: "tiger-nut",
     price: 1700,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/zobo-drink-jYEddzskMqGkKr6KaAoWP2.webp",
+    image: "",
     description: "Chilled tiger nut drink in a compact bottle size.",
     size: "30cl",
     isActive: true
@@ -167564,7 +167564,7 @@ var defaultProducts = [
     name: "Jollof Rice Tray",
     categoryId: "only-food",
     price: 3500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-sticker-P5rCN9yzKReiUjTwn95NV6.webp",
+    image: "",
     description: "Smoky party-style jollof rice served the way Nigerian customers expect.",
     isBestSeller: true,
     isActive: true
@@ -167574,7 +167574,7 @@ var defaultProducts = [
     name: "Fried Rice Tray",
     categoryId: "only-food",
     price: 3500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Colorful fried rice with vegetables and a party-style finish.",
     isActive: true
   },
@@ -167583,7 +167583,7 @@ var defaultProducts = [
     name: "Coconut Rice Tray",
     categoryId: "only-food",
     price: 3500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Coconut rice with a rich aroma and soft, flavorful grains.",
     isActive: true
   },
@@ -167592,7 +167592,7 @@ var defaultProducts = [
     name: "Egusi Soup Bowl",
     categoryId: "only-food",
     price: 4e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/egusi-soup-sticker-XzPfCHQQ2yhuM2dppNJ4zv.webp",
+    image: "",
     description: "Rich egusi soup with vegetables and assorted protein.",
     isActive: true
   },
@@ -167601,7 +167601,7 @@ var defaultProducts = [
     name: "Ogbono Soup Bowl",
     categoryId: "only-food",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Smooth ogbono soup prepared with a rich Nigerian flavor base.",
     isActive: true
   },
@@ -167610,7 +167610,7 @@ var defaultProducts = [
     name: "Editan Soup Bowl",
     categoryId: "only-food",
     price: 2800,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Traditional editan soup finished with a rich local seasoning profile.",
     isActive: true
   },
@@ -167619,7 +167619,7 @@ var defaultProducts = [
     name: "Afang Soup Bowl",
     categoryId: "only-food",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Afang soup with seafood and meat for a fuller restaurant-style portion.",
     isActive: true
   },
@@ -167628,7 +167628,7 @@ var defaultProducts = [
     name: "Okro Soup Bowl",
     categoryId: "only-food",
     price: 2800,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Okro soup with a hearty mix of meat and fish.",
     isActive: true
   },
@@ -167637,7 +167637,7 @@ var defaultProducts = [
     name: "White Soup Bowl",
     categoryId: "only-food",
     price: 3200,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "White soup with a creamy body and bright traditional spice notes.",
     isActive: true
   },
@@ -167646,7 +167646,7 @@ var defaultProducts = [
     name: "Goat Meat Pepper Soup",
     categoryId: "only-food",
     price: 3500,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Hot goat meat pepper soup with a proper restaurant-style spice blend.",
     isActive: true
   },
@@ -167655,7 +167655,7 @@ var defaultProducts = [
     name: "Chicken Pepper Soup",
     categoryId: "only-food",
     price: 3e3,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Chicken pepper soup prepared for a bold, warming finish.",
     isActive: true
   },
@@ -167664,7 +167664,7 @@ var defaultProducts = [
     name: "Efirin Vegetable Soup Bowl",
     categoryId: "only-food",
     price: 2800,
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/jollof-rice-Lb9uv6um8SpqJHjB2vv59F.webp",
+    image: "",
     description: "Vegetable soup with scent leaf and a rich local flavor base.",
     isActive: true
   }
@@ -167851,9 +167851,6 @@ async function resolveProductImage(input) {
     const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, "base64"), mimeType);
     image = blob?.url || input.imageDataUrl;
   }
-  if (!image) {
-    throw new Error("Provide an image URL or upload an image file.");
-  }
   return image;
 }
 async function createProduct(input) {
@@ -167895,9 +167892,6 @@ async function updateProduct(input) {
   );
   const existingProduct = catalog.products.find((product) => product.id === input.productId);
   const image = input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct?.image;
-  if (!image) {
-    throw new Error("Provide an image URL or upload an image file.");
-  }
   const updatedProduct = {
     ...existingProduct ?? {
       id: input.productId
@@ -167905,7 +167899,7 @@ async function updateProduct(input) {
     name: input.name,
     categoryId: input.categoryId,
     price: input.price,
-    image,
+    image: image ?? "",
     description: input.description,
     size: input.size?.trim() || void 0,
     isBestSeller: Boolean(input.isBestSeller),
@@ -167955,6 +167949,17 @@ async function updateSiteSettings(input) {
     }
   });
   return nextCatalog.settings;
+}
+async function clearAllProductImages() {
+  const catalog = await getCatalog();
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map((product) => ({
+      ...product,
+      image: ""
+    }))
+  });
+  return nextCatalog;
 }
 
 // server/routers.ts
@@ -168081,6 +168086,16 @@ var appRouter = router({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: error46 instanceof Error ? error46.message : "Failed to delete product"
+        });
+      }
+    }),
+    clearAllProductImages: adminSessionProcedure.mutation(async () => {
+      try {
+        return await clearAllProductImages();
+      } catch (error46) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: error46 instanceof Error ? error46.message : "Failed to clear product images"
         });
       }
     }),
