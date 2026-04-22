@@ -167800,7 +167800,7 @@ async function resolveProductImage(input) {
     const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, "-");
     const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
     const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, "base64"), mimeType);
-    image = blob?.url || "";
+    image = blob?.url || input.imageDataUrl;
   }
   if (!image) {
     throw new Error("Provide an image URL or upload an image file.");

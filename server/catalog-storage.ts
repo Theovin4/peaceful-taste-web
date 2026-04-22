@@ -282,7 +282,7 @@ async function resolveProductImage(input: {
     const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
     const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, 'base64'), mimeType);
 
-    image = blob?.url || '';
+    image = blob?.url || input.imageDataUrl;
   }
 
   if (!image) {
