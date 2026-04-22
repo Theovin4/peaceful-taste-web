@@ -167958,6 +167958,16 @@ async function updateSiteSettings(input) {
 }
 
 // server/routers.ts
+var imageUrlInputSchema = external_exports.string().optional().refine((value) => {
+  if (!value || value === "") return true;
+  if (value.startsWith("data:image/")) return true;
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}, "Image must be a valid URL or uploaded image data.");
 function ensureReceiptDir() {
   const baseDir = process.env.VERCEL ? import_node_path.default.join(import_node_os.default.tmpdir(), "peaceful-taste-data") : import_node_path.default.join(process.cwd(), "data");
   const receiptDir = import_node_path.default.join(baseDir, "receipts");
@@ -168023,7 +168033,7 @@ var appRouter = router({
       name: external_exports.string().min(2).max(120),
       categoryId: external_exports.string().min(1).max(60),
       price: external_exports.number().positive().max(1e6),
-      imageUrl: external_exports.string().url().optional().or(external_exports.literal("")),
+      imageUrl: imageUrlInputSchema,
       imageDataUrl: external_exports.string().optional(),
       imageFileName: external_exports.string().optional(),
       description: external_exports.string().min(8).max(500),
@@ -168046,7 +168056,7 @@ var appRouter = router({
       name: external_exports.string().min(2).max(120),
       categoryId: external_exports.string().min(1).max(60),
       price: external_exports.number().positive().max(1e6),
-      imageUrl: external_exports.string().url().optional().or(external_exports.literal("")),
+      imageUrl: imageUrlInputSchema,
       imageDataUrl: external_exports.string().optional(),
       imageFileName: external_exports.string().optional(),
       description: external_exports.string().min(8).max(500),

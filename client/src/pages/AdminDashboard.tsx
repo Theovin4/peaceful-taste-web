@@ -241,7 +241,7 @@ export default function AdminDashboard() {
       price: String(product.price),
       description: product.description,
       size: product.size ?? '',
-      imageUrl: product.image,
+      imageUrl: product.image.startsWith('data:') ? '' : product.image,
       imageFile: null,
       isBestSeller: Boolean(product.isBestSeller),
       isNew: Boolean(product.isNew),

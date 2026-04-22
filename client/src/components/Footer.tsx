@@ -1,6 +1,16 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, MessageCircle } from 'lucide-react';
+import { useLocation } from 'wouter';
+
+function TikTokIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.35V2h-3.13v13.18a2.83 2.83 0 1 1-2-2.69V9.3a6 6 0 1 0 5.13 5.88V8.54a7.9 7.9 0 0 0 4.77 1.6V6.69Z" />
+    </svg>
+  );
+}
 
 export default function Footer() {
+  const [, setLocation] = useLocation();
   const currentYear = new Date().getFullYear();
   const transitionStyle = { transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' };
 
@@ -21,8 +31,8 @@ export default function Footer() {
               <a href="https://instagram.com/peacefultaste" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href="https://tiktok.com/@peacefultaste_" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border px-2 py-2 text-[10px] font-bold text-muted-foreground hover:text-accent" style={transitionStyle}>
-                TT
+              <a href="https://tiktok.com/@peacefultaste_" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
+                <TikTokIcon />
               </a>
               <a href="https://wa.me/2349022621323" target="_blank" rel="noopener noreferrer" className="rounded-full border border-border p-2 text-muted-foreground hover:text-accent" style={transitionStyle}>
                 <MessageCircle className="h-4 w-4" />
@@ -40,9 +50,14 @@ export default function Footer() {
                 ['About', '/about'],
               ].map(([label, href]) => (
                 <li key={href}>
-                  <a href={href} className="text-muted-foreground hover:text-accent" style={transitionStyle}>
+                  <button
+                    type="button"
+                    onClick={() => setLocation(href)}
+                    className="text-muted-foreground hover:text-accent"
+                    style={transitionStyle}
+                  >
                     {label}
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>

@@ -39,6 +39,20 @@ import {
   updateSiteSettings,
 } from './catalog-storage';
 
+const imageUrlInputSchema = z
+  .string()
+  .optional()
+  .refine((value) => {
+    if (!value || value === '') return true;
+    if (value.startsWith('data:image/')) return true;
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }, 'Image must be a valid URL or uploaded image data.');
+
 function ensureReceiptDir() {
   const baseDir = process.env.VERCEL
     ? path.join(os.tmpdir(), 'peaceful-taste-data')
@@ -127,7 +141,7 @@ export const appRouter = router({
         name: z.string().min(2).max(120),
         categoryId: z.string().min(1).max(60),
         price: z.number().positive().max(1000000),
-        imageUrl: z.string().url().optional().or(z.literal('')),
+        imageUrl: imageUrlInputSchema,
         imageDataUrl: z.string().optional(),
         imageFileName: z.string().optional(),
         description: z.string().min(8).max(500),
@@ -153,7 +167,7 @@ export const appRouter = router({
         name: z.string().min(2).max(120),
         categoryId: z.string().min(1).max(60),
         price: z.number().positive().max(1000000),
-        imageUrl: z.string().url().optional().or(z.literal('')),
+        imageUrl: imageUrlInputSchema,
         imageDataUrl: z.string().optional(),
         imageFileName: z.string().optional(),
         description: z.string().min(8).max(500),
