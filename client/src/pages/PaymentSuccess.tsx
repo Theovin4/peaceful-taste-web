@@ -8,6 +8,7 @@ import { CheckCircle, Loader2, Upload, MessageCircle, Download, Mail, Copy } fro
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { copyTextToClipboard, downloadPdfReceipt, fileToDataUrl, loadLatestReceipt } from '@/lib/orderReceipt';
+import PageMeta from '@/components/PageMeta';
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
@@ -88,6 +89,12 @@ export default function PaymentSuccess() {
   if (uploadSuccess) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background py-12">
+        <PageMeta
+          title="Receipt Uploaded"
+          description="Your Peaceful Taste payment proof has been uploaded successfully."
+          path="/payment-success"
+          robots="noindex, nofollow"
+        />
         <div className="container max-w-2xl">
           <Card className="glass-panel border-0 p-8 text-center">
             <CheckCircle className="mx-auto mb-4 h-16 w-16 text-emerald-400" />
@@ -130,6 +137,12 @@ export default function PaymentSuccess() {
 
   return (
     <div className="min-h-screen bg-background py-12">
+      <PageMeta
+        title="Upload Payment Receipt"
+        description="Upload your Peaceful Taste transfer receipt and resend your customer receipt if needed."
+        path="/payment-success"
+        robots="noindex, nofollow"
+      />
       <div className="container max-w-3xl">
         <div className="mb-8">
           <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">

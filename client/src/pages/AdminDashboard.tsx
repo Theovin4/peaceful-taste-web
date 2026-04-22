@@ -28,6 +28,7 @@ import { trpc } from '@/lib/trpc';
 import { formatNaira } from '@/lib/format';
 import { fileToDataUrl } from '@/lib/orderReceipt';
 import ProductVisual from '@/components/ProductVisual';
+import PageMeta from '@/components/PageMeta';
 
 type ProductFormState = {
   productId: string | null;
@@ -281,6 +282,12 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background py-12">
+        <PageMeta
+          title="Admin Access"
+          description="Secure admin access for Peaceful Taste."
+          path="/admin"
+          robots="noindex, nofollow"
+        />
         <div className="container max-w-md">
           <Card className="glass-panel border-0 p-8">
             <div className="mb-6 flex justify-center">
@@ -322,6 +329,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background py-12">
+      <PageMeta
+        title="Admin Dashboard"
+        description="Secure Peaceful Taste admin dashboard."
+        path="/admin"
+        robots="noindex, nofollow"
+      />
       <div className="container space-y-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>

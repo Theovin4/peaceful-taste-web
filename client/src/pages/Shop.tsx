@@ -3,6 +3,7 @@ import { Sparkles } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Breadcrumb from '@/components/Breadcrumb';
 import { useCatalog } from '@/hooks/useCatalog';
+import PageMeta from '@/components/PageMeta';
 
 type Category = 'all' | string;
 
@@ -28,6 +29,11 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Shop Nigerian Parfaits, Drinks, Pastries, Cakes and Meals"
+        description="Browse the full Peaceful Taste menu with branded parfaits, bottled drinks, cakes, pastries, soups, and rice trays available for Lagos-area delivery."
+        path="/shop"
+      />
       <Breadcrumb items={[{ label: 'Shop', href: '/shop' }]} />
 
       <section className="relative overflow-hidden border-b border-border py-14">

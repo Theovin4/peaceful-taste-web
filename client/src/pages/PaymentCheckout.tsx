@@ -28,6 +28,7 @@ import {
   type OrderReceiptClientPackage,
 } from '@/lib/orderReceipt';
 import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
+import PageMeta from '@/components/PageMeta';
 
 const BANK_ACCOUNT = {
   name: PEACEFUL_TASTE_CONTACT.accountName,
@@ -156,6 +157,12 @@ export default function PaymentCheckout() {
   if (items.length === 0 && !orderCreated) {
     return (
       <div className="min-h-screen bg-background">
+        <PageMeta
+          title="Checkout"
+          description="Complete your Peaceful Taste order with delivery details, pricing, and receipt generation."
+          path="/checkout"
+          robots="noindex, nofollow"
+        />
         <CheckoutProgress currentStep="cart" />
         <div className="py-12">
           <div className="container max-w-2xl">
@@ -177,6 +184,12 @@ export default function PaymentCheckout() {
 
     return (
       <div className="min-h-screen bg-background">
+        <PageMeta
+          title="Payment Instructions"
+          description="View Peaceful Taste payment instructions, download your receipt, and share your order copy for confirmation."
+          path="/checkout"
+          robots="noindex, nofollow"
+        />
         <CheckoutProgress currentStep="payment" />
         <div className="py-12">
           <div className="container max-w-6xl">
@@ -387,6 +400,12 @@ export default function PaymentCheckout() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Checkout"
+        description="Add delivery details, confirm your Peaceful Taste order, and generate your branded receipt."
+        path="/checkout"
+        robots="noindex, nofollow"
+      />
       <CheckoutProgress currentStep="delivery" />
       <div className="py-12">
         <div className="container max-w-6xl">

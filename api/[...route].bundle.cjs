@@ -120118,7 +120118,7 @@ var require_undici = __commonJS({
 // node_modules/.pnpm/throttleit@2.1.0/node_modules/throttleit/index.js
 var require_throttleit = __commonJS({
   "node_modules/.pnpm/throttleit@2.1.0/node_modules/throttleit/index.js"(exports2, module2) {
-    function throttle3(function_, wait) {
+    function throttle3(function_, wait2) {
       if (typeof function_ !== "function") {
         throw new TypeError(`Expected the first argument to be a \`function\`, got \`${typeof function_}\`.`);
       }
@@ -120128,7 +120128,7 @@ var require_throttleit = __commonJS({
         clearTimeout(timeoutId);
         const now = Date.now();
         const timeSinceLastCall = now - lastCallTime;
-        const delayForNextCall = wait - timeSinceLastCall;
+        const delayForNextCall = wait2 - timeSinceLastCall;
         if (delayForNextCall <= 0) {
           lastCallTime = now;
           function_.apply(this, arguments_);
@@ -166518,33 +166518,51 @@ var completeMultipartUpload2 = createCompleteMultipartUploadMethod({
 });
 
 // server/blob-storage.ts
+var blobRuntimeAvailable = true;
 function hasBlobToken() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+function isBlobUsable() {
+  return hasBlobToken() && blobRuntimeAvailable;
+}
+function markBlobUnavailable(error46) {
+  blobRuntimeAvailable = false;
+  console.warn("[Blob] Disabling blob storage for this runtime:", error46);
 }
 async function streamToBuffer(stream4) {
   const arrayBuffer = await new Response(stream4).arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
 function blobStorageEnabled() {
-  return hasBlobToken();
+  return isBlobUsable();
 }
 async function uploadPrivateBlob(pathname, data, contentType) {
-  if (!hasBlobToken()) return null;
-  return put(pathname, data, {
-    access: "private",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType
-  });
+  if (!isBlobUsable()) return null;
+  try {
+    return await put(pathname, data, {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType
+    });
+  } catch (error46) {
+    markBlobUnavailable(error46);
+    return null;
+  }
 }
 async function uploadPublicBlob(pathname, data, contentType) {
-  if (!hasBlobToken()) return null;
-  return put(pathname, data, {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType
-  });
+  if (!isBlobUsable()) return null;
+  try {
+    return await put(pathname, data, {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType
+    });
+  } catch (error46) {
+    markBlobUnavailable(error46);
+    return null;
+  }
 }
 async function uploadPrivateJson(pathname, data) {
   return uploadPrivateBlob(
@@ -166554,29 +166572,39 @@ async function uploadPrivateJson(pathname, data) {
   );
 }
 async function downloadPrivateBlob(pathname) {
-  if (!hasBlobToken()) return null;
-  const result = await get(pathname, { access: "private" });
-  if (!result || result.statusCode !== 200) {
+  if (!isBlobUsable()) return null;
+  try {
+    const result = await get(pathname, { access: "private" });
+    if (!result || result.statusCode !== 200) {
+      return null;
+    }
+    return {
+      ...result.blob,
+      buffer: await streamToBuffer(result.stream)
+    };
+  } catch (error46) {
+    markBlobUnavailable(error46);
     return null;
   }
-  return {
-    ...result.blob,
-    buffer: await streamToBuffer(result.stream)
-  };
 }
 async function listPrivateBlobs(prefix) {
-  if (!hasBlobToken()) return [];
+  if (!isBlobUsable()) return [];
   const blobs = [];
   let cursor;
-  do {
-    const result = await list({
-      prefix,
-      cursor,
-      limit: 1e3
-    });
-    blobs.push(...result.blobs);
-    cursor = result.hasMore ? result.cursor : void 0;
-  } while (cursor);
+  try {
+    do {
+      const result = await list({
+        prefix,
+        cursor,
+        limit: 1e3
+      });
+      blobs.push(...result.blobs);
+      cursor = result.hasMore ? result.cursor : void 0;
+    } while (cursor);
+  } catch (error46) {
+    markBlobUnavailable(error46);
+    return [];
+  }
   return blobs;
 }
 
@@ -167290,6 +167318,32 @@ var import_node_fs = __toESM(require("node:fs"), 1);
 var import_node_os = __toESM(require("node:os"), 1);
 var import_node_path = __toESM(require("node:path"), 1);
 
+// server/_core/rateLimit.ts
+var buckets = /* @__PURE__ */ new Map();
+function getRequestKey(req, namespace) {
+  if (!req || !("headers" in req) || !req.headers) {
+    return `${namespace}:test-runner`;
+  }
+  const forwarded = req.headers["x-forwarded-for"];
+  const ip = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0]?.trim();
+  return `${namespace}:${ip || ("ip" in req ? req.ip : "") || "unknown"}`;
+}
+function enforceRateLimit(req, namespace, limit, windowMs) {
+  const key = getRequestKey(req, namespace);
+  const now = Date.now();
+  const existing = buckets.get(key);
+  if (!existing || existing.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return;
+  }
+  if (existing.count >= limit) {
+    const seconds = Math.max(1, Math.ceil((existing.resetAt - now) / 1e3));
+    throw new Error(`Too many requests. Please try again in ${seconds} seconds.`);
+  }
+  existing.count += 1;
+  buckets.set(key, existing);
+}
+
 // server/catalog-storage.ts
 var fs2 = __toESM(require("node:fs"), 1);
 var os2 = __toESM(require("node:os"), 1);
@@ -167620,6 +167674,7 @@ var defaultProducts = [
 var DATA_DIR2 = process.env.VERCEL ? path2.join(os2.tmpdir(), "peaceful-taste-data") : path2.join(process.cwd(), "data");
 var CATALOG_FILE = path2.join(DATA_DIR2, "catalog.json");
 var CATALOG_BLOB_PATH = "catalog/catalog.json";
+var CATALOG_BLOB_PREFIX = "catalog/history/";
 var CURRENT_CATALOG_VERSION = 2;
 var defaultSettings = {
   version: CURRENT_CATALOG_VERSION,
@@ -167631,13 +167686,29 @@ var defaultCatalog = {
   products: defaultProducts,
   settings: defaultSettings
 };
+async function wait(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 function ensureDataDir2() {
   if (!fs2.existsSync(DATA_DIR2)) {
     fs2.mkdirSync(DATA_DIR2, { recursive: true });
   }
 }
 async function readCatalogFromBlob() {
-  const blob = await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  let latestSnapshotPath = null;
+  try {
+    const snapshots = await listPrivateBlobs(CATALOG_BLOB_PREFIX);
+    latestSnapshotPath = snapshots.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0]?.pathname || null;
+  } catch (error46) {
+    console.warn("[Catalog] Snapshot list unavailable, falling back to current blob path:", error46);
+  }
+  let blob = null;
+  try {
+    blob = latestSnapshotPath ? await downloadPrivateBlob(latestSnapshotPath) : await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  } catch (error46) {
+    console.warn("[Catalog] Blob read failed, falling back to local catalog:", error46);
+    return null;
+  }
   if (!blob) return null;
   try {
     return JSON.parse(blob.buffer.toString("utf8"));
@@ -167688,6 +167759,8 @@ async function writeCatalog(catalog) {
   ensureDataDir2();
   fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
   if (blobStorageEnabled()) {
+    const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
+    await uploadPrivateJson(snapshotPath, normalized);
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
   }
   return normalized;
@@ -167716,6 +167789,18 @@ async function getCatalog() {
     }
   }
   return writeCatalog(defaultCatalog);
+}
+async function getCatalogWithRetry(predicate, options = {}) {
+  const { attempts = 20, delayMs = 500 } = options;
+  let catalog = await getCatalog();
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (predicate(catalog)) {
+      return catalog;
+    }
+    await wait(delayMs);
+    catalog = await getCatalog();
+  }
+  return catalog;
 }
 async function createCategory(input) {
   const catalog = await getCatalog();
@@ -167772,8 +167857,13 @@ async function resolveProductImage(input) {
   return image;
 }
 async function createProduct(input) {
-  const catalog = await getCatalog();
+  const catalog = await getCatalogWithRetry(
+    (currentCatalog) => currentCatalog.categories.some((category) => category.id === input.categoryId)
+  );
   const image = await resolveProductImage(input);
+  if (!catalog.categories.some((category) => category.id === input.categoryId)) {
+    throw new Error("Category not found.");
+  }
   const baseId = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   let id = baseId || `product-${Date.now()}`;
   let counter = 1;
@@ -167800,14 +167890,18 @@ async function createProduct(input) {
   return { product, catalog: nextCatalog };
 }
 async function updateProduct(input) {
-  const catalog = await getCatalog();
+  const catalog = await getCatalogWithRetry(
+    (currentCatalog) => currentCatalog.products.some((product) => product.id === input.productId)
+  );
   const existingProduct = catalog.products.find((product) => product.id === input.productId);
-  if (!existingProduct) {
-    throw new Error("Product not found.");
+  const image = input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct?.image;
+  if (!image) {
+    throw new Error("Provide an image URL or upload an image file.");
   }
-  const image = input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct.image;
   const updatedProduct = {
-    ...existingProduct,
+    ...existingProduct ?? {
+      id: input.productId
+    },
     name: input.name,
     categoryId: input.categoryId,
     price: input.price,
@@ -167820,9 +167914,9 @@ async function updateProduct(input) {
   };
   const nextCatalog = await writeCatalog({
     ...catalog,
-    products: catalog.products.map(
+    products: existingProduct ? catalog.products.map(
       (product) => product.id === input.productId ? updatedProduct : product
-    )
+    ) : [...catalog.products, updatedProduct]
   });
   return { product: updatedProduct, catalog: nextCatalog };
 }
@@ -167840,7 +167934,18 @@ async function deleteProduct(productId) {
   return nextCatalog;
 }
 async function updateSiteSettings(input) {
-  const catalog = await getCatalog();
+  const requiredProductIds = [input.featuredStoryProductId, ...input.flashDealProductIds];
+  const catalog = await getCatalogWithRetry(
+    (currentCatalog) => requiredProductIds.every(
+      (productId) => currentCatalog.products.some((product) => product.id === productId)
+    )
+  );
+  const hasAllProducts = requiredProductIds.every(
+    (productId) => catalog.products.some((product) => product.id === productId)
+  );
+  if (!hasAllProducts) {
+    throw new Error("One or more selected products are not available yet. Please retry in a moment.");
+  }
   const nextCatalog = await writeCatalog({
     ...catalog,
     settings: {
@@ -168000,6 +168105,14 @@ var appRouter = router({
     login: publicProcedure.input(external_exports.object({
       password: external_exports.string().min(1).max(200)
     })).mutation(({ ctx, input }) => {
+      try {
+        enforceRateLimit(ctx.req, "admin-login", 8, 1e3 * 60 * 10);
+      } catch (error46) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: error46 instanceof Error ? error46.message : "Too many login attempts"
+        });
+      }
       if (!isValidAdminPassword(input.password)) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -168030,8 +168143,9 @@ var appRouter = router({
       subtotal: external_exports.number().positive(),
       tax: external_exports.number().nonnegative(),
       shippingCost: external_exports.number().nonnegative().default(500)
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
       try {
+        enforceRateLimit(ctx.req, "create-order", 10, 1e3 * 60 * 15);
         const totalAmount = input.subtotal + input.tax + input.shippingCost;
         const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const createdAt = (/* @__PURE__ */ new Date()).toISOString();
@@ -168119,8 +168233,9 @@ ${input.items.map((i) => `- ${i.name} x${i.quantity} @ ${formatNairaAmount(i.pri
       orderNumber: external_exports.string().regex(/^ORD-\d+-[a-z0-9]{5}$/).max(50),
       receiptName: external_exports.string().min(1).max(255),
       receiptDataUrl: external_exports.string().min(32).max(8e6)
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
       try {
+        enforceRateLimit(ctx.req, "upload-receipt", 12, 1e3 * 60 * 15);
         const persistedReceipt = await persistReceipt(input.orderNumber, input.receiptName, input.receiptDataUrl);
         const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, persistedReceipt.storedLocation);
         await notifyOwner({
@@ -168167,8 +168282,9 @@ Workbook updated: ${workbookUpdated ? "yes" : "no"}`
       subject: external_exports.string().min(1).max(200),
       message: external_exports.string().min(1).max(5e3),
       inquiryType: external_exports.enum(["general", "catering", "bulk_order", "complaint", "feedback"]).default("general")
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
       try {
+        enforceRateLimit(ctx.req, "create-inquiry", 10, 1e3 * 60 * 15);
         await initializeAllWorkbooks();
         await addInquiryToExcel({
           name: input.name,
@@ -168219,8 +168335,35 @@ var import_node_fs2 = __toESM(require("node:fs"), 1);
 function createVercelApp() {
   const app = (0, import_express.default)();
   const apiRouter = import_express.default.Router();
+  app.disable("x-powered-by");
   app.use(import_express.default.json({ limit: "50mb" }));
   app.use(import_express.default.urlencoded({ limit: "50mb", extended: true }));
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    res.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "img-src 'self' data: https:",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "script-src 'self' 'unsafe-inline'",
+        "connect-src 'self' https:",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self' https://wa.me mailto:"
+      ].join("; ")
+    );
+    if (req.path === "/health" || req.path === "/api/health") {
+      res.setHeader("Cache-Control", "no-store");
+    }
+    next();
+  });
   const warmWorkbooks = async () => {
     try {
       await initializeAllWorkbooks();

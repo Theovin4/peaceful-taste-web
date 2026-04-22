@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Users, Gift, Utensils, Zap } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import PageMeta from '@/components/PageMeta';
 
 export default function Services() {
   const submitInquiryMutation = trpc.inquiries.createInquiry.useMutation();
@@ -86,6 +87,11 @@ export default function Services() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Catering, Bulk Orders and Dessert Packages"
+        description="Request catering, event trays, dessert packages, and bulk Nigerian food orders from Peaceful Taste for birthdays, weddings, corporate events, and celebrations."
+        path="/services"
+      />
       <section className="relative overflow-hidden border-b border-border py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.12),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
         <div className="container relative">

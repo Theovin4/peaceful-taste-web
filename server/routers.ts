@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { uploadPrivateBlob } from './blob-storage';
+import { enforceRateLimit } from './_core/rateLimit';
 import {
   createCategory,
   createProduct,
@@ -223,6 +224,15 @@ export const appRouter = router({
         password: z.string().min(1).max(200),
       }))
       .mutation(({ ctx, input }) => {
+        try {
+          enforceRateLimit(ctx.req, 'admin-login', 8, 1000 * 60 * 10);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'TOO_MANY_REQUESTS',
+            message: error instanceof Error ? error.message : 'Too many login attempts',
+          });
+        }
+
         if (!isValidAdminPassword(input.password)) {
           throw new TRPCError({
             code: 'FORBIDDEN',
@@ -258,8 +268,9 @@ export const appRouter = router({
         tax: z.number().nonnegative(),
         shippingCost: z.number().nonnegative().default(500),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
         try {
+          enforceRateLimit(ctx.req, 'create-order', 10, 1000 * 60 * 15);
           const totalAmount = input.subtotal + input.tax + input.shippingCost;
           const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
           const createdAt = new Date().toISOString();
@@ -348,8 +359,9 @@ export const appRouter = router({
         receiptName: z.string().min(1).max(255),
         receiptDataUrl: z.string().min(32).max(8_000_000),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
         try {
+          enforceRateLimit(ctx.req, 'upload-receipt', 12, 1000 * 60 * 15);
           const persistedReceipt = await persistReceipt(input.orderNumber, input.receiptName, input.receiptDataUrl);
           const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, persistedReceipt.storedLocation);
 
@@ -401,8 +413,9 @@ export const appRouter = router({
         message: z.string().min(1).max(5000),
         inquiryType: z.enum(['general', 'catering', 'bulk_order', 'complaint', 'feedback']).default('general'),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
         try {
+          enforceRateLimit(ctx.req, 'create-inquiry', 10, 1000 * 60 * 15);
           await initializeAllWorkbooks();
 
           await addInquiryToExcel({

@@ -12,7 +12,9 @@ export function OrganizationSchema() {
     "description": "Fresh handcrafted Nigerian treats - parfaits, pastries, chin-chin, and puff-puff with same-day delivery in Lagos",
     "sameAs": [
       "https://wa.me/2349022621323",
-      "https://instagram.com/peacefultaste"
+      "https://instagram.com/peacefultaste",
+      "https://facebook.com/peacefultaste",
+      "https://tiktok.com/@peacefultaste_"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
@@ -22,10 +24,10 @@ export function OrganizationSchema() {
     },
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Gasline, Magboro",
-      "addressLocality": "Lagos",
-      "addressRegion": "Lagos State",
-      "postalCode": "100001",
+      "streetAddress": PEACEFUL_TASTE_CONTACT.address,
+      "addressLocality": "Magboro",
+      "addressRegion": "Ogun State",
+      "postalCode": "110115",
       "addressCountry": "NG"
     }
   };
@@ -44,19 +46,19 @@ export function LocalBusinessSchema() {
     "@type": "LocalBusiness",
     "name": "Peaceful Taste",
     "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
-    "description": "Premium Nigerian food delivery service offering handcrafted parfaits, pastries, chin-chin, and puff-puff",
+    "description": "Premium Nigerian food delivery service offering branded parfaits, bottled drinks, pastries, cakes, soups, and party trays",
     "url": SITE_URL,
     "telephone": "+234-902-262-1323",
     "email": "queenofpeace323@gmail.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Gasline, Magboro",
-      "addressLocality": "Lagos",
-      "addressRegion": "Lagos State",
+      "streetAddress": PEACEFUL_TASTE_CONTACT.address,
+      "addressLocality": "Magboro",
+      "addressRegion": "Ogun State",
       "addressCountry": "NG"
     },
     "areaServed": ["Lagos", "Magboro", "Ibafo", "Mowe"],
-    "priceRange": "NGN 1500-6000",
+    "priceRange": "NGN 1500-78000",
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],

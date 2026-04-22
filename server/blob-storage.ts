@@ -4,9 +4,19 @@ import path from 'node:path';
 
 const ORDER_WORKBOOK_BLOB = 'exports/orders.xlsx';
 const INQUIRY_WORKBOOK_BLOB = 'exports/inquiries.xlsx';
+let blobRuntimeAvailable = true;
 
 function hasBlobToken() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+function isBlobUsable() {
+  return hasBlobToken() && blobRuntimeAvailable;
+}
+
+function markBlobUnavailable(error: unknown) {
+  blobRuntimeAvailable = false;
+  console.warn('[Blob] Disabling blob storage for this runtime:', error);
 }
 
 async function streamToBuffer(stream: ReadableStream<Uint8Array>) {
@@ -15,29 +25,39 @@ async function streamToBuffer(stream: ReadableStream<Uint8Array>) {
 }
 
 export function blobStorageEnabled() {
-  return hasBlobToken();
+  return isBlobUsable();
 }
 
 export async function uploadPrivateBlob(pathname: string, data: Buffer, contentType: string) {
-  if (!hasBlobToken()) return null;
+  if (!isBlobUsable()) return null;
 
-  return put(pathname, data, {
-    access: 'private',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType,
-  });
+  try {
+    return await put(pathname, data, {
+      access: 'private',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType,
+    });
+  } catch (error) {
+    markBlobUnavailable(error);
+    return null;
+  }
 }
 
 export async function uploadPublicBlob(pathname: string, data: Buffer, contentType: string) {
-  if (!hasBlobToken()) return null;
+  if (!isBlobUsable()) return null;
 
-  return put(pathname, data, {
-    access: 'public',
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType,
-  });
+  try {
+    return await put(pathname, data, {
+      access: 'public',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType,
+    });
+  } catch (error) {
+    markBlobUnavailable(error);
+    return null;
+  }
 }
 
 export async function uploadPrivateJson(pathname: string, data: unknown) {
@@ -49,41 +69,51 @@ export async function uploadPrivateJson(pathname: string, data: unknown) {
 }
 
 export async function downloadPrivateBlob(pathname: string) {
-  if (!hasBlobToken()) return null;
+  if (!isBlobUsable()) return null;
 
-  const result = await get(pathname, { access: 'private' });
-  if (!result || result.statusCode !== 200) {
+  try {
+    const result = await get(pathname, { access: 'private' });
+    if (!result || result.statusCode !== 200) {
+      return null;
+    }
+
+    return {
+      ...result.blob,
+      buffer: await streamToBuffer(result.stream),
+    };
+  } catch (error) {
+    markBlobUnavailable(error);
     return null;
   }
-
-  return {
-    ...result.blob,
-    buffer: await streamToBuffer(result.stream),
-  };
 }
 
 export async function listPrivateBlobs(prefix: string) {
-  if (!hasBlobToken()) return [];
+  if (!isBlobUsable()) return [];
 
   const blobs = [];
   let cursor: string | undefined;
 
-  do {
-    const result = await list({
-      prefix,
-      cursor,
-      limit: 1000,
-    });
+  try {
+    do {
+      const result = await list({
+        prefix,
+        cursor,
+        limit: 1000,
+      });
 
-    blobs.push(...result.blobs);
-    cursor = result.hasMore ? result.cursor : undefined;
-  } while (cursor);
+      blobs.push(...result.blobs);
+      cursor = result.hasMore ? result.cursor : undefined;
+    } while (cursor);
+  } catch (error) {
+    markBlobUnavailable(error);
+    return [];
+  }
 
   return blobs;
 }
 
 export async function syncWorkbookToBlob(localPath: string, type: 'orders' | 'inquiries') {
-  if (!hasBlobToken() || !fs.existsSync(localPath)) return null;
+  if (!isBlobUsable() || !fs.existsSync(localPath)) return null;
 
   const pathname = type === 'orders' ? ORDER_WORKBOOK_BLOB : INQUIRY_WORKBOOK_BLOB;
   const buffer = fs.readFileSync(localPath);
@@ -98,7 +128,7 @@ export async function hydrateWorkbookFromBlob(
 ) {
   const { force = false } = options;
 
-  if (!hasBlobToken()) return fs.existsSync(localPath);
+  if (!isBlobUsable()) return fs.existsSync(localPath);
   if (!force && fs.existsSync(localPath)) return true;
 
   const pathname = type === 'orders' ? ORDER_WORKBOOK_BLOB : INQUIRY_WORKBOOK_BLOB;

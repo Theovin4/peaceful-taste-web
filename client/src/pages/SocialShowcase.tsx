@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 import { useCatalog } from '@/hooks/useCatalog';
 import ProductVisual from '@/components/ProductVisual';
+import PageMeta from '@/components/PageMeta';
 
 function BrandIcon({ brand, className = 'h-12 w-12' }: { brand: 'instagram' | 'facebook' | 'whatsapp' | 'tiktok'; className?: string }) {
   const paths = {
@@ -40,6 +41,11 @@ export default function SocialShowcase() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Follow Peaceful Taste on Social Media"
+        description="Explore Peaceful Taste product highlights, branded food presentations, and social-ready menu items across Instagram, TikTok, Facebook, and WhatsApp."
+        path="/social"
+      />
       <section className="relative overflow-hidden border-b border-border py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.12),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
         <div className="container relative">

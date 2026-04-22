@@ -1,6 +1,7 @@
 import { Check, Package2 } from 'lucide-react';
 import ProductVisual from '@/components/ProductVisual';
 import { defaultProducts } from '@/lib/products';
+import PageMeta from '@/components/PageMeta';
 
 const yoghurtShowcaseProduct =
   defaultProducts.find((product) => product.id === 'yoghurt-1') ?? defaultProducts[0];
@@ -8,6 +9,11 @@ const yoghurtShowcaseProduct =
 export default function About() {
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="About Peaceful Taste"
+        description="Learn about Peaceful Taste, our premium Nigerian food standards, branded packaging direction, and why customers trust us for treats, meals, and event orders."
+        path="/about"
+      />
       <section className="relative overflow-hidden border-b border-border py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.1),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
         <div className="container relative">

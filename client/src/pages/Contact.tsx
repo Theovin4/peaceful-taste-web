@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
+import PageMeta from '@/components/PageMeta';
 
 const CONTACT_INFO = {
   phone: '+234 902 262 1323',
@@ -74,6 +75,11 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Contact Peaceful Taste"
+        description="Contact Peaceful Taste by WhatsApp, phone, or email for delivery support, quick orders, bulk requests, or catering inquiries."
+        path="/contact"
+      />
       <section className="relative overflow-hidden border-b border-border py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.12),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
         <div className="container relative">

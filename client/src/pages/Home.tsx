@@ -7,6 +7,7 @@ import NewsletterSignup from '@/components/NewsletterSignup';
 import { useCatalog } from '@/hooks/useCatalog';
 import { formatNaira } from '@/lib/format';
 import ProductVisual from '@/components/ProductVisual';
+import PageMeta from '@/components/PageMeta';
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -19,6 +20,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Premium Nigerian Food Delivery in Lagos"
+        description="Order Peaceful Taste parfaits, yoghurt, zobo, cakes, pastries, soups, and party rice with clear pricing, fast delivery support, and branded receipts."
+        path="/"
+        image={featuredProduct?.image}
+      />
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.16),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.22),transparent_32%)]" />
         <div className="container">

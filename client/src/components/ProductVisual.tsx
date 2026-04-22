@@ -61,9 +61,49 @@ function Sticker({
   );
 }
 
-function BottleMockup({ product, compact = false }: { product: Product; compact?: boolean }) {
+function ProductPhoto({
+  product,
+  className,
+  variant,
+  tint,
+}: {
+  product: Product;
+  className: string;
+  variant: ProductVisualProps['variant'];
+  tint?: string;
+}) {
+  return (
+    <div className={cn('absolute overflow-hidden', className)}>
+      <img
+        src={product.image}
+        alt={product.name}
+        className="h-full w-full object-cover"
+        loading={variant === 'hero' ? 'eager' : 'lazy'}
+        fetchPriority={variant === 'hero' ? 'high' : 'auto'}
+        decoding="async"
+        sizes={
+          variant === 'hero'
+            ? '(max-width: 768px) 100vw, 50vw'
+            : variant === 'compact'
+              ? '96px'
+              : '(max-width: 768px) 100vw, 25vw'
+        }
+      />
+      {tint ? <div className="absolute inset-0" style={{ background: tint }} /> : null}
+    </div>
+  );
+}
+
+function BottleMockup({
+  product,
+  compact = false,
+  variant = 'card',
+}: {
+  product: Product;
+  compact?: boolean;
+  variant?: ProductVisualProps['variant'];
+}) {
   const { palette, label } = getProductVisualMeta(product);
-  const fluidHeight = product.size?.includes('30') ? '45%' : '56%';
 
   return (
     <div
@@ -86,17 +126,15 @@ function BottleMockup({ product, compact = false }: { product: Product; compact?
         )}
         style={{
           background:
-            'linear-gradient(180deg, rgba(255,255,255,0.58), rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.1) 100%)',
+            'linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.22) 36%, rgba(255,255,255,0.14) 100%)',
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.12), 0 26px 44px rgba(0,0,0,0.22)',
         }}
       >
-        <div
-          className="absolute inset-x-0 bottom-0"
-          style={{
-            height: fluidHeight,
-            background: `linear-gradient(180deg, ${palette.highlight}, ${palette.accentSoft})`,
-            opacity: 0.88,
-          }}
+        <ProductPhoto
+          product={product}
+          variant={variant}
+          className="bottom-1 left-1 right-1 top-7 rounded-[1.5rem]"
+          tint={`linear-gradient(180deg, ${palette.highlight}20, ${palette.accent}25)`}
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent)] opacity-80" />
         <div
@@ -146,7 +184,15 @@ function BottleMockup({ product, compact = false }: { product: Product; compact?
   );
 }
 
-function CupMockup({ product, compact = false }: { product: Product; compact?: boolean }) {
+function CupMockup({
+  product,
+  compact = false,
+  variant = 'card',
+}: {
+  product: Product;
+  compact?: boolean;
+  variant?: ProductVisualProps['variant'];
+}) {
   const { palette, label } = getProductVisualMeta(product);
   const note = getProductFlavorNote(product);
 
@@ -167,25 +213,18 @@ function CupMockup({ product, compact = false }: { product: Product; compact?: b
       <div
         className={cn(
           'absolute bottom-0 overflow-hidden border border-white/35 bg-white/15 backdrop-blur-sm',
-          compact ? 'h-24 w-20 rounded-b-[1.3rem] rounded-t-[0.8rem]' : 'h-56 w-32 rounded-b-[2rem] rounded-t-[1.1rem]'
+          compact
+            ? 'h-24 w-20 rounded-b-[1.3rem] rounded-t-[0.8rem]'
+            : 'h-56 w-32 rounded-b-[2rem] rounded-t-[1.1rem]'
         )}
       >
-        <div
-          className="absolute inset-x-0 bottom-0 h-[24%]"
-          style={{ backgroundColor: '#f4d092', opacity: 0.95 }}
+        <ProductPhoto
+          product={product}
+          variant={variant}
+          className="inset-1 rounded-[1.4rem]"
+          tint={`linear-gradient(180deg, ${palette.highlight}10, ${palette.depth}18)`}
         />
-        <div
-          className="absolute inset-x-0 bottom-[24%] h-[22%]"
-          style={{ backgroundColor: palette.highlight, opacity: 0.92 }}
-        />
-        <div
-          className="absolute inset-x-0 bottom-[46%] h-[20%]"
-          style={{ backgroundColor: palette.accentSoft, opacity: 0.9 }}
-        />
-        <div
-          className="absolute inset-x-0 bottom-[66%] h-[18%]"
-          style={{ backgroundColor: '#fff8f0', opacity: 0.95 }}
-        />
+        <div className="absolute inset-x-0 bottom-0 h-[24%] bg-gradient-to-t from-black/35 to-transparent" />
         <div
           className="absolute inset-x-2 top-[38%] rounded-2xl border px-2 py-2 text-center"
           style={{
@@ -214,7 +253,10 @@ function CupMockup({ product, compact = false }: { product: Product; compact?: b
           >
             {label}
           </p>
-          <p className={cn(compact ? 'text-[5px]' : 'text-[7px]')} style={{ color: palette.highlight }}>
+          <p
+            className={cn(compact ? 'text-[5px]' : 'text-[7px]')}
+            style={{ color: palette.highlight }}
+          >
             {note}
           </p>
         </div>
@@ -230,9 +272,16 @@ function CupMockup({ product, compact = false }: { product: Product; compact?: b
   );
 }
 
-function BowlMockup({ product, compact = false }: { product: Product; compact?: boolean }) {
+function BowlMockup({
+  product,
+  compact = false,
+  variant = 'card',
+}: {
+  product: Product;
+  compact?: boolean;
+  variant?: ProductVisualProps['variant'];
+}) {
   const { palette, label } = getProductVisualMeta(product);
-  const garnish = palette.garnish;
 
   return (
     <div
@@ -248,29 +297,18 @@ function BowlMockup({ product, compact = false }: { product: Product; compact?: 
         )}
         style={{ boxShadow: '0 24px 40px rgba(0,0,0,0.2)' }}
       >
-        <div
-          className="absolute inset-x-2 top-2 rounded-full"
-          style={{
-            bottom: compact ? '0.35rem' : '0.75rem',
-            background: `radial-gradient(circle at top, ${garnish[0]}, ${palette.accentSoft} 56%, ${palette.depth})`,
-          }}
-        />
-        <div
-          className="absolute left-[18%] top-[26%] h-[14%] w-[16%] rounded-full opacity-90"
-          style={{ backgroundColor: garnish[2] }}
-        />
-        <div
-          className="absolute left-[42%] top-[14%] h-[16%] w-[18%] rounded-full opacity-90"
-          style={{ backgroundColor: garnish[1] }}
-        />
-        <div
-          className="absolute left-[64%] top-[28%] h-[14%] w-[14%] rounded-full opacity-90"
-          style={{ backgroundColor: garnish[0] }}
+        <ProductPhoto
+          product={product}
+          variant={variant}
+          className="inset-2 rounded-full"
+          tint={`linear-gradient(180deg, ${palette.highlight}10, ${palette.depth}22)`}
         />
         <div
           className={cn(
             'absolute rounded-full border px-2 text-center',
-            compact ? 'bottom-2 left-1/2 w-16 -translate-x-1/2 py-1' : 'bottom-4 left-1/2 w-24 -translate-x-1/2 py-2'
+            compact
+              ? 'bottom-2 left-1/2 w-16 -translate-x-1/2 py-1'
+              : 'bottom-4 left-1/2 w-24 -translate-x-1/2 py-2'
           )}
           style={{
             background: `linear-gradient(180deg, ${palette.shell}, #fcf6ea)`,
@@ -319,7 +357,15 @@ function BowlMockup({ product, compact = false }: { product: Product; compact?: 
   );
 }
 
-function PastryMockup({ product, compact = false }: { product: Product; compact?: boolean }) {
+function PastryMockup({
+  product,
+  compact = false,
+  variant = 'card',
+}: {
+  product: Product;
+  compact?: boolean;
+  variant?: ProductVisualProps['variant'];
+}) {
   const { palette } = getProductVisualMeta(product);
 
   return (
@@ -334,22 +380,14 @@ function PastryMockup({ product, compact = false }: { product: Product; compact?
           'absolute rounded-[2rem] border border-white/25 bg-white/10 backdrop-blur-sm',
           compact ? 'bottom-3 h-20 w-24' : 'bottom-6 h-36 w-44'
         )}
-      />
-      {Array.from({ length: 5 }).map((_, index) => (
-        <div
-          key={index}
-          className="absolute rounded-full"
-          style={{
-            width: compact ? 18 : 34,
-            height: compact ? 12 : 24,
-            left: compact ? 26 + (index % 2) * 16 : 48 + (index % 2) * 38,
-            top: compact ? 44 + index * 7 : 94 + index * 11,
-            background: `linear-gradient(180deg, ${palette.highlight}, ${palette.accentSoft})`,
-            transform: `rotate(${index % 2 === 0 ? -12 : 12}deg)`,
-            boxShadow: '0 8px 14px rgba(0,0,0,0.18)',
-          }}
+      >
+        <ProductPhoto
+          product={product}
+          variant={variant}
+          className="inset-2 rounded-[1.6rem]"
+          tint="linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.1))"
         />
-      ))}
+      </div>
       <div
         className={cn(
           'absolute rounded-full border text-center',
@@ -380,7 +418,15 @@ function PastryMockup({ product, compact = false }: { product: Product; compact?
   );
 }
 
-function CakeMockup({ product, compact = false }: { product: Product; compact?: boolean }) {
+function CakeMockup({
+  product,
+  compact = false,
+  variant = 'card',
+}: {
+  product: Product;
+  compact?: boolean;
+  variant?: ProductVisualProps['variant'];
+}) {
   const { palette, label } = getProductVisualMeta(product);
 
   return (
@@ -391,22 +437,29 @@ function CakeMockup({ product, compact = false }: { product: Product; compact?: 
       )}
     >
       <div
-        className={cn('absolute rounded-full bg-[#d8b170]', compact ? 'bottom-2 h-5 w-24' : 'bottom-5 h-10 w-40')}
+        className={cn(
+          'absolute rounded-full bg-[#d8b170]',
+          compact ? 'bottom-2 h-5 w-24' : 'bottom-5 h-10 w-40'
+        )}
       />
       <div
-        className={cn('absolute rounded-[1.6rem]', compact ? 'bottom-5 h-14 w-20' : 'bottom-10 h-32 w-32')}
+        className={cn(
+          'absolute overflow-hidden rounded-[1.6rem]',
+          compact ? 'bottom-5 h-14 w-20' : 'bottom-10 h-32 w-32'
+        )}
         style={{
           background: `linear-gradient(180deg, ${palette.shell}, ${palette.highlight})`,
           boxShadow: '0 18px 30px rgba(0,0,0,0.2)',
         }}
-      />
-      <div
-        className={cn(
-          'absolute rounded-full',
-          compact ? 'bottom-[4.9rem] h-3 w-20' : 'bottom-[9rem] h-7 w-32'
-        )}
-        style={{ backgroundColor: '#fff8f0' }}
-      />
+      >
+        <ProductPhoto
+          product={product}
+          variant={variant}
+          className="inset-1 rounded-[1.3rem]"
+          tint="linear-gradient(180deg, rgba(255,255,255,0.1), rgba(0,0,0,0.08))"
+        />
+        <div className="absolute left-0 right-0 top-[18%] h-[14%] rounded-full bg-white/70" />
+      </div>
       <div
         className={cn(
           'absolute rounded-full border text-center',
@@ -486,7 +539,11 @@ export default function ProductVisual({
           <p
             className={cn(
               'mt-1 font-black leading-tight text-white',
-              compact ? 'max-w-[5rem] text-[10px]' : hero ? 'max-w-xs text-3xl' : 'max-w-[12rem] text-lg'
+              compact
+                ? 'max-w-[5rem] text-[10px]'
+                : hero
+                  ? 'max-w-xs text-3xl'
+                  : 'max-w-[12rem] text-lg'
             )}
           >
             {product.name}
@@ -512,11 +569,19 @@ export default function ProductVisual({
           compact ? 'bottom-1 top-5' : hero ? 'bottom-2 top-16' : 'bottom-2 top-14'
         )}
       >
-        {packaging === 'bottle' && <BottleMockup product={product} compact={compact} />}
-        {packaging === 'cup' && <CupMockup product={product} compact={compact} />}
-        {packaging === 'bowl' && <BowlMockup product={product} compact={compact} />}
-        {packaging === 'pastry' && <PastryMockup product={product} compact={compact} />}
-        {packaging === 'cake' && <CakeMockup product={product} compact={compact} />}
+        {packaging === 'bottle' && (
+          <BottleMockup product={product} compact={compact} variant={variant} />
+        )}
+        {packaging === 'cup' && <CupMockup product={product} compact={compact} variant={variant} />}
+        {packaging === 'bowl' && (
+          <BowlMockup product={product} compact={compact} variant={variant} />
+        )}
+        {packaging === 'pastry' && (
+          <PastryMockup product={product} compact={compact} variant={variant} />
+        )}
+        {packaging === 'cake' && (
+          <CakeMockup product={product} compact={compact} variant={variant} />
+        )}
       </div>
 
       <div

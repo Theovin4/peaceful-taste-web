@@ -10,6 +10,7 @@ import {
 import {
   blobStorageEnabled,
   downloadPrivateBlob,
+  listPrivateBlobs,
   uploadPrivateJson,
   uploadPublicBlob,
 } from './blob-storage';
@@ -20,6 +21,7 @@ const DATA_DIR = process.env.VERCEL
 
 const CATALOG_FILE = path.join(DATA_DIR, 'catalog.json');
 const CATALOG_BLOB_PATH = 'catalog/catalog.json';
+const CATALOG_BLOB_PREFIX = 'catalog/history/';
 const CURRENT_CATALOG_VERSION = 2;
 
 export interface SiteSettings {
@@ -46,6 +48,10 @@ const defaultCatalog: ProductCatalog = {
   settings: defaultSettings,
 };
 
+async function wait(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -53,7 +59,26 @@ function ensureDataDir() {
 }
 
 async function readCatalogFromBlob(): Promise<ProductCatalog | null> {
-  const blob = await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  let latestSnapshotPath: string | null = null;
+
+  try {
+    const snapshots = await listPrivateBlobs(CATALOG_BLOB_PREFIX);
+    latestSnapshotPath = snapshots
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0]?.pathname || null;
+  } catch (error) {
+    console.warn('[Catalog] Snapshot list unavailable, falling back to current blob path:', error);
+  }
+
+  let blob = null;
+
+  try {
+    blob = latestSnapshotPath
+      ? await downloadPrivateBlob(latestSnapshotPath)
+      : await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  } catch (error) {
+    console.warn('[Catalog] Blob read failed, falling back to local catalog:', error);
+    return null;
+  }
   if (!blob) return null;
 
   try {
@@ -135,6 +160,8 @@ async function writeCatalog(catalog: ProductCatalog) {
   fs.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
 
   if (blobStorageEnabled()) {
+    const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
+    await uploadPrivateJson(snapshotPath, normalized);
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
   }
 
@@ -168,6 +195,24 @@ export async function getCatalog(): Promise<ProductCatalog> {
   }
 
   return writeCatalog(defaultCatalog);
+}
+
+async function getCatalogWithRetry(
+  predicate: (catalog: ProductCatalog) => boolean,
+  options: { attempts?: number; delayMs?: number } = {}
+) {
+  const { attempts = 20, delayMs = 500 } = options;
+  let catalog = await getCatalog();
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (predicate(catalog)) {
+      return catalog;
+    }
+    await wait(delayMs);
+    catalog = await getCatalog();
+  }
+
+  return catalog;
 }
 
 export async function createCategory(input: { name: string; description: string }) {
@@ -260,8 +305,14 @@ export async function createProduct(input: {
   isNew?: boolean;
   isActive?: boolean;
 }) {
-  const catalog = await getCatalog();
+  const catalog = await getCatalogWithRetry((currentCatalog) =>
+    currentCatalog.categories.some((category) => category.id === input.categoryId)
+  );
   const image = await resolveProductImage(input);
+
+  if (!catalog.categories.some((category) => category.id === input.categoryId)) {
+    throw new Error('Category not found.');
+  }
 
   const baseId = input.name
     .toLowerCase()
@@ -310,19 +361,22 @@ export async function updateProduct(input: {
   isNew?: boolean;
   isActive?: boolean;
 }) {
-  const catalog = await getCatalog();
+  const catalog = await getCatalogWithRetry((currentCatalog) =>
+    currentCatalog.products.some((product) => product.id === input.productId)
+  );
   const existingProduct = catalog.products.find((product) => product.id === input.productId);
-
-  if (!existingProduct) {
-    throw new Error('Product not found.');
-  }
-
   const image = input.imageDataUrl || input.imageUrl?.trim()
     ? await resolveProductImage(input)
-    : existingProduct.image;
+    : existingProduct?.image;
+
+  if (!image) {
+    throw new Error('Provide an image URL or upload an image file.');
+  }
 
   const updatedProduct: Product = {
-    ...existingProduct,
+    ...(existingProduct ?? {
+      id: input.productId,
+    }),
     name: input.name,
     categoryId: input.categoryId,
     price: input.price,
@@ -336,9 +390,11 @@ export async function updateProduct(input: {
 
   const nextCatalog = await writeCatalog({
     ...catalog,
-    products: catalog.products.map((product) =>
-      product.id === input.productId ? updatedProduct : product
-    ),
+    products: existingProduct
+      ? catalog.products.map((product) =>
+          product.id === input.productId ? updatedProduct : product
+        )
+      : [...catalog.products, updatedProduct],
   });
 
   return { product: updatedProduct, catalog: nextCatalog };
@@ -367,7 +423,20 @@ export async function updateSiteSettings(input: {
   featuredStoryProductId: string;
   flashDealProductIds: string[];
 }) {
-  const catalog = await getCatalog();
+  const requiredProductIds = [input.featuredStoryProductId, ...input.flashDealProductIds];
+  const catalog = await getCatalogWithRetry((currentCatalog) =>
+    requiredProductIds.every((productId) =>
+      currentCatalog.products.some((product) => product.id === productId)
+    )
+  );
+
+  const hasAllProducts = requiredProductIds.every((productId) =>
+    catalog.products.some((product) => product.id === productId)
+  );
+
+  if (!hasAllProducts) {
+    throw new Error('One or more selected products are not available yet. Please retry in a moment.');
+  }
 
   const nextCatalog = await writeCatalog({
     ...catalog,

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { formatNaira } from '@/lib/format';
 import ProductVisual from '@/components/ProductVisual';
+import PageMeta from '@/components/PageMeta';
 
 export default function Cart() {
   const [, setLocation] = useLocation();
@@ -28,6 +29,12 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageMeta
+        title="Shopping Cart"
+        description="Review your Peaceful Taste cart, update quantities, and move into secure checkout with clear delivery fees and totals."
+        path="/cart"
+        robots="noindex, nofollow"
+      />
       <section className="relative overflow-hidden border-b border-border py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.1),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.18),transparent_28%)]" />
         <div className="container relative">
