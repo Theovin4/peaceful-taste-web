@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import {
   Lock,
   Mail,
   MessageCircle,
+  MousePointerSquareDashed,
   Package,
   Pencil,
   Plus,
@@ -37,6 +38,7 @@ type ProductFormState = {
   price: string;
   description: string;
   size: string;
+  currentImage: string;
   imageUrl: string;
   imageFile: File | null;
   isBestSeller: boolean;
@@ -51,12 +53,25 @@ const initialProductForm: ProductFormState = {
   price: '',
   description: '',
   size: '',
+  currentImage: '',
   imageUrl: '',
   imageFile: null,
   isBestSeller: false,
   isNew: false,
   isActive: true,
 };
+
+function buildAutoDescription(name: string, categoryName: string, size: string) {
+  const cleanName = name.trim() || 'This product';
+  const cleanCategory = categoryName.trim() || 'menu item';
+  const cleanSize = size.trim();
+
+  if (cleanSize) {
+    return `${cleanName} is a freshly prepared ${cleanCategory.toLowerCase()} served in ${cleanSize}, made for customers who want great taste, clear portions, and reliable delivery.`;
+  }
+
+  return `${cleanName} is a freshly prepared ${cleanCategory.toLowerCase()} made for customers who want great taste, clear portions, and reliable delivery.`;
+}
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -66,6 +81,9 @@ export default function AdminDashboard() {
   const [productForm, setProductForm] = useState<ProductFormState>(initialProductForm);
   const [featuredStoryProductId, setFeaturedStoryProductId] = useState('');
   const [flashDealProductIds, setFlashDealProductIds] = useState<string[]>([]);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [descriptionTouched, setDescriptionTouched] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const statusQuery = trpc.admin.status.useQuery(undefined, {
     refetchOnWindowFocus: false,
@@ -91,6 +109,25 @@ export default function AdminDashboard() {
     setFeaturedStoryProductId(catalogQuery.data.settings.featuredStoryProductId);
     setFlashDealProductIds(catalogQuery.data.settings.flashDealProductIds);
   }, [catalogQuery.data?.settings]);
+
+  useEffect(() => {
+    if (productForm.productId || descriptionTouched) return;
+
+    const categoryName =
+      catalogQuery.data?.categories.find((category) => category.id === productForm.categoryId)?.name ?? 'product';
+
+    setProductForm((prev) => ({
+      ...prev,
+      description: buildAutoDescription(prev.name, categoryName, prev.size),
+    }));
+  }, [
+    catalogQuery.data?.categories,
+    descriptionTouched,
+    productForm.categoryId,
+    productForm.name,
+    productForm.productId,
+    productForm.size,
+  ]);
 
   const loginMutation = trpc.admin.login.useMutation({
     onSuccess: async () => {
@@ -133,6 +170,7 @@ export default function AdminDashboard() {
       await catalogQuery.refetch();
       toast.success('Product created successfully.');
       setProductForm(initialProductForm);
+      setDescriptionTouched(false);
     },
     onError: (error) => toast.error(error.message),
   });
@@ -142,6 +180,7 @@ export default function AdminDashboard() {
       await catalogQuery.refetch();
       toast.success('Product updated successfully.');
       setProductForm(initialProductForm);
+      setDescriptionTouched(false);
     },
     onError: (error) => toast.error(error.message),
   });
@@ -150,6 +189,14 @@ export default function AdminDashboard() {
     onSuccess: async () => {
       await catalogQuery.refetch();
       toast.success('Product removed.');
+    },
+    onError: (error) => toast.error(error.message),
+  });
+
+  const clearProductImageMutation = trpc.catalog.clearProductImage.useMutation({
+    onSuccess: async () => {
+      await catalogQuery.refetch();
+      toast.success('Product image removed.');
     },
     onError: (error) => toast.error(error.message),
   });
@@ -222,6 +269,7 @@ export default function AdminDashboard() {
       price: Number(productForm.price),
       description: productForm.description,
       size: productForm.size,
+      clearImage: !productForm.imageFile && !productForm.imageUrl && !productForm.currentImage,
       imageUrl: productForm.imageUrl,
       imageDataUrl,
       imageFileName,
@@ -249,14 +297,56 @@ export default function AdminDashboard() {
       price: String(product.price),
       description: product.description,
       size: product.size ?? '',
+      currentImage: product.image,
       imageUrl: product.image.startsWith('data:') ? '' : product.image,
       imageFile: null,
       isBestSeller: Boolean(product.isBestSeller),
       isNew: Boolean(product.isNew),
       isActive: product.isActive !== false,
     });
+    setDescriptionTouched(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const setImageFile = (file: File | null) => {
+    setProductForm((prev) => ({
+      ...prev,
+      imageFile: file,
+      imageUrl: file ? '' : prev.imageUrl,
+      currentImage: file ? '' : prev.currentImage,
+    }));
+  };
+
+  const removeSelectedImage = () => {
+    setProductForm((prev) => ({
+      ...prev,
+      imageFile: null,
+      imageUrl: '',
+      currentImage: '',
+    }));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const previewImage = useMemo(() => {
+    if (productForm.imageFile) {
+      return URL.createObjectURL(productForm.imageFile);
+    }
+
+    if (productForm.imageUrl.trim()) {
+      return productForm.imageUrl.trim();
+    }
+
+    return productForm.currentImage;
+  }, [productForm.currentImage, productForm.imageFile, productForm.imageUrl]);
+
+  useEffect(() => {
+    if (!previewImage.startsWith('blob:')) return;
+
+    return () => URL.revokeObjectURL(previewImage);
+  }, [previewImage]);
 
   const toggleFlashDeal = (productId: string) => {
     setFlashDealProductIds((current) => {
@@ -528,7 +618,7 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productName" className="mb-2 block font-semibold text-foreground">Product name</Label>
-                  <Input id="productName" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Mango Yoghurt 35cl" className="bg-background" required />
+                <Input id="productName" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Mango Yoghurt 35cl" className="bg-background" required />
                 </div>
                 <div>
                   <Label htmlFor="productCategory" className="mb-2 block font-semibold text-foreground">Category</Label>
@@ -554,7 +644,31 @@ export default function AdminDashboard() {
 
               <div>
                 <Label htmlFor="productDescription" className="mb-2 block font-semibold text-foreground">Description</Label>
-                <textarea id="productDescription" value={productForm.description} onChange={(e) => setProductForm((prev) => ({ ...prev, description: e.target.value }))} placeholder="Short clear description for customers" className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" required />
+                <textarea id="productDescription" value={productForm.description} onChange={(e) => {
+                  setDescriptionTouched(true);
+                  setProductForm((prev) => ({ ...prev, description: e.target.value }));
+                }} placeholder="Short clear description for customers" className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" required />
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 px-4 py-3 text-sm">
+                <p className="text-muted-foreground">
+                  New products get an automatic description suggestion from the name, category, and size.
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-accent hover:bg-accent/10 hover:text-accent"
+                  onClick={() => {
+                    const categoryName =
+                      catalog?.categories.find((category) => category.id === productForm.categoryId)?.name ?? 'product';
+                    setProductForm((prev) => ({
+                      ...prev,
+                      description: buildAutoDescription(prev.name, categoryName, prev.size),
+                    }));
+                    setDescriptionTouched(false);
+                  }}
+                >
+                  Regenerate
+                </Button>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -564,8 +678,71 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <Label htmlFor="productImageFile" className="mb-2 block font-semibold text-foreground">Upload your image</Label>
-                  <input id="productImageFile" type="file" accept="image/*" onChange={(e) => setProductForm((prev) => ({ ...prev, imageFile: e.target.files?.[0] ?? null }))} className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground" />
+                  <div
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setIsDraggingImage(true);
+                    }}
+                    onDragLeave={() => setIsDraggingImage(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setIsDraggingImage(false);
+                      setImageFile(event.dataTransfer.files?.[0] ?? null);
+                    }}
+                    className={`rounded-2xl border border-dashed px-4 py-5 text-center transition-colors ${
+                      isDraggingImage ? 'border-accent bg-accent/10' : 'border-border bg-background'
+                    }`}
+                  >
+                    <MousePointerSquareDashed className="mx-auto mb-3 h-6 w-6 text-accent" />
+                    <p className="text-sm font-medium text-foreground">Drag and drop an image here</p>
+                    <p className="mt-1 text-xs text-muted-foreground">or choose a file from your device</p>
+                    <input
+                      ref={fileInputRef}
+                      id="productImageFile"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                      className="mt-4 block w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground"
+                    />
+                  </div>
                 </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-background/60 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="font-semibold text-foreground">Image preview</p>
+                  <div className="flex gap-2">
+                    {productForm.productId && productForm.currentImage && !productForm.imageFile && !productForm.imageUrl && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-destructive/40 bg-destructive/5 text-destructive hover:bg-destructive/10"
+                        onClick={async () => {
+                          await clearProductImageMutation.mutateAsync({ productId: productForm.productId! });
+                          removeSelectedImage();
+                        }}
+                      >
+                        Remove saved image
+                      </Button>
+                    )}
+                    {(productForm.imageFile || productForm.imageUrl || productForm.currentImage) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={removeSelectedImage}
+                      >
+                        Clear selection
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {previewImage ? (
+                  <img src={previewImage} alt="Product preview" className="h-48 w-full rounded-2xl object-cover" />
+                ) : (
+                  <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground">
+                    No product image selected yet
+                  </div>
+                )}
               </div>
               <p className="text-xs text-muted-foreground">
                 Uploaded images are now shown directly on the website. If you leave both fields empty, the product will show a clean placeholder until you upload your own photo.
@@ -617,6 +794,13 @@ export default function AdminDashboard() {
                       <div className="flex gap-2">
                         <Button variant="ghost" onClick={() => beginEditProduct(product)} className="text-accent hover:bg-accent/10 hover:text-accent">
                           <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => clearProductImageMutation.mutate({ productId: product.id })}
+                          className="text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+                        >
+                          <ImagePlus className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" onClick={() => deleteProductMutation.mutate({ productId: product.id })} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                           <Trash2 className="h-4 w-4" />

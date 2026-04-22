@@ -348,6 +348,7 @@ export async function updateProduct(input: {
   name: string;
   categoryId: string;
   price: number;
+  clearImage?: boolean;
   imageUrl?: string;
   imageDataUrl?: string;
   imageFileName?: string;
@@ -361,7 +362,9 @@ export async function updateProduct(input: {
     currentCatalog.products.some((product) => product.id === input.productId)
   );
   const existingProduct = catalog.products.find((product) => product.id === input.productId);
-  const image = input.imageDataUrl || input.imageUrl?.trim()
+  const image = input.clearImage
+    ? ''
+    : input.imageDataUrl || input.imageUrl?.trim()
     ? await resolveProductImage(input)
     : existingProduct?.image;
 
@@ -451,6 +454,26 @@ export async function clearAllProductImages() {
       ...product,
       image: '',
     })),
+  });
+
+  return nextCatalog;
+}
+
+export async function clearProductImage(productId: string) {
+  const catalog = await getCatalogWithRetry((currentCatalog) =>
+    currentCatalog.products.some((product) => product.id === productId)
+  );
+
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map((product) =>
+      product.id === productId
+        ? {
+            ...product,
+            image: '',
+          }
+        : product
+    ),
   });
 
   return nextCatalog;

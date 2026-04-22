@@ -31,6 +31,7 @@ import { uploadPrivateBlob } from './blob-storage';
 import { enforceRateLimit } from './_core/rateLimit';
 import {
   clearAllProductImages,
+  clearProductImage,
   createCategory,
   createProduct,
   deleteCategory,
@@ -168,6 +169,7 @@ export const appRouter = router({
         name: z.string().min(2).max(120),
         categoryId: z.string().min(1).max(60),
         price: z.number().positive().max(1000000),
+        clearImage: z.boolean().optional(),
         imageUrl: imageUrlInputSchema,
         imageDataUrl: z.string().optional(),
         imageFileName: z.string().optional(),
@@ -184,6 +186,19 @@ export const appRouter = router({
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
             message: error instanceof Error ? error.message : 'Failed to update product',
+          });
+        }
+      }),
+
+    clearProductImage: adminSessionProcedure
+      .input(z.object({ productId: z.string().min(1).max(120) }))
+      .mutation(async ({ input }) => {
+        try {
+          return await clearProductImage(input.productId);
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to clear product image',
           });
         }
       }),
