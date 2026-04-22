@@ -42,17 +42,55 @@ export function copyTextToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
-export function fileToDataUrl(file: File): Promise<string> {
+async function compressImageFile(file: File) {
+  if (typeof window === 'undefined' || !file.type.startsWith('image/')) {
+    return fileToPlainDataUrl(file);
+  }
+
+  const imageBitmap = await createImageBitmap(file);
+  const maxDimension = 1400;
+  const scale = Math.min(1, maxDimension / Math.max(imageBitmap.width, imageBitmap.height));
+  const targetWidth = Math.max(1, Math.round(imageBitmap.width * scale));
+  const targetHeight = Math.max(1, Math.round(imageBitmap.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const context = canvas.getContext('2d');
+  if (!context) {
+    imageBitmap.close();
+    return fileToPlainDataUrl(file);
+  }
+
+  context.drawImage(imageBitmap, 0, 0, targetWidth, targetHeight);
+  imageBitmap.close();
+
+  const compressedType = file.type === 'image/png' ? 'image/webp' : 'image/jpeg';
+  const quality = compressedType === 'image/webp' ? 0.82 : 0.8;
+
+  return canvas.toDataURL(compressedType, quality);
+}
+
+function fileToPlainDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === "string") {
+      if (typeof reader.result === 'string') {
         resolve(reader.result);
       } else {
-        reject(new Error("Failed to read file"));
+        reject(new Error('Failed to read file'));
       }
     };
-    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file"));
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+export function fileToDataUrl(file: File): Promise<string> {
+  if (!file.type.startsWith('image/')) {
+    return fileToPlainDataUrl(file);
+  }
+
+  return compressImageFile(file).catch(() => fileToPlainDataUrl(file));
 }

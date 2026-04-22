@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Product } from '@/lib/products';
 import { cn } from '@/lib/utils';
 import { getProductFlavorNote, getProductVisualMeta } from '@/lib/productVisuals';
@@ -72,15 +73,31 @@ function ProductPhoto({
   variant: ProductVisualProps['variant'];
   tint?: string;
 }) {
+  const [loaded, setLoaded] = useState(false);
+  const { palette } = getProductVisualMeta(product);
+
   return (
     <div className={cn('absolute overflow-hidden', className)}>
+      <div
+        className={cn(
+          'absolute inset-0 transition-opacity duration-500',
+          loaded ? 'opacity-0' : 'opacity-100'
+        )}
+        style={{
+          background: `linear-gradient(135deg, ${palette.depth}, ${palette.highlight})`,
+        }}
+      />
       <img
         src={product.image}
         alt={product.name}
-        className="h-full w-full object-cover"
+        className={cn(
+          'h-full w-full object-cover transition-opacity duration-500',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
         loading={variant === 'hero' ? 'eager' : 'lazy'}
         fetchPriority={variant === 'hero' ? 'high' : 'auto'}
         decoding="async"
+        onLoad={() => setLoaded(true)}
         sizes={
           variant === 'hero'
             ? '(max-width: 768px) 100vw, 50vw'

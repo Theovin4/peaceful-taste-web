@@ -66,17 +66,32 @@ function App() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+
+    if (connection?.saveData || connection?.effectiveType?.includes('2g')) {
+      return;
+    }
+
     const preload = () => {
       void import("./pages/Shop");
       void import("./pages/Services");
       void import("./pages/About");
       void import("./pages/Contact");
-      void import("./pages/Cart");
-      void import("./pages/PaymentCheckout");
-      void import("./pages/PaymentSuccess");
-      void import("./pages/SocialShowcase");
-      void import("./pages/AdminDashboard");
-      void import("./pages/NotFound");
+
+      // Keep background preloading focused on likely next clicks so mobile devices
+      // do less work during first paint.
+      globalThis.setTimeout(() => {
+        void import("./pages/Cart");
+        void import("./pages/PaymentCheckout");
+        void import("./pages/PaymentSuccess");
+        void import("./pages/SocialShowcase");
+        void import("./pages/AdminDashboard");
+        void import("./pages/NotFound");
+      }, 900);
     };
 
     if ("requestIdleCallback" in window) {
@@ -84,8 +99,8 @@ function App() {
       return () => window.cancelIdleCallback(idleId);
     }
 
-    const timeoutId = window.setTimeout(preload, 600);
-    return () => window.clearTimeout(timeoutId);
+    const timeoutId = globalThis.setTimeout(preload, 600);
+    return () => globalThis.clearTimeout(timeoutId);
   }, []);
 
   return (
