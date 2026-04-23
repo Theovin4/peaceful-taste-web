@@ -1,12 +1,15 @@
 import { Check, Package2 } from 'lucide-react';
 import ProductVisual from '@/components/ProductVisual';
-import { defaultProducts } from '@/lib/products';
+import { useCatalog } from '@/hooks/useCatalog';
 import PageMeta from '@/components/PageMeta';
 
-const yoghurtShowcaseProduct =
-  defaultProducts.find((product) => product.id === 'yoghurt-1') ?? defaultProducts[0];
-
 export default function About() {
+  const { products } = useCatalog();
+  const yoghurtShowcaseProduct =
+    products.find((product) => product.categoryId === 'yoghurt' && product.image?.trim()) ??
+    products.find((product) => product.image?.trim()) ??
+    products[0];
+
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -109,11 +112,17 @@ export default function About() {
                 Featured bottle label
               </p>
               <div className="overflow-hidden rounded-3xl border border-border bg-background/60">
-                <ProductVisual
-                  product={yoghurtShowcaseProduct}
-                  variant="hero"
-                  className="h-[360px] min-h-0 rounded-none border-0"
-                />
+                {yoghurtShowcaseProduct ? (
+                  <ProductVisual
+                    product={yoghurtShowcaseProduct}
+                    variant="hero"
+                    className="h-[360px] min-h-0 rounded-none border-0"
+                  />
+                ) : (
+                  <div className="flex h-[360px] items-center justify-center px-6 text-center text-muted-foreground">
+                    Upload a product photo from the admin dashboard to feature it here.
+                  </div>
+                )}
               </div>
               <div className="mt-5 rounded-2xl border border-border bg-background/60 p-4">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-accent">Current focus</p>

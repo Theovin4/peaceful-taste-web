@@ -167772,25 +167772,28 @@ function ensureDataDir2() {
   }
 }
 async function readCatalogFromBlob() {
-  let latestSnapshotPath = null;
+  let currentBlob = null;
+  try {
+    currentBlob = await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  } catch (error46) {
+    console.warn("[Catalog] Current blob read failed, checking snapshots:", error46);
+  }
+  if (currentBlob) {
+    try {
+      return JSON.parse(currentBlob.buffer.toString("utf8"));
+    } catch (error46) {
+      console.error("[Catalog] Failed to parse current blob catalog:", error46);
+    }
+  }
   try {
     const snapshots = await listPrivateBlobs(CATALOG_BLOB_PREFIX);
-    latestSnapshotPath = snapshots.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0]?.pathname || null;
+    const latestSnapshotPath = snapshots.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0]?.pathname || null;
+    if (!latestSnapshotPath) return null;
+    const snapshotBlob = await downloadPrivateBlob(latestSnapshotPath);
+    if (!snapshotBlob) return null;
+    return JSON.parse(snapshotBlob.buffer.toString("utf8"));
   } catch (error46) {
-    console.warn("[Catalog] Snapshot list unavailable, falling back to current blob path:", error46);
-  }
-  let blob = null;
-  try {
-    blob = latestSnapshotPath ? await downloadPrivateBlob(latestSnapshotPath) : await downloadPrivateBlob(CATALOG_BLOB_PATH);
-  } catch (error46) {
-    console.warn("[Catalog] Blob read failed, falling back to local catalog:", error46);
-    return null;
-  }
-  if (!blob) return null;
-  try {
-    return JSON.parse(blob.buffer.toString("utf8"));
-  } catch (error46) {
-    console.error("[Catalog] Failed to parse blob catalog:", error46);
+    console.warn("[Catalog] Snapshot blob read failed, falling back to local catalog:", error46);
     return null;
   }
 }
@@ -167837,8 +167840,8 @@ async function writeCatalog(catalog) {
   fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
   if (blobStorageEnabled()) {
     const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
-    await uploadPrivateJson(snapshotPath, normalized);
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
+    await uploadPrivateJson(snapshotPath, normalized);
   }
   return normalized;
 }
@@ -168499,7 +168502,7 @@ function createVercelApp() {
         "form-action 'self' https://wa.me mailto:"
       ].join("; ")
     );
-    if (req.path === "/health" || req.path === "/api/health") {
+    if (req.path.startsWith("/trpc") || req.path.startsWith("/api/trpc") || req.path === "/health" || req.path === "/api/health") {
       res.setHeader("Cache-Control", "no-store");
     }
     next();

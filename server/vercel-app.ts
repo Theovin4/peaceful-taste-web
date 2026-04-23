@@ -42,7 +42,7 @@ export function createVercelApp() {
       ].join('; ')
     );
 
-    if (req.path === '/health' || req.path === '/api/health') {
+    if (req.path.startsWith('/trpc') || req.path.startsWith('/api/trpc') || req.path === '/health' || req.path === '/api/health') {
       res.setHeader('Cache-Control', 'no-store');
     }
 

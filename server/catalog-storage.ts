@@ -63,32 +63,35 @@ function ensureDataDir() {
 }
 
 async function readCatalogFromBlob(): Promise<ProductCatalog | null> {
-  let latestSnapshotPath: string | null = null;
+  let currentBlob = null;
+
+  try {
+    currentBlob = await downloadPrivateBlob(CATALOG_BLOB_PATH);
+  } catch (error) {
+    console.warn('[Catalog] Current blob read failed, checking snapshots:', error);
+  }
+
+  if (currentBlob) {
+    try {
+      return JSON.parse(currentBlob.buffer.toString('utf8')) as ProductCatalog;
+    } catch (error) {
+      console.error('[Catalog] Failed to parse current blob catalog:', error);
+    }
+  }
 
   try {
     const snapshots = await listPrivateBlobs(CATALOG_BLOB_PREFIX);
-    latestSnapshotPath = snapshots
+    const latestSnapshotPath = snapshots
       .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0]?.pathname || null;
-  } catch (error) {
-    console.warn('[Catalog] Snapshot list unavailable, falling back to current blob path:', error);
-  }
 
-  let blob = null;
+    if (!latestSnapshotPath) return null;
 
-  try {
-    blob = latestSnapshotPath
-      ? await downloadPrivateBlob(latestSnapshotPath)
-      : await downloadPrivateBlob(CATALOG_BLOB_PATH);
-  } catch (error) {
-    console.warn('[Catalog] Blob read failed, falling back to local catalog:', error);
-    return null;
-  }
-  if (!blob) return null;
+    const snapshotBlob = await downloadPrivateBlob(latestSnapshotPath);
+    if (!snapshotBlob) return null;
 
-  try {
-    return JSON.parse(blob.buffer.toString('utf8')) as ProductCatalog;
+    return JSON.parse(snapshotBlob.buffer.toString('utf8')) as ProductCatalog;
   } catch (error) {
-    console.error('[Catalog] Failed to parse blob catalog:', error);
+    console.warn('[Catalog] Snapshot blob read failed, falling back to local catalog:', error);
     return null;
   }
 }
@@ -165,8 +168,8 @@ async function writeCatalog(catalog: ProductCatalog) {
 
   if (blobStorageEnabled()) {
     const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
-    await uploadPrivateJson(snapshotPath, normalized);
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
+    await uploadPrivateJson(snapshotPath, normalized);
   }
 
   return normalized;

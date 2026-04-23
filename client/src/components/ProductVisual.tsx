@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ImagePlus } from 'lucide-react';
 import type { Product } from '@/lib/products';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,13 @@ export default function ProductVisual({
 }: ProductVisualProps) {
   const hero = variant === 'hero';
   const compact = variant === 'compact';
-  const hasImage = Boolean(product.image?.trim());
+  const [imageFailed, setImageFailed] = useState(false);
+  const imageUrl = product.image?.trim() ?? '';
+  const hasImage = Boolean(imageUrl) && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
 
   return (
     <div
@@ -27,7 +34,7 @@ export default function ProductVisual({
     >
       {hasImage ? (
         <img
-          src={product.image}
+          src={imageUrl}
           alt={product.name}
           className="h-full w-full object-cover"
           loading={hero ? 'eager' : 'lazy'}
@@ -40,6 +47,7 @@ export default function ProductVisual({
                 ? '96px'
                 : '(max-width: 768px) 100vw, 25vw'
           }
+          onError={() => setImageFailed(true)}
         />
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.18),transparent_30%),linear-gradient(180deg,#172127,#0d1317)] px-4 text-center">

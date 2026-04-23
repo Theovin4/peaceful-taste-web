@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,34 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { products, settings } = useCatalog();
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
-  const featuredProduct =
-    products.find((product) => product.id === settings?.featuredStoryProductId) ||
-    bestSellers[0] ||
-    products[0];
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const featuredStoryProducts = useMemo(() => {
+    const storyIds = [
+      settings?.featuredStoryProductId,
+      ...(settings?.flashDealProductIds ?? []),
+    ].filter((id, index, list): id is string => Boolean(id) && list.indexOf(id) === index);
+    const selectedProducts = storyIds
+      .map((productId) => products.find((product) => product.id === productId && product.image?.trim()))
+      .filter((product): product is (typeof products)[number] => Boolean(product));
+    const imageProducts = products.filter((product) => product.image?.trim());
+
+    return selectedProducts.length > 0 ? selectedProducts : imageProducts;
+  }, [products, settings?.featuredStoryProductId, settings?.flashDealProductIds]);
+  const featuredProduct = featuredStoryProducts[featuredIndex] ?? featuredStoryProducts[0];
+
+  useEffect(() => {
+    setFeaturedIndex(0);
+  }, [featuredStoryProducts.length]);
+
+  useEffect(() => {
+    if (featuredStoryProducts.length <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setFeaturedIndex((current) => (current + 1) % featuredStoryProducts.length);
+    }, 60000);
+
+    return () => window.clearInterval(interval);
+  }, [featuredStoryProducts.length]);
 
   return (
     <div className="min-h-screen bg-background">
