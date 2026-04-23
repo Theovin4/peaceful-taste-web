@@ -167842,7 +167842,7 @@ async function updateProduct(input) {
     (currentCatalog) => currentCatalog.products.some((product) => product.id === input.productId)
   );
   const existingProduct = catalog.products.find((product) => product.id === input.productId);
-  const image = input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct?.image;
+  const image = input.clearImage ? "" : input.imageDataUrl || input.imageUrl?.trim() ? await resolveProductImage(input) : existingProduct?.image;
   const updatedProduct = {
     ...existingProduct ?? {
       id: input.productId
@@ -167909,6 +167909,21 @@ async function clearAllProductImages() {
       ...product,
       image: ""
     }))
+  });
+  return nextCatalog;
+}
+async function clearProductImage(productId) {
+  const catalog = await getCatalogWithRetry(
+    (currentCatalog) => currentCatalog.products.some((product) => product.id === productId)
+  );
+  const nextCatalog = await writeCatalog({
+    ...catalog,
+    products: catalog.products.map(
+      (product) => product.id === productId ? {
+        ...product,
+        image: ""
+      } : product
+    )
   });
   return nextCatalog;
 }
@@ -168012,6 +168027,7 @@ var appRouter = router({
       name: external_exports.string().min(2).max(120),
       categoryId: external_exports.string().min(1).max(60),
       price: external_exports.number().positive().max(1e6),
+      clearImage: external_exports.boolean().optional(),
       imageUrl: imageUrlInputSchema,
       imageDataUrl: external_exports.string().optional(),
       imageFileName: external_exports.string().optional(),
@@ -168027,6 +168043,16 @@ var appRouter = router({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: error46 instanceof Error ? error46.message : "Failed to update product"
+        });
+      }
+    }),
+    clearProductImage: adminSessionProcedure.input(external_exports.object({ productId: external_exports.string().min(1).max(120) })).mutation(async ({ input }) => {
+      try {
+        return await clearProductImage(input.productId);
+      } catch (error46) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: error46 instanceof Error ? error46.message : "Failed to clear product image"
         });
       }
     }),
@@ -168322,7 +168348,7 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: blob: https:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "script-src 'self' 'unsafe-inline'",
