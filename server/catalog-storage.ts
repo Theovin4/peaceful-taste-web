@@ -16,7 +16,9 @@ import {
 } from './blob-storage';
 import {
   cloudinaryStorageEnabled,
+  downloadCloudinaryRawJson,
   uploadCloudinaryImageDataUrl,
+  uploadCloudinaryRawJson,
 } from './cloudinary-storage';
 
 const DATA_DIR = process.env.VERCEL
@@ -24,6 +26,7 @@ const DATA_DIR = process.env.VERCEL
   : path.join(process.cwd(), 'data');
 
 const CATALOG_FILE = path.join(DATA_DIR, 'catalog.json');
+const CATALOG_CLOUDINARY_PUBLIC_ID = 'peaceful-taste/catalog/current.json';
 const CATALOG_BLOB_PATH = 'catalog/catalog.json';
 const CATALOG_BLOB_PREFIX = 'catalog/history/';
 const CURRENT_CATALOG_VERSION = 2;
@@ -92,6 +95,17 @@ async function readCatalogFromBlob(): Promise<ProductCatalog | null> {
     return JSON.parse(snapshotBlob.buffer.toString('utf8')) as ProductCatalog;
   } catch (error) {
     console.warn('[Catalog] Snapshot blob read failed, falling back to local catalog:', error);
+    return null;
+  }
+}
+
+async function readCatalogFromCloudinary(): Promise<ProductCatalog | null> {
+  if (!cloudinaryStorageEnabled()) return null;
+
+  try {
+    return await downloadCloudinaryRawJson<ProductCatalog>(CATALOG_CLOUDINARY_PUBLIC_ID);
+  } catch (error) {
+    console.warn('[Catalog] Cloudinary catalog read failed, falling back:', error);
     return null;
   }
 }
@@ -166,6 +180,13 @@ async function writeCatalog(catalog: ProductCatalog) {
   ensureDataDir();
   fs.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
 
+  if (cloudinaryStorageEnabled()) {
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CATALOG_CLOUDINARY_PUBLIC_ID,
+      data: normalized,
+    });
+  }
+
   if (blobStorageEnabled()) {
     const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
@@ -177,6 +198,15 @@ async function writeCatalog(catalog: ProductCatalog) {
 
 export async function getCatalog(): Promise<ProductCatalog> {
   ensureDataDir();
+
+  if (cloudinaryStorageEnabled()) {
+    const cloudinaryCatalog = await readCatalogFromCloudinary();
+    if (cloudinaryCatalog) {
+      const normalized = normalizeCatalog(cloudinaryCatalog);
+      fs.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      return normalized;
+    }
+  }
 
   if (blobStorageEnabled()) {
     const blobCatalog = await readCatalogFromBlob();

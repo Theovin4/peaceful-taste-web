@@ -41,6 +41,13 @@ function getCloudinaryConfig(): CloudinaryConfig | null {
   return { cloudName, apiKey, apiSecret };
 }
 
+function getCloudinaryRawUrl(publicIdWithExtension: string) {
+  const config = getCloudinaryConfig();
+  if (!config) return null;
+
+  return `https://res.cloudinary.com/${config.cloudName}/raw/upload/${publicIdWithExtension}`;
+}
+
 function signUploadParams(params: Record<string, string>, apiSecret: string) {
   const signatureBase = Object.keys(params)
     .sort()
@@ -113,4 +120,62 @@ export async function uploadCloudinaryImageDataUrl(input: {
   }
 
   return optimizedCloudinaryUrl(uploadedUrl);
+}
+
+export async function uploadCloudinaryRawJson(input: {
+  publicIdWithExtension: string;
+  data: unknown;
+}) {
+  const config = getCloudinaryConfig();
+  if (!config) return null;
+
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const paramsToSign = {
+    invalidate: 'true',
+    overwrite: 'true',
+    public_id: input.publicIdWithExtension,
+    timestamp,
+  };
+  const signature = signUploadParams(paramsToSign, config.apiSecret);
+  const body = new FormData();
+  const jsonBuffer = Buffer.from(JSON.stringify(input.data, null, 2), 'utf8');
+  const dataUrl = `data:application/json;base64,${jsonBuffer.toString('base64')}`;
+
+  body.append('file', dataUrl);
+  body.append('api_key', config.apiKey);
+  body.append('public_id', paramsToSign.public_id);
+  body.append('timestamp', timestamp);
+  body.append('overwrite', 'true');
+  body.append('invalidate', 'true');
+  body.append('signature', signature);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${config.cloudName}/raw/upload`,
+    {
+      method: 'POST',
+      body,
+    }
+  );
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => response.statusText);
+    throw new Error(`Cloudinary raw upload failed: ${message}`);
+  }
+
+  return getCloudinaryRawUrl(input.publicIdWithExtension);
+}
+
+export async function downloadCloudinaryRawJson<T>(publicIdWithExtension: string) {
+  const url = getCloudinaryRawUrl(publicIdWithExtension);
+  if (!url) return null;
+
+  const response = await fetch(url, {
+    headers: {
+      'cache-control': 'no-cache',
+    },
+  });
+
+  if (!response.ok) return null;
+
+  return (await response.json()) as T;
 }

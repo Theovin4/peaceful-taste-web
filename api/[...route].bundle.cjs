@@ -167696,6 +167696,11 @@ function getCloudinaryConfig() {
   if (!cloudName || !apiKey || !apiSecret) return null;
   return { cloudName, apiKey, apiSecret };
 }
+function getCloudinaryRawUrl(publicIdWithExtension) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  return `https://res.cloudinary.com/${config2.cloudName}/raw/upload/${publicIdWithExtension}`;
+}
 function signUploadParams(params, apiSecret) {
   const signatureBase = Object.keys(params).sort().map((key) => `${key}=${params[key]}`).join("&");
   return import_node_crypto2.default.createHash("sha1").update(`${signatureBase}${apiSecret}`).digest("hex");
@@ -167746,10 +167751,56 @@ async function uploadCloudinaryImageDataUrl(input) {
   }
   return optimizedCloudinaryUrl(uploadedUrl);
 }
+async function uploadCloudinaryRawJson(input) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
+  const paramsToSign = {
+    invalidate: "true",
+    overwrite: "true",
+    public_id: input.publicIdWithExtension,
+    timestamp: timestamp2
+  };
+  const signature = signUploadParams(paramsToSign, config2.apiSecret);
+  const body = new FormData();
+  const jsonBuffer = Buffer.from(JSON.stringify(input.data, null, 2), "utf8");
+  const dataUrl = `data:application/json;base64,${jsonBuffer.toString("base64")}`;
+  body.append("file", dataUrl);
+  body.append("api_key", config2.apiKey);
+  body.append("public_id", paramsToSign.public_id);
+  body.append("timestamp", timestamp2);
+  body.append("overwrite", "true");
+  body.append("invalidate", "true");
+  body.append("signature", signature);
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${config2.cloudName}/raw/upload`,
+    {
+      method: "POST",
+      body
+    }
+  );
+  if (!response.ok) {
+    const message2 = await response.text().catch(() => response.statusText);
+    throw new Error(`Cloudinary raw upload failed: ${message2}`);
+  }
+  return getCloudinaryRawUrl(input.publicIdWithExtension);
+}
+async function downloadCloudinaryRawJson(publicIdWithExtension) {
+  const url3 = getCloudinaryRawUrl(publicIdWithExtension);
+  if (!url3) return null;
+  const response = await fetch(url3, {
+    headers: {
+      "cache-control": "no-cache"
+    }
+  });
+  if (!response.ok) return null;
+  return await response.json();
+}
 
 // server/catalog-storage.ts
 var DATA_DIR2 = process.env.VERCEL ? path2.join(os2.tmpdir(), "peaceful-taste-data") : path2.join(process.cwd(), "data");
 var CATALOG_FILE = path2.join(DATA_DIR2, "catalog.json");
+var CATALOG_CLOUDINARY_PUBLIC_ID = "peaceful-taste/catalog/current.json";
 var CATALOG_BLOB_PATH = "catalog/catalog.json";
 var CATALOG_BLOB_PREFIX = "catalog/history/";
 var CURRENT_CATALOG_VERSION = 2;
@@ -167797,6 +167848,15 @@ async function readCatalogFromBlob() {
     return null;
   }
 }
+async function readCatalogFromCloudinary() {
+  if (!cloudinaryStorageEnabled()) return null;
+  try {
+    return await downloadCloudinaryRawJson(CATALOG_CLOUDINARY_PUBLIC_ID);
+  } catch (error46) {
+    console.warn("[Catalog] Cloudinary catalog read failed, falling back:", error46);
+    return null;
+  }
+}
 function normalizeCatalog(catalog) {
   const categoryMap = new Map(defaultCategories.map((category) => [category.id, category]));
   const productMap = new Map(defaultProducts.map((product) => [product.id, product]));
@@ -167838,6 +167898,12 @@ async function writeCatalog(catalog) {
   const normalized = normalizeCatalog(catalog);
   ensureDataDir2();
   fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+  if (cloudinaryStorageEnabled()) {
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CATALOG_CLOUDINARY_PUBLIC_ID,
+      data: normalized
+    });
+  }
   if (blobStorageEnabled()) {
     const snapshotPath = `${CATALOG_BLOB_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
     await uploadPrivateJson(CATALOG_BLOB_PATH, normalized);
@@ -167847,6 +167913,14 @@ async function writeCatalog(catalog) {
 }
 async function getCatalog() {
   ensureDataDir2();
+  if (cloudinaryStorageEnabled()) {
+    const cloudinaryCatalog = await readCatalogFromCloudinary();
+    if (cloudinaryCatalog) {
+      const normalized = normalizeCatalog(cloudinaryCatalog);
+      fs2.writeFileSync(CATALOG_FILE, JSON.stringify(normalized, null, 2));
+      return normalized;
+    }
+  }
   if (blobStorageEnabled()) {
     const blobCatalog = await readCatalogFromBlob();
     if (blobCatalog) {
