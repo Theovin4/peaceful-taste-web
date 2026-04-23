@@ -14,6 +14,10 @@ import {
   uploadPrivateJson,
   uploadPublicBlob,
 } from './blob-storage';
+import {
+  cloudinaryStorageEnabled,
+  uploadCloudinaryImageDataUrl,
+} from './cloudinary-storage';
 
 const DATA_DIR = process.env.VERCEL
   ? path.join(os.tmpdir(), 'peaceful-taste-data')
@@ -278,11 +282,28 @@ async function resolveProductImage(input: {
     }
 
     const [, mimeType, base64Content] = dataUrlMatch;
+    const cloudinaryImage = await uploadCloudinaryImageDataUrl({
+      imageDataUrl: input.imageDataUrl,
+      imageFileName: input.imageFileName,
+    });
+
+    if (cloudinaryImage) {
+      return cloudinaryImage;
+    }
+
     const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, '-');
     const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
     const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, 'base64'), mimeType);
 
-    image = blob?.url || input.imageDataUrl;
+    if (blob?.url) {
+      return blob.url;
+    }
+
+    throw new Error(
+      cloudinaryStorageEnabled()
+        ? 'Image upload failed. Please retry, or check the Cloudinary configuration.'
+        : 'Image upload storage is not configured. Please add Cloudinary credentials to Vercel before uploading product images.'
+    );
   }
 
   return image;

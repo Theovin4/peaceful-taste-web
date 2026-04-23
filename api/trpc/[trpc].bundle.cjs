@@ -18590,14 +18590,14 @@ var require_etag = __commonJS({
   "node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var Stats = require("fs").Stats;
     var toString3 = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash2 = crypto7.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash2 = crypto8.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash2 + '"';
     }
@@ -21489,11 +21489,11 @@ var require_request = __commonJS({
 // node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports2) {
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto7.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto8.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21502,7 +21502,7 @@ var require_cookie_signature = __commonJS({
       return sha12(mac) == sha12(val) ? str : false;
     };
     function sha12(str) {
-      return crypto7.createHash("sha1").update(str).digest("hex");
+      return crypto8.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -23255,7 +23255,7 @@ var require_form_data = __commonJS({
     var parseUrl = require("url").parse;
     var fs4 = require("fs");
     var Stream = require("stream").Stream;
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var mime = require_mime_types();
     var asynckit = require_asynckit();
     var setToStringTag = require_es_set_tostringtag();
@@ -23461,7 +23461,7 @@ var require_form_data = __commonJS({
       return Buffer.concat([dataBuffer, Buffer.from(this._lastBoundary())]);
     };
     FormData3.prototype._generateBoundary = function() {
-      this._boundary = "--------------------------" + crypto7.randomBytes(12).toString("hex");
+      this._boundary = "--------------------------" + crypto8.randomBytes(12).toString("hex");
     };
     FormData3.prototype.getLengthSync = function() {
       var knownLength = this._overheadLength + this._valueLength;
@@ -36065,9 +36065,9 @@ var require_binlog_dump = __commonJS({
 var require_auth_41 = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_41.js"(exports2) {
     "use strict";
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     function sha12(msg, msg1, msg2) {
-      const hash2 = crypto7.createHash("sha1");
+      const hash2 = crypto8.createHash("sha1");
       hash2.update(msg);
       if (msg1) {
         hash2.update(msg1);
@@ -37836,7 +37836,7 @@ var require_sha256_password = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_plugins/sha256_password.js"(exports2, module2) {
     "use strict";
     var PLUGIN_NAME = "sha256_password";
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var { xorRotating } = require_auth_41();
     var Tls = require("tls");
     var REQUEST_SERVER_KEY_PACKET = Buffer.from([1]);
@@ -37845,7 +37845,7 @@ var require_sha256_password = __commonJS({
     var STATE_FINAL = -1;
     function encrypt(password, scramble, key) {
       const stage1 = xorRotating(Buffer.from(`${password}\0`, "utf8"), scramble);
-      return crypto7.publicEncrypt(key, stage1);
+      return crypto8.publicEncrypt(key, stage1);
     }
     module2.exports = (pluginOptions = {}) => ({ connection }) => {
       let state = 0;
@@ -37891,7 +37891,7 @@ var require_caching_sha2_password = __commonJS({
   "node_modules/.pnpm/mysql2@3.19.1_@types+node@24.7.0/node_modules/mysql2/lib/auth_plugins/caching_sha2_password.js"(exports2, module2) {
     "use strict";
     var PLUGIN_NAME = "caching_sha2_password";
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var { xor, xorRotating } = require_auth_41();
     var REQUEST_SERVER_KEY_PACKET = Buffer.from([2]);
     var FAST_AUTH_SUCCESS_PACKET = Buffer.from([3]);
@@ -37901,7 +37901,7 @@ var require_caching_sha2_password = __commonJS({
     var STATE_WAIT_SERVER_KEY = 2;
     var STATE_FINAL = -1;
     function sha256(msg) {
-      const hash2 = crypto7.createHash("sha256");
+      const hash2 = crypto8.createHash("sha256");
       hash2.update(msg);
       return hash2.digest();
     }
@@ -37916,10 +37916,10 @@ var require_caching_sha2_password = __commonJS({
     }
     function encrypt(password, scramble, key) {
       const stage1 = xorRotating(Buffer.from(`${password}\0`, "utf8"), scramble);
-      return crypto7.publicEncrypt(
+      return crypto8.publicEncrypt(
         {
           key,
-          padding: crypto7.constants.RSA_PKCS1_OAEP_PADDING
+          padding: crypto8.constants.RSA_PKCS1_OAEP_PADDING
         },
         stage1
       );
@@ -47206,7 +47206,7 @@ var require_data_validations = __commonJS({
 var require_encryptor = __commonJS({
   "node_modules/.pnpm/exceljs@4.4.0/node_modules/exceljs/lib/utils/encryptor.js"(exports2, module2) {
     "use strict";
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var Encryptor = {
       /**
        * Calculate a hash of the concatenated buffers with the given algorithm.
@@ -47214,7 +47214,7 @@ var require_encryptor = __commonJS({
        * @returns {Buffer} The hash
        */
       hash(algorithm, ...buffers) {
-        const hash2 = crypto7.createHash(algorithm);
+        const hash2 = crypto8.createHash(algorithm);
         hash2.update(Buffer.concat(buffers));
         return hash2.digest();
       },
@@ -47230,7 +47230,7 @@ var require_encryptor = __commonJS({
        */
       convertPasswordToHash(password, hashAlgorithm, saltValue, spinCount) {
         hashAlgorithm = hashAlgorithm.toLowerCase();
-        const hashes = crypto7.getHashes();
+        const hashes = crypto8.getHashes();
         if (hashes.indexOf(hashAlgorithm) < 0) {
           throw new Error(`Hash algorithm '${hashAlgorithm}' not supported!`);
         }
@@ -47248,7 +47248,7 @@ var require_encryptor = __commonJS({
        * @param size The size argument is a number indicating the number of bytes to generate.
        */
       randomBytes(size) {
-        return crypto7.randomBytes(size);
+        return crypto8.randomBytes(size);
       }
     };
     module2.exports = Encryptor;
@@ -100315,7 +100315,7 @@ var require_tmp = __commonJS({
     var fs4 = require("fs");
     var os4 = require("os");
     var path4 = require("path");
-    var crypto7 = require("crypto");
+    var crypto8 = require("crypto");
     var _c = { fs: fs4.constants, os: os4.constants };
     var RANDOM_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     var TEMPLATE_PATTERN = /XXXXXX/;
@@ -100495,9 +100495,9 @@ var require_tmp = __commonJS({
     function _randomChars(howMany) {
       let value = [], rnd = null;
       try {
-        rnd = crypto7.randomBytes(howMany);
+        rnd = crypto8.randomBytes(howMany);
       } catch (e) {
-        rnd = crypto7.pseudoRandomBytes(howMany);
+        rnd = crypto8.pseudoRandomBytes(howMany);
       }
       for (let i = 0; i < howMany; i++) {
         value.push(RANDOM_CHARS[rnd[i] % RANDOM_CHARS.length]);
@@ -105492,11 +105492,11 @@ var require_util7 = __commonJS({
     var { isUint8Array } = require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto7;
+    var crypto8;
     try {
-      crypto7 = require("node:crypto");
+      crypto8 = require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto7.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
+      supportedHashes = crypto8.getHashes().filter((hash2) => possibleRelevantHashes.includes(hash2));
     } catch {
     }
     function responseURL(response) {
@@ -105769,7 +105769,7 @@ var require_util7 = __commonJS({
       }
     }
     function bytesMatch(bytes2, metadataList) {
-      if (crypto7 === void 0) {
+      if (crypto8 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -105784,7 +105784,7 @@ var require_util7 = __commonJS({
       for (const item of metadata) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto7.createHash(algorithm).update(bytes2).digest("base64");
+        let actualValue = crypto8.createHash(algorithm).update(bytes2).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -106848,8 +106848,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto7 = require("node:crypto");
-      random = (max) => crypto7.randomInt(0, max);
+      const crypto8 = require("node:crypto");
+      random = (max) => crypto8.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -118258,13 +118258,13 @@ var require_frame = __commonJS({
     "use strict";
     var { maxUnsigned16Bit } = require_constants7();
     var BUFFER_SIZE = 16386;
-    var crypto7;
+    var crypto8;
     var buffer = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto7 = require("node:crypto");
+      crypto8 = require("node:crypto");
     } catch {
-      crypto7 = {
+      crypto8 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer2, _offset, _size2) {
           for (let i = 0; i < buffer2.length; ++i) {
@@ -118277,7 +118277,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto7.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto8.randomFillSync(buffer ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++], buffer[bufIdx++]];
     }
@@ -118349,9 +118349,9 @@ var require_connection4 = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers2();
     var { getDecodeSplit } = require_util7();
     var { WebsocketFrameSend } = require_frame();
-    var crypto7;
+    var crypto8;
     try {
-      crypto7 = require("node:crypto");
+      crypto8 = require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url3, protocols, client, ws, onEstablish, options) {
@@ -118371,7 +118371,7 @@ var require_connection4 = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto7.randomBytes(16).toString("base64");
+      const keyValue = crypto8.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue);
       request.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -118401,7 +118401,7 @@ var require_connection4 = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto7.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto8.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -167621,6 +167621,83 @@ var defaultProducts = [
   }
 ];
 
+// server/cloudinary-storage.ts
+var import_node_crypto2 = __toESM(require("node:crypto"), 1);
+function parseCloudinaryUrl() {
+  const cloudinaryUrl = process.env.CLOUDINARY_URL;
+  if (!cloudinaryUrl) return {};
+  try {
+    const parsed = new URL(cloudinaryUrl);
+    if (parsed.protocol !== "cloudinary:") return {};
+    return {
+      cloudName: parsed.hostname,
+      apiKey: decodeURIComponent(parsed.username),
+      apiSecret: decodeURIComponent(parsed.password)
+    };
+  } catch (error46) {
+    console.warn("[Cloudinary] Invalid CLOUDINARY_URL:", error46);
+    return {};
+  }
+}
+function getCloudinaryConfig() {
+  const fromUrl = parseCloudinaryUrl();
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || fromUrl.cloudName;
+  const apiKey = process.env.CLOUDINARY_API_KEY || fromUrl.apiKey;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET || fromUrl.apiSecret;
+  if (!cloudName || !apiKey || !apiSecret) return null;
+  return { cloudName, apiKey, apiSecret };
+}
+function signUploadParams(params, apiSecret) {
+  const signatureBase = Object.keys(params).sort().map((key) => `${key}=${params[key]}`).join("&");
+  return import_node_crypto2.default.createHash("sha1").update(`${signatureBase}${apiSecret}`).digest("hex");
+}
+function safePublicId(fileName) {
+  const nameWithoutExtension = fileName.replace(/\.[a-zA-Z0-9]+$/, "");
+  const safeName = nameWithoutExtension.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  return `${Date.now()}-${safeName || "product-image"}`;
+}
+function optimizedCloudinaryUrl(url3) {
+  return url3.replace("/image/upload/", "/image/upload/c_limit,w_1200/f_auto/q_auto/");
+}
+function cloudinaryStorageEnabled() {
+  return Boolean(getCloudinaryConfig());
+}
+async function uploadCloudinaryImageDataUrl(input) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
+  const paramsToSign = {
+    folder: "peaceful-taste/products",
+    public_id: safePublicId(input.imageFileName),
+    timestamp: timestamp2
+  };
+  const signature = signUploadParams(paramsToSign, config2.apiSecret);
+  const body = new FormData();
+  body.append("file", input.imageDataUrl);
+  body.append("api_key", config2.apiKey);
+  body.append("folder", paramsToSign.folder);
+  body.append("public_id", paramsToSign.public_id);
+  body.append("timestamp", timestamp2);
+  body.append("signature", signature);
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${config2.cloudName}/image/upload`,
+    {
+      method: "POST",
+      body
+    }
+  );
+  if (!response.ok) {
+    const message2 = await response.text().catch(() => response.statusText);
+    throw new Error(`Cloudinary image upload failed: ${message2}`);
+  }
+  const result = await response.json();
+  const uploadedUrl = result.secure_url || result.url;
+  if (!uploadedUrl) {
+    throw new Error("Cloudinary image upload did not return a public image URL.");
+  }
+  return optimizedCloudinaryUrl(uploadedUrl);
+}
+
 // server/catalog-storage.ts
 var DATA_DIR2 = process.env.VERCEL ? path2.join(os2.tmpdir(), "peaceful-taste-data") : path2.join(process.cwd(), "data");
 var CATALOG_FILE = path2.join(DATA_DIR2, "catalog.json");
@@ -167797,10 +167874,22 @@ async function resolveProductImage(input) {
       throw new Error("Image upload must be a valid data URL.");
     }
     const [, mimeType, base64Content] = dataUrlMatch;
+    const cloudinaryImage = await uploadCloudinaryImageDataUrl({
+      imageDataUrl: input.imageDataUrl,
+      imageFileName: input.imageFileName
+    });
+    if (cloudinaryImage) {
+      return cloudinaryImage;
+    }
     const safeFileName = input.imageFileName.replace(/[^a-zA-Z0-9._-]/g, "-");
     const pathname = `catalog/products/${Date.now()}-${safeFileName}`;
     const blob = await uploadPublicBlob(pathname, Buffer.from(base64Content, "base64"), mimeType);
-    image = blob?.url || input.imageDataUrl;
+    if (blob?.url) {
+      return blob.url;
+    }
+    throw new Error(
+      cloudinaryStorageEnabled() ? "Image upload failed. Please retry, or check the Cloudinary configuration." : "Image upload storage is not configured. Please add Cloudinary credentials to Vercel before uploading product images."
+    );
   }
   return image;
 }
