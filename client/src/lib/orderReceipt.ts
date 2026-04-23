@@ -42,16 +42,25 @@ export function copyTextToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
 }
 
-async function compressImageFile(file: File) {
+export type ImageCropOptions = {
+  zoom?: number;
+  offsetX?: number;
+  offsetY?: number;
+  aspectRatio?: number;
+};
+
+async function compressImageFile(file: File, cropOptions: ImageCropOptions = {}) {
   if (typeof window === 'undefined' || !file.type.startsWith('image/')) {
     return fileToPlainDataUrl(file);
   }
 
   const imageBitmap = await createImageBitmap(file);
-  const maxDimension = 1400;
-  const scale = Math.min(1, maxDimension / Math.max(imageBitmap.width, imageBitmap.height));
-  const targetWidth = Math.max(1, Math.round(imageBitmap.width * scale));
-  const targetHeight = Math.max(1, Math.round(imageBitmap.height * scale));
+  const aspectRatio = cropOptions.aspectRatio ?? 1;
+  const targetWidth = 1200;
+  const targetHeight = Math.round(targetWidth / aspectRatio);
+  const zoom = Math.min(Math.max(cropOptions.zoom ?? 1, 1), 2.5);
+  const offsetX = Math.min(Math.max(cropOptions.offsetX ?? 50, 0), 100);
+  const offsetY = Math.min(Math.max(cropOptions.offsetY ?? 50, 0), 100);
 
   const canvas = document.createElement('canvas');
   canvas.width = targetWidth;
@@ -63,7 +72,36 @@ async function compressImageFile(file: File) {
     return fileToPlainDataUrl(file);
   }
 
-  context.drawImage(imageBitmap, 0, 0, targetWidth, targetHeight);
+  const sourceAspectRatio = imageBitmap.width / imageBitmap.height;
+  const cropAspectRatio = targetWidth / targetHeight;
+  let sourceWidth = imageBitmap.width;
+  let sourceHeight = imageBitmap.height;
+
+  if (sourceAspectRatio > cropAspectRatio) {
+    sourceWidth = imageBitmap.height * cropAspectRatio;
+  } else {
+    sourceHeight = imageBitmap.width / cropAspectRatio;
+  }
+
+  sourceWidth = Math.max(1, sourceWidth / zoom);
+  sourceHeight = Math.max(1, sourceHeight / zoom);
+
+  const maxSourceX = Math.max(0, imageBitmap.width - sourceWidth);
+  const maxSourceY = Math.max(0, imageBitmap.height - sourceHeight);
+  const sourceX = maxSourceX * (offsetX / 100);
+  const sourceY = maxSourceY * (offsetY / 100);
+
+  context.drawImage(
+    imageBitmap,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    targetWidth,
+    targetHeight
+  );
   imageBitmap.close();
 
   const compressedType = file.type === 'image/png' ? 'image/webp' : 'image/jpeg';
@@ -87,10 +125,10 @@ function fileToPlainDataUrl(file: File): Promise<string> {
   });
 }
 
-export function fileToDataUrl(file: File): Promise<string> {
+export function fileToDataUrl(file: File, cropOptions?: ImageCropOptions): Promise<string> {
   if (!file.type.startsWith('image/')) {
     return fileToPlainDataUrl(file);
   }
 
-  return compressImageFile(file).catch(() => fileToPlainDataUrl(file));
+  return compressImageFile(file, cropOptions).catch(() => fileToPlainDataUrl(file));
 }

@@ -83,6 +83,7 @@ export default function AdminDashboard() {
   const [flashDealProductIds, setFlashDealProductIds] = useState<string[]>([]);
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [descriptionTouched, setDescriptionTouched] = useState(false);
+  const [imageCrop, setImageCrop] = useState({ zoom: 1, offsetX: 50, offsetY: 50 });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const statusQuery = trpc.admin.status.useQuery(undefined, {
@@ -259,7 +260,12 @@ export default function AdminDashboard() {
     let imageDataUrl: string | undefined;
     let imageFileName: string | undefined;
     if (productForm.imageFile) {
-      imageDataUrl = await fileToDataUrl(productForm.imageFile);
+      imageDataUrl = await fileToDataUrl(productForm.imageFile, {
+        zoom: imageCrop.zoom,
+        offsetX: imageCrop.offsetX,
+        offsetY: imageCrop.offsetY,
+        aspectRatio: 1,
+      });
       imageFileName = productForm.imageFile.name;
     }
 
@@ -315,6 +321,10 @@ export default function AdminDashboard() {
       imageUrl: file ? '' : prev.imageUrl,
       currentImage: file ? '' : prev.currentImage,
     }));
+
+    if (file) {
+      setImageCrop({ zoom: 1, offsetX: 50, offsetY: 50 });
+    }
   };
 
   const removeSelectedImage = () => {
@@ -328,6 +338,8 @@ export default function AdminDashboard() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    setImageCrop({ zoom: 1, offsetX: 50, offsetY: 50 });
   };
 
   const previewImage = useMemo(() => {
@@ -737,10 +749,85 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 {previewImage ? (
-                  <img src={previewImage} alt="Product preview" className="h-48 w-full rounded-2xl object-cover" />
+                  <div className="overflow-hidden rounded-2xl">
+                    <img
+                      src={previewImage}
+                      alt="Product preview"
+                      className="h-64 w-full object-cover"
+                      style={
+                        productForm.imageFile
+                          ? {
+                              transform: `scale(${imageCrop.zoom})`,
+                              transformOrigin: `${imageCrop.offsetX}% ${imageCrop.offsetY}%`,
+                            }
+                          : undefined
+                      }
+                    />
+                  </div>
                 ) : (
                   <div className="flex h-48 items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground">
                     No product image selected yet
+                  </div>
+                )}
+                {productForm.imageFile && (
+                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                    <label className="text-sm">
+                      <span className="mb-2 block font-semibold text-foreground">Zoom</span>
+                      <input
+                        type="range"
+                        min="1"
+                        max="2.5"
+                        step="0.05"
+                        value={imageCrop.zoom}
+                        onChange={(event) =>
+                          setImageCrop((current) => ({
+                            ...current,
+                            zoom: Number(event.target.value),
+                          }))
+                        }
+                        className="w-full accent-[hsl(var(--accent))]"
+                      />
+                    </label>
+                    <label className="text-sm">
+                      <span className="mb-2 block font-semibold text-foreground">Move left/right</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imageCrop.offsetX}
+                        onChange={(event) =>
+                          setImageCrop((current) => ({
+                            ...current,
+                            offsetX: Number(event.target.value),
+                          }))
+                        }
+                        className="w-full accent-[hsl(var(--accent))]"
+                      />
+                    </label>
+                    <label className="text-sm">
+                      <span className="mb-2 block font-semibold text-foreground">Move up/down</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={imageCrop.offsetY}
+                        onChange={(event) =>
+                          setImageCrop((current) => ({
+                            ...current,
+                            offsetY: Number(event.target.value),
+                          }))
+                        }
+                        className="w-full accent-[hsl(var(--accent))]"
+                      />
+                    </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10 md:col-span-3"
+                      onClick={() => setImageCrop({ zoom: 1, offsetX: 50, offsetY: 50 })}
+                    >
+                      Reset crop
+                    </Button>
                   </div>
                 )}
               </div>
