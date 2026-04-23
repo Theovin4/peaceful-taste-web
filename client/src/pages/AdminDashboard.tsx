@@ -85,6 +85,8 @@ export default function AdminDashboard() {
   const [descriptionTouched, setDescriptionTouched] = useState(false);
   const [imageCrop, setImageCrop] = useState({ zoom: 1, offsetX: 50, offsetY: 50 });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const productEditorRef = useRef<HTMLDivElement | null>(null);
+  const productNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const statusQuery = trpc.admin.status.useQuery(undefined, {
     refetchOnWindowFocus: false,
@@ -311,7 +313,10 @@ export default function AdminDashboard() {
       isActive: product.isActive !== false,
     });
     setDescriptionTouched(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.requestAnimationFrame(() => {
+      productEditorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.setTimeout(() => productNameInputRef.current?.focus({ preventScroll: true }), 250);
+    });
   };
 
   const setImageFile = (file: File | null) => {
@@ -601,6 +606,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+          <div ref={productEditorRef} className="scroll-mt-6">
           <Card className="glass-panel border-0 p-6">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -630,7 +636,7 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="productName" className="mb-2 block font-semibold text-foreground">Product name</Label>
-                <Input id="productName" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Mango Yoghurt 35cl" className="bg-background" required />
+                <Input ref={productNameInputRef} id="productName" value={productForm.name} onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="e.g. Mango Yoghurt 35cl" className="bg-background" required />
                 </div>
                 <div>
                   <Label htmlFor="productCategory" className="mb-2 block font-semibold text-foreground">Category</Label>
@@ -857,6 +863,7 @@ export default function AdminDashboard() {
               </Button>
             </form>
           </Card>
+          </div>
 
           <Card className="glass-panel border-0 p-6">
             <h2 className="mb-4 text-2xl font-bold text-foreground">Current products</h2>
