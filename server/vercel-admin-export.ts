@@ -1,10 +1,9 @@
 // @ts-nocheck
 import express from "express";
-import fs from "node:fs";
 import { readAdminSessionFromRequest } from "./_core/adminSession";
 import {
-  prepareInquiriesWorkbookDownload,
-  prepareOrdersWorkbookDownload,
+  prepareInquiriesWorkbookBuffer,
+  prepareOrdersWorkbookBuffer,
 } from "./excel-storage";
 
 const app = express();
@@ -18,24 +17,32 @@ app.get("*", async (req, res) => {
   const sheet = req.path.split("/").filter(Boolean).pop();
 
   if (sheet === "orders") {
-    const ordersFile = await prepareOrdersWorkbookDownload();
-    if (!fs.existsSync(ordersFile)) {
-      res.status(404).json({ error: "Orders workbook not found" });
-      return;
-    }
-
-    res.download(ordersFile, "peaceful-taste-orders.xlsx");
+    const buffer = await prepareOrdersWorkbookBuffer();
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="peaceful-taste-orders.xlsx"'
+    );
+    res.setHeader("Content-Length", String(buffer.length));
+    res.send(buffer);
     return;
   }
 
   if (sheet === "inquiries") {
-    const inquiriesFile = await prepareInquiriesWorkbookDownload();
-    if (!fs.existsSync(inquiriesFile)) {
-      res.status(404).json({ error: "Inquiries workbook not found" });
-      return;
-    }
-
-    res.download(inquiriesFile, "peaceful-taste-inquiries.xlsx");
+    const buffer = await prepareInquiriesWorkbookBuffer();
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="peaceful-taste-inquiries.xlsx"'
+    );
+    res.setHeader("Content-Length", String(buffer.length));
+    res.send(buffer);
     return;
   }
 

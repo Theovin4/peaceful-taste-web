@@ -248,7 +248,7 @@ export default function AdminDashboard() {
 
   const openDownload = (type: 'orders' | 'inquiries') => {
     const url = type === 'orders' ? '/api/admin/export/orders' : '/api/admin/export/inquiries';
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.location.assign(url);
   };
 
   const submitCategory = async (e: React.FormEvent) => {

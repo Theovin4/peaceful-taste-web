@@ -246,6 +246,11 @@ async function buildOrdersWorkbookFile() {
   };
 
   orders.forEach((order) => worksheet.addRow(order));
+  return workbook;
+}
+
+async function writeOrdersWorkbookFile() {
+  const workbook = await buildOrdersWorkbookFile();
   await workbook.xlsx.writeFile(ORDERS_FILE);
   return ORDERS_FILE;
 }
@@ -275,6 +280,11 @@ async function buildInquiriesWorkbookFile() {
   };
 
   inquiries.forEach((inquiry) => worksheet.addRow(inquiry));
+  return workbook;
+}
+
+async function writeInquiriesWorkbookFile() {
+  const workbook = await buildInquiriesWorkbookFile();
   await workbook.xlsx.writeFile(INQUIRIES_FILE);
   return INQUIRIES_FILE;
 }
@@ -321,7 +331,7 @@ export async function addOrderToExcel(orderData: {
   };
 
   await writeOrderRecord(record);
-  await buildOrdersWorkbookFile();
+  await writeOrdersWorkbookFile();
   return true;
 }
 
@@ -339,7 +349,7 @@ export async function updateOrderReceiptInExcel(
     receiptUrl,
     status,
   });
-  await buildOrdersWorkbookFile();
+  await writeOrdersWorkbookFile();
 
   return true;
 }
@@ -400,16 +410,28 @@ export async function addInquiryToExcel(inquiryData: {
   };
 
   await writeInquiryRecord(record);
-  await buildInquiriesWorkbookFile();
+  await writeInquiriesWorkbookFile();
   return true;
 }
 
 export async function prepareOrdersWorkbookDownload() {
-  return buildOrdersWorkbookFile();
+  return writeOrdersWorkbookFile();
 }
 
 export async function prepareInquiriesWorkbookDownload() {
-  return buildInquiriesWorkbookFile();
+  return writeInquiriesWorkbookFile();
+}
+
+export async function prepareOrdersWorkbookBuffer() {
+  const workbook = await buildOrdersWorkbookFile();
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
+export async function prepareInquiriesWorkbookBuffer() {
+  const workbook = await buildInquiriesWorkbookFile();
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
 }
 
 export function getOrdersFilePath(): string {
