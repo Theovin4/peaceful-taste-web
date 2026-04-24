@@ -3,9 +3,9 @@ import { trpc } from '@/lib/trpc';
 
 export function useCatalog() {
   const catalogQuery = trpc.catalog.getCatalog.useQuery(undefined, {
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30,
     gcTime: 1000 * 60 * 5,
   });
 

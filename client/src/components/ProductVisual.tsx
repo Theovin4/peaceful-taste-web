@@ -19,6 +19,7 @@ export default function ProductVisual({
   const [imageFailed, setImageFailed] = useState(false);
   const imageUrl = product.image?.trim() ?? '';
   const hasImage = Boolean(imageUrl) && !imageFailed;
+  const optimizedImageUrl = getOptimizedImageUrl(imageUrl, variant);
 
   useEffect(() => {
     setImageFailed(false);
@@ -34,7 +35,7 @@ export default function ProductVisual({
     >
       {hasImage ? (
         <img
-          src={imageUrl}
+          src={optimizedImageUrl}
           alt={product.name}
           className="h-full w-full object-cover"
           loading={hero ? 'eager' : 'lazy'}
@@ -109,5 +110,27 @@ export default function ProductVisual({
         </div>
       </div>
     </div>
+  );
+}
+
+function getOptimizedImageUrl(
+  imageUrl: string,
+  variant: ProductVisualProps['variant']
+) {
+  if (!imageUrl.includes('/image/upload/')) {
+    return imageUrl;
+  }
+
+  const transformByVariant = {
+    hero: 'c_fill,g_auto,w_960,h_960/f_auto/q_auto',
+    card: 'c_fill,g_auto,w_640,h_640/f_auto/q_auto',
+    compact: 'c_fill,g_auto,w_160,h_160/f_auto/q_auto',
+  } satisfies Record<NonNullable<ProductVisualProps['variant']>, string>;
+
+  const transform = transformByVariant[variant ?? 'card'];
+
+  return imageUrl.replace(
+    /\/image\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
+    `/image/upload/${transform}/$1`
   );
 }

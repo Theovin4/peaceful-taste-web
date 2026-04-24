@@ -1,32 +1,48 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowRight, Leaf, Shield, Sparkles } from 'lucide-react';
+import { ArrowRight, Leaf, Shield, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProductCard from '@/components/ProductCard';
-import LimitedTimeOffers from '@/components/LimitedTimeOffers';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import { useCatalog } from '@/hooks/useCatalog';
 import { formatNaira } from '@/lib/format';
 import ProductVisual from '@/components/ProductVisual';
 import PageMeta from '@/components/PageMeta';
+import LazySection from '@/components/LazySection';
+import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
+import {
+  FAQSchema,
+  LocalBusinessSchema,
+  OrganizationSchema,
+  WebsiteSchema,
+} from '@/components/SEOSchema';
+
+const LimitedTimeOffers = lazy(() => import('@/components/LimitedTimeOffers'));
+const NewsletterSignup = lazy(() => import('@/components/NewsletterSignup'));
+const HomeBestSellersSection = lazy(
+  () => import('@/components/home/HomeBestSellersSection')
+);
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { products, settings } = useCatalog();
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
   const [featuredIndex, setFeaturedIndex] = useState(0);
+
   const featuredStoryProducts = useMemo(() => {
     const storyIds = [
       settings?.featuredStoryProductId,
       ...(settings?.flashDealProductIds ?? []),
     ].filter((id, index, list): id is string => Boolean(id) && list.indexOf(id) === index);
-    const selectedProducts = storyIds
-      .map((productId) => products.find((product) => product.id === productId && product.image?.trim()))
-      .filter((product): product is (typeof products)[number] => Boolean(product));
-    const imageProducts = products.filter((product) => product.image?.trim());
 
+    const selectedProducts = storyIds
+      .map((productId) =>
+        products.find((product) => product.id === productId && product.image?.trim())
+      )
+      .filter((product): product is (typeof products)[number] => Boolean(product));
+
+    const imageProducts = products.filter((product) => product.image?.trim());
     return selectedProducts.length > 0 ? selectedProducts : imageProducts;
   }, [products, settings?.featuredStoryProductId, settings?.flashDealProductIds]);
+
   const featuredProduct = featuredStoryProducts[featuredIndex] ?? featuredStoryProducts[0];
 
   useEffect(() => {
@@ -43,6 +59,31 @@ export default function Home() {
     return () => window.clearInterval(interval);
   }, [featuredStoryProducts.length]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const heroImage = featuredProduct?.image?.trim();
+    if (!heroImage) return;
+
+    const preloadHref = heroImage.replace(
+      /\/image\/upload\/(?:[^/]+\/)*?(v\d+\/)/,
+      '/image/upload/c_fill,g_auto,w_960,h_960/f_auto/q_auto/$1'
+    );
+
+    let preloadLink = document.head.querySelector(
+      'link[data-home-hero-preload="true"]'
+    ) as HTMLLinkElement | null;
+
+    if (!preloadLink) {
+      preloadLink = document.createElement('link');
+      preloadLink.setAttribute('data-home-hero-preload', 'true');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'image';
+      document.head.appendChild(preloadLink);
+    }
+
+    preloadLink.href = preloadHref;
+  }, [featuredProduct?.image]);
+
   return (
     <div className="min-h-screen bg-background">
       <PageMeta
@@ -51,6 +92,11 @@ export default function Home() {
         path="/"
         image={featuredProduct?.image}
       />
+      <OrganizationSchema />
+      <LocalBusinessSchema />
+      <WebsiteSchema />
+      <FAQSchema />
+
       <section className="relative overflow-hidden py-16 md:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,169,109,0.16),transparent_24%),radial-gradient(circle_at_left,rgba(63,107,34,0.22),transparent_32%)]" />
         <div className="container">
@@ -100,8 +146,23 @@ export default function Home() {
                 {featuredProduct ? (
                   <ProductVisual product={featuredProduct} variant="hero" className="w-full" />
                 ) : (
-                  <div className="glass-panel flex min-h-[420px] items-center justify-center rounded-2xl text-center text-muted-foreground">
-                    Product visuals are loading...
+                  <div className="glass-panel flex min-h-[420px] flex-col items-center justify-center rounded-2xl px-8 text-center">
+                    <img
+                      src={PEACEFUL_TASTE_CONTACT.logoUrl}
+                      alt="Peaceful Taste"
+                      className="h-24 w-24 rounded-3xl border border-accent/20 object-cover shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
+                      loading="eager"
+                      decoding="async"
+                    />
+                    <p className="mt-6 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
+                      Peaceful Taste
+                    </p>
+                    <p className="mt-3 max-w-sm text-lg font-semibold text-foreground">
+                      Premium product visuals are preparing for your next order.
+                    </p>
+                    <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+                      Browse best sellers now while live storefront images finish loading in the background.
+                    </p>
                   </div>
                 )}
                 <div className="glass-panel absolute -bottom-6 -left-6 max-w-xs rounded-2xl p-4 text-foreground">
@@ -114,7 +175,11 @@ export default function Home() {
         </div>
       </section>
 
-      <LimitedTimeOffers />
+      <LazySection fallback={<div className="min-h-20 border-y border-border bg-card/30" />}>
+        <Suspense fallback={<div className="min-h-20 border-y border-border bg-card/30" />}>
+          <LimitedTimeOffers />
+        </Suspense>
+      </LazySection>
 
       <section className="border-y border-border bg-card/55 py-12 backdrop-blur-md">
         <div className="container">
@@ -150,30 +215,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
-        <div className="container">
-          <div className="mb-12 text-center">
-            <h2 className="text-heading mb-4 text-foreground">Customer Favorites</h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Best-selling treats customers come back for again and again.
-            </p>
-          </div>
-
-          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {bestSellers.map((product, index) => (
-              <div key={product.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button onClick={() => setLocation('/shop')} className="btn-primary gap-2 text-white">
-              View All Products <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
+      <LazySection fallback={<div className="container min-h-[540px] py-16 md:py-24" />}>
+        <Suspense fallback={<div className="container min-h-[540px] py-16 md:py-24" />}>
+          <HomeBestSellersSection products={bestSellers} />
+        </Suspense>
+      </LazySection>
 
       <section className="py-16 md:py-24">
         <div className="container">
@@ -208,7 +254,7 @@ export default function Home() {
               <div key={testimonial.name} className="glass-panel rounded-2xl p-6" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="mb-4 flex gap-1">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <span key={i} className="text-lg text-accent">★</span>
+                    <Star key={i} className="h-5 w-5 fill-current text-accent" />
                   ))}
                 </div>
                 <p className="mb-4 font-medium leading-relaxed text-card-foreground">{testimonial.text}</p>
@@ -258,7 +304,11 @@ export default function Home() {
         </div>
       </section>
 
-      <NewsletterSignup />
+      <LazySection fallback={<div className="container min-h-[320px] py-16 md:py-24" />}>
+        <Suspense fallback={<div className="container min-h-[320px] py-16 md:py-24" />}>
+          <NewsletterSignup />
+        </Suspense>
+      </LazySection>
 
       <section className="py-12">
         <div className="container">

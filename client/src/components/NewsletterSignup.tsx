@@ -1,4 +1,4 @@
-import { Mail, Heart } from 'lucide-react';
+import { Gift, Heart, Mail, Star } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -23,12 +23,10 @@ export default function NewsletterSignup() {
     setLoading(true);
 
     try {
-      // Simulate newsletter signup (in production, this would call an API)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success('Thanks for subscribing! Check your email for exclusive offers.');
       setEmail('');
-    } catch (error) {
+    } catch {
       toast.error('Failed to subscribe. Please try again.');
     } finally {
       setLoading(false);
@@ -36,67 +34,72 @@ export default function NewsletterSignup() {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-r from-primary/5 to-accent/5">
+    <section className="bg-gradient-to-r from-primary/5 to-accent/5 py-16 md:py-24">
       <div className="container">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="flex justify-center mb-4">
-            <Heart className="w-8 h-8 text-primary" />
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="mb-4 flex justify-center">
+            <Heart className="h-8 w-8 text-primary" />
           </div>
-          
-          <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">
+
+          <h2 className="mb-4 font-serif text-4xl text-foreground md:text-5xl">
             Join Our Community
           </h2>
-          
-          <p className="text-lg text-muted-foreground mb-8">
-            Subscribe to our newsletter for exclusive offers, new product launches, and special promotions delivered straight to your inbox.
+
+          <p className="mb-8 text-lg text-muted-foreground">
+            Subscribe for exclusive offers, new product launches, and special promotions delivered straight to your inbox.
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <div className="flex-1 relative">
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <form onSubmit={handleSubmit} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
               <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
-                className="w-full pl-12 pr-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                className="w-full rounded-lg border border-border bg-white py-3 pl-12 pr-4 text-foreground transition-all placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
             <Button
               type="submit"
               disabled={loading}
-              className="bg-primary hover:bg-primary/90 text-white font-semibold whitespace-nowrap"
+              className="whitespace-nowrap bg-primary font-semibold text-white hover:bg-primary/90"
             >
               {loading ? 'Subscribing...' : 'Subscribe'}
             </Button>
           </form>
 
-          <p className="text-xs text-muted-foreground mt-4">
+          <p className="mt-4 text-xs text-muted-foreground">
             We respect your privacy. Unsubscribe at any time.
           </p>
 
-          {/* Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="text-center">
-              <div className="text-3xl mb-2">🎁</div>
-              <h3 className="font-semibold text-foreground mb-1">Exclusive Deals</h3>
+              <div className="mb-2 flex justify-center text-primary">
+                <Gift className="h-8 w-8" />
+              </div>
+              <h3 className="mb-1 font-semibold text-foreground">Exclusive Deals</h3>
               <p className="text-sm text-muted-foreground">
-                Get subscriber-only discounts and early access to new products
+                Get subscriber-only discounts and early access to new products.
               </p>
             </div>
             <div className="text-center">
-              <div className="text-3xl mb-2">📧</div>
-              <h3 className="font-semibold text-foreground mb-1">Weekly Updates</h3>
+              <div className="mb-2 flex justify-center text-primary">
+                <Mail className="h-8 w-8" />
+              </div>
+              <h3 className="mb-1 font-semibold text-foreground">Weekly Updates</h3>
               <p className="text-sm text-muted-foreground">
-                Stay informed about our latest treats and special offers
+                Stay informed about the latest treats and special offers.
               </p>
             </div>
             <div className="text-center">
-              <div className="text-3xl mb-2">⭐</div>
-              <h3 className="font-semibold text-foreground mb-1">VIP Rewards</h3>
+              <div className="mb-2 flex justify-center text-primary">
+                <Star className="h-8 w-8 fill-current" />
+              </div>
+              <h3 className="mb-1 font-semibold text-foreground">VIP Rewards</h3>
               <p className="text-sm text-muted-foreground">
-                Earn points with every purchase and redeem for rewards
+                Earn loyalty perks with repeat purchases and seasonal campaigns.
               </p>
             </div>
           </div>

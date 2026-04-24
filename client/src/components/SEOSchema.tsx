@@ -1,6 +1,7 @@
 import { PEACEFUL_TASTE_CONTACT } from '@shared/orderReceipt';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://peacefultaste.vercel.app';
+const LOGO_URL = PEACEFUL_TASTE_CONTACT.logoUrl;
 
 export function OrganizationSchema() {
   const schema = {
@@ -8,8 +9,8 @@ export function OrganizationSchema() {
     "@type": "Organization",
     "name": "Peaceful Taste",
     "url": SITE_URL,
-    "logo": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
-    "description": "Fresh handcrafted Nigerian treats - parfaits, pastries, chin-chin, and puff-puff with same-day delivery in Lagos",
+    "logo": LOGO_URL,
+    "description": "Order premium Nigerian parfaits, drinks, pastries, cakes, soups, and event trays from Peaceful Taste.",
     "sameAs": [
       "https://wa.me/2349022621323",
       "https://instagram.com/peacefultaste",
@@ -45,7 +46,7 @@ export function LocalBusinessSchema() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Peaceful Taste",
-    "image": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417086272/fTUGaCUm9YQhQkvWWi8FLU/peaceful_taste_logo_new_b80be0b3.png",
+    "image": LOGO_URL,
     "description": "Premium Nigerian food delivery service offering branded parfaits, bottled drinks, pastries, cakes, soups, and party trays",
     "url": SITE_URL,
     "telephone": "+234-902-262-1323",
@@ -91,12 +92,11 @@ export function ProductSchema({ name, price, image, description }: { name: strin
       "url": `${SITE_URL}/shop`,
       "priceCurrency": "NGN",
       "price": price.toString(),
-      "availability": "https://schema.org/InStock"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "150"
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "Peaceful Taste"
+      }
     }
   };
 
@@ -166,6 +166,24 @@ export function FAQSchema() {
         }
       }
     ]
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export function WebsiteSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Peaceful Taste",
+    "url": SITE_URL,
+    "description":
+      "Peaceful Taste online store for Nigerian parfaits, drinks, pastries, cakes, soups, and trays.",
   };
 
   return (
