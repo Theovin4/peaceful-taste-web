@@ -8,6 +8,11 @@ import {
   listPrivateBlobs,
   uploadPrivateJson,
 } from './blob-storage';
+import {
+  cloudinaryStorageEnabled,
+  downloadCloudinaryRawJson,
+  uploadCloudinaryRawJson,
+} from './cloudinary-storage';
 
 const { Workbook } = ExcelJS;
 
@@ -19,6 +24,8 @@ const ORDERS_FILE = path.join(DATA_DIR, 'orders.xlsx');
 const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.xlsx');
 const ORDER_RECORD_PREFIX = 'records/orders/';
 const INQUIRY_RECORD_PREFIX = 'records/inquiries/';
+const CLOUDINARY_ORDER_RECORDS_PUBLIC_ID = 'peaceful-taste/records/orders.json';
+const CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID = 'peaceful-taste/records/inquiries.json';
 const LOCAL_ORDER_RECORDS_DIR = path.join(DATA_DIR, 'records', 'orders');
 const LOCAL_INQUIRY_RECORDS_DIR = path.join(DATA_DIR, 'records', 'inquiries');
 
@@ -91,6 +98,19 @@ async function writeOrderRecord(record: OrderRecord) {
   ensureDataDir();
   fs.writeFileSync(localOrderRecordFile(record.orderNumber), JSON.stringify(record, null, 2));
 
+  if (cloudinaryStorageEnabled()) {
+    const records = await readCloudinaryOrderRecords();
+    const nextRecords = [
+      ...records.filter((existing) => existing.orderNumber !== record.orderNumber),
+      record,
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CLOUDINARY_ORDER_RECORDS_PUBLIC_ID,
+      data: nextRecords,
+    });
+  }
+
   if (blobStorageEnabled()) {
     await uploadPrivateJson(orderRecordPath(record.orderNumber), record);
   }
@@ -102,6 +122,21 @@ async function writeInquiryRecord(record: InquiryRecord) {
     localInquiryRecordFile(record.createdAt, record.email),
     JSON.stringify(record, null, 2)
   );
+
+  if (cloudinaryStorageEnabled()) {
+    const records = await readCloudinaryInquiryRecords();
+    const nextRecords = [
+      ...records.filter(
+        (existing) => !(existing.createdAt === record.createdAt && existing.email === record.email)
+      ),
+      record,
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID,
+      data: nextRecords,
+    });
+  }
 
   if (blobStorageEnabled()) {
     await uploadPrivateJson(inquiryRecordPath(record.createdAt, record.email), record);
@@ -129,6 +164,16 @@ async function readAllBlobRecords<T>(prefix: string): Promise<T[]> {
   return records.filter(Boolean) as T[];
 }
 
+async function readCloudinaryOrderRecords(): Promise<OrderRecord[]> {
+  const records = await downloadCloudinaryRawJson<OrderRecord[]>(CLOUDINARY_ORDER_RECORDS_PUBLIC_ID);
+  return Array.isArray(records) ? records : [];
+}
+
+async function readCloudinaryInquiryRecords(): Promise<InquiryRecord[]> {
+  const records = await downloadCloudinaryRawJson<InquiryRecord[]>(CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID);
+  return Array.isArray(records) ? records : [];
+}
+
 function readLocalJsonRecords<T>(dirPath: string): T[] {
   ensureDir(dirPath);
 
@@ -148,18 +193,22 @@ function readLocalJsonRecords<T>(dirPath: string): T[] {
 
 async function getOrderRecords(): Promise<OrderRecord[]> {
   ensureDataDir();
-  const records = blobStorageEnabled()
-    ? await readAllBlobRecords<OrderRecord>(ORDER_RECORD_PREFIX)
-    : readLocalJsonRecords<OrderRecord>(LOCAL_ORDER_RECORDS_DIR);
+  const records = cloudinaryStorageEnabled()
+    ? await readCloudinaryOrderRecords()
+    : blobStorageEnabled()
+      ? await readAllBlobRecords<OrderRecord>(ORDER_RECORD_PREFIX)
+      : readLocalJsonRecords<OrderRecord>(LOCAL_ORDER_RECORDS_DIR);
 
   return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 async function getInquiryRecords(): Promise<InquiryRecord[]> {
   ensureDataDir();
-  const records = blobStorageEnabled()
-    ? await readAllBlobRecords<InquiryRecord>(INQUIRY_RECORD_PREFIX)
-    : readLocalJsonRecords<InquiryRecord>(LOCAL_INQUIRY_RECORDS_DIR);
+  const records = cloudinaryStorageEnabled()
+    ? await readCloudinaryInquiryRecords()
+    : blobStorageEnabled()
+      ? await readAllBlobRecords<InquiryRecord>(INQUIRY_RECORD_PREFIX)
+      : readLocalJsonRecords<InquiryRecord>(LOCAL_INQUIRY_RECORDS_DIR);
 
   return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }

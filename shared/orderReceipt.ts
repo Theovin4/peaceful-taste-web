@@ -4,7 +4,7 @@ export const PEACEFUL_TASTE_CONTACT = {
   email: "queenofpeace323@gmail.com",
   bankName: "Providus Bank",
   accountName: "ELYSIUM ENT (PEACEFUL TASTE)",
-  accountNumber: "1104428705",
+  accountNumber: "1105925610",
   siteUrl: "https://peacefultaste.vercel.app",
   address: "Lagos-Ibadan Expressway, Nigeria",
   instagram: "@peacefultaste",

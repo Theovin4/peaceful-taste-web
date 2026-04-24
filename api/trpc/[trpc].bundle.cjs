@@ -152181,7 +152181,7 @@ var PEACEFUL_TASTE_CONTACT = {
   email: "queenofpeace323@gmail.com",
   bankName: "Providus Bank",
   accountName: "ELYSIUM ENT (PEACEFUL TASTE)",
-  accountNumber: "1104428705",
+  accountNumber: "1105925610",
   siteUrl: "https://peacefultaste.vercel.app",
   address: "Lagos-Ibadan Expressway, Nigeria",
   instagram: "@peacefultaste",
@@ -166565,6 +166565,144 @@ async function listPrivateBlobs(prefix) {
   return blobs;
 }
 
+// server/cloudinary-storage.ts
+var import_node_crypto2 = __toESM(require("node:crypto"), 1);
+function parseCloudinaryUrl() {
+  const cloudinaryUrl = process.env.CLOUDINARY_URL;
+  if (!cloudinaryUrl) return {};
+  try {
+    const parsed = new URL(cloudinaryUrl);
+    if (parsed.protocol !== "cloudinary:") return {};
+    return {
+      cloudName: parsed.hostname,
+      apiKey: decodeURIComponent(parsed.username),
+      apiSecret: decodeURIComponent(parsed.password)
+    };
+  } catch (error46) {
+    console.warn("[Cloudinary] Invalid CLOUDINARY_URL:", error46);
+    return {};
+  }
+}
+function getCloudinaryConfig() {
+  const fromUrl = parseCloudinaryUrl();
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || fromUrl.cloudName;
+  const apiKey = process.env.CLOUDINARY_API_KEY || fromUrl.apiKey;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET || fromUrl.apiSecret;
+  if (!cloudName || !apiKey || !apiSecret) return null;
+  return { cloudName, apiKey, apiSecret };
+}
+function getCloudinaryRawUrl(publicIdWithExtension) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  return `https://res.cloudinary.com/${config2.cloudName}/raw/upload/${publicIdWithExtension}`;
+}
+function signUploadParams(params, apiSecret) {
+  const signatureBase = Object.keys(params).sort().map((key) => `${key}=${params[key]}`).join("&");
+  return import_node_crypto2.default.createHash("sha1").update(`${signatureBase}${apiSecret}`).digest("hex");
+}
+function safePublicId(fileName) {
+  const nameWithoutExtension = fileName.replace(/\.[a-zA-Z0-9]+$/, "");
+  const safeName = nameWithoutExtension.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  return `${Date.now()}-${safeName || "product-image"}`;
+}
+function optimizedCloudinaryUrl(url3) {
+  return url3.replace("/image/upload/", "/image/upload/c_limit,w_1200/f_auto/q_auto/");
+}
+function cloudinaryStorageEnabled() {
+  return Boolean(getCloudinaryConfig());
+}
+async function uploadCloudinaryImageDataUrl(input) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
+  const paramsToSign = {
+    folder: "peaceful-taste/products",
+    public_id: safePublicId(input.imageFileName),
+    timestamp: timestamp2
+  };
+  const signature = signUploadParams(paramsToSign, config2.apiSecret);
+  const body = new FormData();
+  body.append("file", input.imageDataUrl);
+  body.append("api_key", config2.apiKey);
+  body.append("folder", paramsToSign.folder);
+  body.append("public_id", paramsToSign.public_id);
+  body.append("timestamp", timestamp2);
+  body.append("signature", signature);
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${config2.cloudName}/image/upload`,
+    {
+      method: "POST",
+      body
+    }
+  );
+  if (!response.ok) {
+    const message2 = await response.text().catch(() => response.statusText);
+    throw new Error(`Cloudinary image upload failed: ${message2}`);
+  }
+  const result = await response.json();
+  const uploadedUrl = result.secure_url || result.url;
+  if (!uploadedUrl) {
+    throw new Error("Cloudinary image upload did not return a public image URL.");
+  }
+  return optimizedCloudinaryUrl(uploadedUrl);
+}
+async function uploadCloudinaryRawBuffer(input) {
+  const config2 = getCloudinaryConfig();
+  if (!config2) return null;
+  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
+  const paramsToSign = {
+    invalidate: "true",
+    overwrite: "true",
+    public_id: input.publicIdWithExtension,
+    timestamp: timestamp2
+  };
+  const signature = signUploadParams(paramsToSign, config2.apiSecret);
+  const body = new FormData();
+  const dataUrl = `data:${input.contentType};base64,${input.data.toString("base64")}`;
+  body.append("file", dataUrl);
+  body.append("api_key", config2.apiKey);
+  body.append("public_id", paramsToSign.public_id);
+  body.append("timestamp", timestamp2);
+  body.append("overwrite", "true");
+  body.append("invalidate", "true");
+  body.append("signature", signature);
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${config2.cloudName}/raw/upload`,
+    {
+      method: "POST",
+      body
+    }
+  );
+  if (!response.ok) {
+    const message2 = await response.text().catch(() => response.statusText);
+    throw new Error(`Cloudinary raw upload failed: ${message2}`);
+  }
+  return getCloudinaryRawUrl(input.publicIdWithExtension);
+}
+async function uploadCloudinaryRawJson(input) {
+  return uploadCloudinaryRawBuffer({
+    publicIdWithExtension: input.publicIdWithExtension,
+    data: Buffer.from(JSON.stringify(input.data, null, 2), "utf8"),
+    contentType: "application/json"
+  });
+}
+async function downloadCloudinaryRawBuffer(publicIdWithExtension) {
+  const url3 = getCloudinaryRawUrl(publicIdWithExtension);
+  if (!url3) return null;
+  const response = await fetch(url3, {
+    headers: {
+      "cache-control": "no-cache"
+    }
+  });
+  if (!response.ok) return null;
+  return Buffer.from(await response.arrayBuffer());
+}
+async function downloadCloudinaryRawJson(publicIdWithExtension) {
+  const buffer = await downloadCloudinaryRawBuffer(publicIdWithExtension);
+  if (!buffer) return null;
+  return JSON.parse(buffer.toString("utf8"));
+}
+
 // server/excel-storage.ts
 var { Workbook } = import_exceljs.default;
 var DATA_DIR = process.env.VERCEL ? path.join(os.tmpdir(), "peaceful-taste-data") : path.join(process.cwd(), "data");
@@ -166572,6 +166710,8 @@ var ORDERS_FILE = path.join(DATA_DIR, "orders.xlsx");
 var INQUIRIES_FILE = path.join(DATA_DIR, "inquiries.xlsx");
 var ORDER_RECORD_PREFIX = "records/orders/";
 var INQUIRY_RECORD_PREFIX = "records/inquiries/";
+var CLOUDINARY_ORDER_RECORDS_PUBLIC_ID = "peaceful-taste/records/orders.json";
+var CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID = "peaceful-taste/records/inquiries.json";
 var LOCAL_ORDER_RECORDS_DIR = path.join(DATA_DIR, "records", "orders");
 var LOCAL_INQUIRY_RECORDS_DIR = path.join(DATA_DIR, "records", "inquiries");
 function ensureDir(dirPath) {
@@ -166603,6 +166743,17 @@ function localInquiryRecordFile(createdAt, email3) {
 async function writeOrderRecord(record2) {
   ensureDataDir();
   fs.writeFileSync(localOrderRecordFile(record2.orderNumber), JSON.stringify(record2, null, 2));
+  if (cloudinaryStorageEnabled()) {
+    const records = await readCloudinaryOrderRecords();
+    const nextRecords = [
+      ...records.filter((existing) => existing.orderNumber !== record2.orderNumber),
+      record2
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CLOUDINARY_ORDER_RECORDS_PUBLIC_ID,
+      data: nextRecords
+    });
+  }
   if (blobStorageEnabled()) {
     await uploadPrivateJson(orderRecordPath(record2.orderNumber), record2);
   }
@@ -166613,6 +166764,19 @@ async function writeInquiryRecord(record2) {
     localInquiryRecordFile(record2.createdAt, record2.email),
     JSON.stringify(record2, null, 2)
   );
+  if (cloudinaryStorageEnabled()) {
+    const records = await readCloudinaryInquiryRecords();
+    const nextRecords = [
+      ...records.filter(
+        (existing) => !(existing.createdAt === record2.createdAt && existing.email === record2.email)
+      ),
+      record2
+    ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID,
+      data: nextRecords
+    });
+  }
   if (blobStorageEnabled()) {
     await uploadPrivateJson(inquiryRecordPath(record2.createdAt, record2.email), record2);
   }
@@ -166634,6 +166798,14 @@ async function readAllBlobRecords(prefix) {
   );
   return records.filter(Boolean);
 }
+async function readCloudinaryOrderRecords() {
+  const records = await downloadCloudinaryRawJson(CLOUDINARY_ORDER_RECORDS_PUBLIC_ID);
+  return Array.isArray(records) ? records : [];
+}
+async function readCloudinaryInquiryRecords() {
+  const records = await downloadCloudinaryRawJson(CLOUDINARY_INQUIRY_RECORDS_PUBLIC_ID);
+  return Array.isArray(records) ? records : [];
+}
 function readLocalJsonRecords(dirPath) {
   ensureDir(dirPath);
   return fs.readdirSync(dirPath).filter((fileName) => fileName.endsWith(".json")).map((fileName) => {
@@ -166647,12 +166819,12 @@ function readLocalJsonRecords(dirPath) {
 }
 async function getOrderRecords() {
   ensureDataDir();
-  const records = blobStorageEnabled() ? await readAllBlobRecords(ORDER_RECORD_PREFIX) : readLocalJsonRecords(LOCAL_ORDER_RECORDS_DIR);
+  const records = cloudinaryStorageEnabled() ? await readCloudinaryOrderRecords() : blobStorageEnabled() ? await readAllBlobRecords(ORDER_RECORD_PREFIX) : readLocalJsonRecords(LOCAL_ORDER_RECORDS_DIR);
   return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 async function getInquiryRecords() {
   ensureDataDir();
-  const records = blobStorageEnabled() ? await readAllBlobRecords(INQUIRY_RECORD_PREFIX) : readLocalJsonRecords(LOCAL_INQUIRY_RECORDS_DIR);
+  const records = cloudinaryStorageEnabled() ? await readCloudinaryInquiryRecords() : blobStorageEnabled() ? await readAllBlobRecords(INQUIRY_RECORD_PREFIX) : readLocalJsonRecords(LOCAL_INQUIRY_RECORDS_DIR);
   return records.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 async function buildOrdersWorkbookFile() {
@@ -167620,133 +167792,6 @@ var defaultProducts = [
     isActive: true
   }
 ];
-
-// server/cloudinary-storage.ts
-var import_node_crypto2 = __toESM(require("node:crypto"), 1);
-function parseCloudinaryUrl() {
-  const cloudinaryUrl = process.env.CLOUDINARY_URL;
-  if (!cloudinaryUrl) return {};
-  try {
-    const parsed = new URL(cloudinaryUrl);
-    if (parsed.protocol !== "cloudinary:") return {};
-    return {
-      cloudName: parsed.hostname,
-      apiKey: decodeURIComponent(parsed.username),
-      apiSecret: decodeURIComponent(parsed.password)
-    };
-  } catch (error46) {
-    console.warn("[Cloudinary] Invalid CLOUDINARY_URL:", error46);
-    return {};
-  }
-}
-function getCloudinaryConfig() {
-  const fromUrl = parseCloudinaryUrl();
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || fromUrl.cloudName;
-  const apiKey = process.env.CLOUDINARY_API_KEY || fromUrl.apiKey;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET || fromUrl.apiSecret;
-  if (!cloudName || !apiKey || !apiSecret) return null;
-  return { cloudName, apiKey, apiSecret };
-}
-function getCloudinaryRawUrl(publicIdWithExtension) {
-  const config2 = getCloudinaryConfig();
-  if (!config2) return null;
-  return `https://res.cloudinary.com/${config2.cloudName}/raw/upload/${publicIdWithExtension}`;
-}
-function signUploadParams(params, apiSecret) {
-  const signatureBase = Object.keys(params).sort().map((key) => `${key}=${params[key]}`).join("&");
-  return import_node_crypto2.default.createHash("sha1").update(`${signatureBase}${apiSecret}`).digest("hex");
-}
-function safePublicId(fileName) {
-  const nameWithoutExtension = fileName.replace(/\.[a-zA-Z0-9]+$/, "");
-  const safeName = nameWithoutExtension.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
-  return `${Date.now()}-${safeName || "product-image"}`;
-}
-function optimizedCloudinaryUrl(url3) {
-  return url3.replace("/image/upload/", "/image/upload/c_limit,w_1200/f_auto/q_auto/");
-}
-function cloudinaryStorageEnabled() {
-  return Boolean(getCloudinaryConfig());
-}
-async function uploadCloudinaryImageDataUrl(input) {
-  const config2 = getCloudinaryConfig();
-  if (!config2) return null;
-  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
-  const paramsToSign = {
-    folder: "peaceful-taste/products",
-    public_id: safePublicId(input.imageFileName),
-    timestamp: timestamp2
-  };
-  const signature = signUploadParams(paramsToSign, config2.apiSecret);
-  const body = new FormData();
-  body.append("file", input.imageDataUrl);
-  body.append("api_key", config2.apiKey);
-  body.append("folder", paramsToSign.folder);
-  body.append("public_id", paramsToSign.public_id);
-  body.append("timestamp", timestamp2);
-  body.append("signature", signature);
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${config2.cloudName}/image/upload`,
-    {
-      method: "POST",
-      body
-    }
-  );
-  if (!response.ok) {
-    const message2 = await response.text().catch(() => response.statusText);
-    throw new Error(`Cloudinary image upload failed: ${message2}`);
-  }
-  const result = await response.json();
-  const uploadedUrl = result.secure_url || result.url;
-  if (!uploadedUrl) {
-    throw new Error("Cloudinary image upload did not return a public image URL.");
-  }
-  return optimizedCloudinaryUrl(uploadedUrl);
-}
-async function uploadCloudinaryRawJson(input) {
-  const config2 = getCloudinaryConfig();
-  if (!config2) return null;
-  const timestamp2 = Math.floor(Date.now() / 1e3).toString();
-  const paramsToSign = {
-    invalidate: "true",
-    overwrite: "true",
-    public_id: input.publicIdWithExtension,
-    timestamp: timestamp2
-  };
-  const signature = signUploadParams(paramsToSign, config2.apiSecret);
-  const body = new FormData();
-  const jsonBuffer = Buffer.from(JSON.stringify(input.data, null, 2), "utf8");
-  const dataUrl = `data:application/json;base64,${jsonBuffer.toString("base64")}`;
-  body.append("file", dataUrl);
-  body.append("api_key", config2.apiKey);
-  body.append("public_id", paramsToSign.public_id);
-  body.append("timestamp", timestamp2);
-  body.append("overwrite", "true");
-  body.append("invalidate", "true");
-  body.append("signature", signature);
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${config2.cloudName}/raw/upload`,
-    {
-      method: "POST",
-      body
-    }
-  );
-  if (!response.ok) {
-    const message2 = await response.text().catch(() => response.statusText);
-    throw new Error(`Cloudinary raw upload failed: ${message2}`);
-  }
-  return getCloudinaryRawUrl(input.publicIdWithExtension);
-}
-async function downloadCloudinaryRawJson(publicIdWithExtension) {
-  const url3 = getCloudinaryRawUrl(publicIdWithExtension);
-  if (!url3) return null;
-  const response = await fetch(url3, {
-    headers: {
-      "cache-control": "no-cache"
-    }
-  });
-  if (!response.ok) return null;
-  return await response.json();
-}
 
 // server/catalog-storage.ts
 var DATA_DIR2 = process.env.VERCEL ? path2.join(os2.tmpdir(), "peaceful-taste-data") : path2.join(process.cwd(), "data");

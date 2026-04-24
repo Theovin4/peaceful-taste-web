@@ -122,9 +122,10 @@ export async function uploadCloudinaryImageDataUrl(input: {
   return optimizedCloudinaryUrl(uploadedUrl);
 }
 
-export async function uploadCloudinaryRawJson(input: {
+export async function uploadCloudinaryRawBuffer(input: {
   publicIdWithExtension: string;
-  data: unknown;
+  data: Buffer;
+  contentType: string;
 }) {
   const config = getCloudinaryConfig();
   if (!config) return null;
@@ -138,8 +139,7 @@ export async function uploadCloudinaryRawJson(input: {
   };
   const signature = signUploadParams(paramsToSign, config.apiSecret);
   const body = new FormData();
-  const jsonBuffer = Buffer.from(JSON.stringify(input.data, null, 2), 'utf8');
-  const dataUrl = `data:application/json;base64,${jsonBuffer.toString('base64')}`;
+  const dataUrl = `data:${input.contentType};base64,${input.data.toString('base64')}`;
 
   body.append('file', dataUrl);
   body.append('api_key', config.apiKey);
@@ -165,7 +165,18 @@ export async function uploadCloudinaryRawJson(input: {
   return getCloudinaryRawUrl(input.publicIdWithExtension);
 }
 
-export async function downloadCloudinaryRawJson<T>(publicIdWithExtension: string) {
+export async function uploadCloudinaryRawJson(input: {
+  publicIdWithExtension: string;
+  data: unknown;
+}) {
+  return uploadCloudinaryRawBuffer({
+    publicIdWithExtension: input.publicIdWithExtension,
+    data: Buffer.from(JSON.stringify(input.data, null, 2), 'utf8'),
+    contentType: 'application/json',
+  });
+}
+
+export async function downloadCloudinaryRawBuffer(publicIdWithExtension: string) {
   const url = getCloudinaryRawUrl(publicIdWithExtension);
   if (!url) return null;
 
@@ -177,5 +188,12 @@ export async function downloadCloudinaryRawJson<T>(publicIdWithExtension: string
 
   if (!response.ok) return null;
 
-  return (await response.json()) as T;
+  return Buffer.from(await response.arrayBuffer());
+}
+
+export async function downloadCloudinaryRawJson<T>(publicIdWithExtension: string) {
+  const buffer = await downloadCloudinaryRawBuffer(publicIdWithExtension);
+  if (!buffer) return null;
+
+  return JSON.parse(buffer.toString('utf8')) as T;
 }
