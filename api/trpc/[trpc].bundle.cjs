@@ -120118,7 +120118,7 @@ var require_undici = __commonJS({
 // node_modules/.pnpm/throttleit@2.1.0/node_modules/throttleit/index.js
 var require_throttleit = __commonJS({
   "node_modules/.pnpm/throttleit@2.1.0/node_modules/throttleit/index.js"(exports2, module2) {
-    function throttle3(function_, wait2) {
+    function throttle3(function_, wait3) {
       if (typeof function_ !== "function") {
         throw new TypeError(`Expected the first argument to be a \`function\`, got \`${typeof function_}\`.`);
       }
@@ -120128,7 +120128,7 @@ var require_throttleit = __commonJS({
         clearTimeout(timeoutId);
         const now = Date.now();
         const timeSinceLastCall = now - lastCallTime;
-        const delayForNextCall = wait2 - timeSinceLastCall;
+        const delayForNextCall = wait3 - timeSinceLastCall;
         if (delayForNextCall <= 0) {
           lastCallTime = now;
           function_.apply(this, arguments_);
@@ -166817,6 +166817,9 @@ function readLocalJsonRecords(dirPath) {
     }
   }).filter((record2) => Boolean(record2));
 }
+async function wait(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 async function getOrderRecords() {
   ensureDataDir();
   const records = cloudinaryStorageEnabled() ? await readCloudinaryOrderRecords() : blobStorageEnabled() ? await readAllBlobRecords(ORDER_RECORD_PREFIX) : readLocalJsonRecords(LOCAL_ORDER_RECORDS_DIR);
@@ -166857,6 +166860,10 @@ async function buildOrdersWorkbookFile() {
     fgColor: { argb: "FF8B4513" }
   };
   orders2.forEach((order) => worksheet.addRow(order));
+  return workbook;
+}
+async function writeOrdersWorkbookFile() {
+  const workbook = await buildOrdersWorkbookFile();
   await workbook.xlsx.writeFile(ORDERS_FILE);
   return ORDERS_FILE;
 }
@@ -166882,6 +166889,10 @@ async function buildInquiriesWorkbookFile() {
     fgColor: { argb: "FF8B4513" }
   };
   inquiries2.forEach((inquiry) => worksheet.addRow(inquiry));
+  return workbook;
+}
+async function writeInquiriesWorkbookFile() {
+  const workbook = await buildInquiriesWorkbookFile();
   await workbook.xlsx.writeFile(INQUIRIES_FILE);
   return INQUIRIES_FILE;
 }
@@ -166906,19 +166917,24 @@ async function addOrderToExcel(orderData) {
     notes: orderData.notes || ""
   };
   await writeOrderRecord(record2);
-  await buildOrdersWorkbookFile();
+  await writeOrdersWorkbookFile();
   return true;
 }
 async function updateOrderReceiptInExcel(orderNumber, receiptUrl, status = "receipt_uploaded") {
-  const records = await getOrderRecords();
-  const existing = records.find((record2) => record2.orderNumber === orderNumber);
+  let existing;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const records = await getOrderRecords();
+    existing = records.find((record2) => record2.orderNumber === orderNumber);
+    if (existing) break;
+    await wait(300);
+  }
   if (!existing) return false;
   await writeOrderRecord({
     ...existing,
     receiptUrl,
     status
   });
-  await buildOrdersWorkbookFile();
+  await writeOrdersWorkbookFile();
   return true;
 }
 async function getWorkbookSummary() {
@@ -166957,7 +166973,7 @@ async function addInquiryToExcel(inquiryData) {
     status: inquiryData.status
   };
   await writeInquiryRecord(record2);
-  await buildInquiriesWorkbookFile();
+  await writeInquiriesWorkbookFile();
   return true;
 }
 async function initializeAllWorkbooks() {
@@ -167810,7 +167826,7 @@ var defaultCatalog = {
   products: defaultProducts,
   settings: defaultSettings
 };
-async function wait(ms) {
+async function wait2(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 function ensureDataDir2() {
@@ -167947,7 +167963,7 @@ async function getCatalogWithRetry(predicate, options = {}) {
     if (predicate(catalog)) {
       return catalog;
     }
-    await wait(delayMs);
+    await wait2(delayMs);
     catalog = await getCatalog();
   }
   return catalog;

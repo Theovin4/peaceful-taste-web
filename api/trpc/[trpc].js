@@ -1,3 +1,3 @@
-import bundledTrpcApp from "./[trpc].bundle.cjs";
+import bundledApp from "./[trpc].bundle.cjs";
 
-export default bundledTrpcApp;
+export default bundledApp;

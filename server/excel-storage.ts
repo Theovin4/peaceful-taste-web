@@ -191,6 +191,10 @@ function readLocalJsonRecords<T>(dirPath: string): T[] {
     .filter((record): record is T => Boolean(record));
 }
 
+async function wait(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function getOrderRecords(): Promise<OrderRecord[]> {
   ensureDataDir();
   const records = cloudinaryStorageEnabled()
@@ -340,8 +344,15 @@ export async function updateOrderReceiptInExcel(
   receiptUrl: string,
   status: string = 'receipt_uploaded'
 ) {
-  const records = await getOrderRecords();
-  const existing = records.find((record) => record.orderNumber === orderNumber);
+  let existing: OrderRecord | undefined;
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const records = await getOrderRecords();
+    existing = records.find((record) => record.orderNumber === orderNumber);
+    if (existing) break;
+    await wait(300);
+  }
+
   if (!existing) return false;
 
   await writeOrderRecord({

@@ -1,3 +1,3 @@
-import bundledExportApp from "./[sheet].bundle.cjs";
+import bundledApp from "./[sheet].bundle.cjs";
 
-export default bundledExportApp;
+export default bundledApp;
