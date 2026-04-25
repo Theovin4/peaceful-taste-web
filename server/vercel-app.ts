@@ -10,6 +10,18 @@ import {
   prepareInquiriesWorkbookBuffer,
   prepareOrdersWorkbookBuffer,
 } from "./excel-storage";
+import { sendBrevoOrderEmails } from "./brevo-email";
+import { z } from "zod";
+
+const orderEmailSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(255),
+  product: z.string().trim().min(1).max(200),
+  price: z.union([
+    z.number().finite().nonnegative(),
+    z.string().trim().min(1).max(60),
+  ]),
+});
 
 export function createVercelApp() {
   const app = express();
@@ -68,6 +80,39 @@ export function createVercelApp() {
 
   apiRouter.get("/health", (_req, res) => {
     res.status(200).json({ ok: true });
+  });
+
+  apiRouter.all("/order-email", async (req, res) => {
+    if (req.method !== "POST") {
+      res.setHeader("Allow", "POST");
+      res.status(405).json({
+        success: false,
+        error: "Method not allowed",
+      });
+      return;
+    }
+
+    const parsed = orderEmailSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({
+        success: false,
+        error: "Invalid request body",
+        details: parsed.error.flatten(),
+      });
+      return;
+    }
+
+    try {
+      await sendBrevoOrderEmails(parsed.data);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("[Brevo] Failed to send order emails:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to send order emails",
+      });
+    }
   });
 
   apiRouter.get("/admin/export/orders", async (_req, res) => {
