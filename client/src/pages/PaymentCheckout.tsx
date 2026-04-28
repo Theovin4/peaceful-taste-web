@@ -117,10 +117,18 @@ export default function PaymentCheckout() {
 
       if (response.success) {
         setOrderCreated(response);
-        saveLatestReceipt(response.receipt as OrderReceiptClientPackage);
-        downloadPdfReceipt(response.receipt.fileName, response.receipt.pdfBase64);
         clearCart();
-        toast.success('Order created, cart cleared, and customer receipt downloaded. Proceed with payment.');
+
+        const receiptSaved = saveLatestReceipt(response.receipt as OrderReceiptClientPackage);
+        const receiptDownloaded = downloadPdfReceipt(response.receipt.fileName, response.receipt.pdfBase64);
+
+        if (receiptSaved && receiptDownloaded) {
+          toast.success('Order created, cart cleared, and customer receipt downloaded. Proceed with payment.');
+        } else if (receiptSaved) {
+          toast.success('Order created successfully. Your receipt is ready below if the automatic download did not start.');
+        } else {
+          toast.success('Order created successfully. Continue with payment using the receipt and bank details below.');
+        }
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create order';

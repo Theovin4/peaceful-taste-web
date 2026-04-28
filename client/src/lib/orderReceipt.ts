@@ -11,16 +11,50 @@ export interface OrderReceiptClientPackage {
 
 const STORAGE_KEY = "peaceful-taste-last-order-receipt";
 
+function base64ToBlob(base64: string, mimeType: string) {
+  const binary = atob(base64);
+  const chunkSize = 1024;
+  const byteArrays: ArrayBuffer[] = [];
+
+  for (let offset = 0; offset < binary.length; offset += chunkSize) {
+    const slice = binary.slice(offset, offset + chunkSize);
+    const byteNumbers = new Array(slice.length);
+
+    for (let index = 0; index < slice.length; index += 1) {
+      byteNumbers[index] = slice.charCodeAt(index);
+    }
+
+    byteArrays.push(new Uint8Array(byteNumbers).buffer);
+  }
+
+  return new Blob(byteArrays, { type: mimeType });
+}
+
 export function downloadPdfReceipt(fileName: string, pdfBase64: string) {
-  const href = `data:application/pdf;base64,${pdfBase64}`;
-  const link = document.createElement("a");
-  link.href = href;
-  link.download = fileName;
-  link.click();
+  try {
+    const blob = base64ToBlob(pdfBase64, "application/pdf");
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = fileName;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    globalThis.setTimeout(() => URL.revokeObjectURL(href), 1_000);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function saveLatestReceipt(receipt: OrderReceiptClientPackage) {
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(receipt));
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(receipt));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function loadLatestReceipt(): OrderReceiptClientPackage | null {
@@ -35,7 +69,11 @@ export function loadLatestReceipt(): OrderReceiptClientPackage | null {
 }
 
 export function clearLatestReceipt() {
-  sessionStorage.removeItem(STORAGE_KEY);
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore storage failures so receipt cleanup never blocks payment flow.
+  }
 }
 
 export function copyTextToClipboard(text: string) {
