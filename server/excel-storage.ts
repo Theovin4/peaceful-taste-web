@@ -347,11 +347,11 @@ export async function updateOrderReceiptInExcel(
 ) {
   let existing: OrderRecord | undefined;
 
-  for (let attempt = 0; attempt < 10; attempt += 1) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
     const records = await getOrderRecords();
     existing = records.find((record) => record.orderNumber === orderNumber);
     if (existing) break;
-    await wait(300);
+    await wait(500);
   }
 
   if (!existing) return false;
