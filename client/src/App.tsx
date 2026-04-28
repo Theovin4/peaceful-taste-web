@@ -19,6 +19,8 @@ const PaymentCheckout = lazy(() => import("./pages/PaymentCheckout"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const SocialShowcase = lazy(() => import("./pages/SocialShowcase"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function RouteLoader() {
@@ -53,6 +55,8 @@ function Router() {
       <Route path={"/payment-success"} component={PaymentSuccess} />
       <Route path={"/social"} component={SocialShowcase} />
       <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/privacy-policy"} component={PrivacyPolicy} />
+      <Route path={"/terms-of-service"} component={TermsOfService} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -89,6 +93,8 @@ function App() {
         void import("./pages/PaymentCheckout");
         void import("./pages/PaymentSuccess");
         void import("./pages/SocialShowcase");
+        void import("./pages/PrivacyPolicy");
+        void import("./pages/TermsOfService");
         void import("./pages/AdminDashboard");
         void import("./pages/NotFound");
       }, 900);

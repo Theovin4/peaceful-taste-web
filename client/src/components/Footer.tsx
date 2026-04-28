@@ -95,10 +95,13 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 text-sm md:flex-row">
             <p className="text-muted-foreground">&copy; {currentYear} Peaceful Taste. All rights reserved.</p>
             <div className="flex gap-6">
-              <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Privacy Policy</a>
-              <a href="#" className="text-muted-foreground hover:text-accent" style={transitionStyle}>Terms of Service</a>
+              <button type="button" onClick={() => setLocation('/privacy-policy')} className="text-muted-foreground hover:text-accent" style={transitionStyle}>Privacy Policy</button>
+              <button type="button" onClick={() => setLocation('/terms-of-service')} className="text-muted-foreground hover:text-accent" style={transitionStyle}>Terms of Service</button>
             </div>
           </div>
+          <p className="mt-4 text-center text-xs leading-6 text-muted-foreground md:text-left">
+            By using this website, you agree to our terms and the use of essential cookies or browser storage needed for cart activity, checkout, and admin session handling.
+          </p>
         </div>
       </div>
     </footer>

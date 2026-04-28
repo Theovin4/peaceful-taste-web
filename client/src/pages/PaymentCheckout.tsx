@@ -516,6 +516,17 @@ export default function PaymentCheckout() {
                       'Create Order and Receipt'
                     )}
                   </Button>
+                  <p className="text-xs leading-6 text-muted-foreground">
+                    By creating this order, you agree to the Peaceful Taste{' '}
+                    <button type="button" onClick={() => setLocation('/terms-of-service')} className="text-accent underline-offset-4 hover:underline">
+                      Terms of Service
+                    </button>{' '}
+                    and acknowledge our{' '}
+                    <button type="button" onClick={() => setLocation('/privacy-policy')} className="text-accent underline-offset-4 hover:underline">
+                      Privacy Policy
+                    </button>
+                    , including the use of essential cookies and browser storage for checkout and receipts.
+                  </p>
                 </form>
               </Card>
             </div>

@@ -132,3 +132,75 @@ export async function sendOwnerPaymentProofEmail(orderNumber: string, receiptLoc
 export function emailAutomationAvailable() {
   return canSendEmail();
 }
+
+type OrderNotificationPayload = {
+  name: string;
+  email: string;
+  product: string;
+  price: string | number;
+};
+
+function formatNairaValue(value: string | number) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return `₦${value.toLocaleString('en-NG')}`;
+  }
+
+  return String(value);
+}
+
+export async function sendOrderNotificationEmails(payload: OrderNotificationPayload) {
+  if (!canSendEmail()) {
+    throw new Error('Resend email configuration is not available.');
+  }
+
+  const formattedPrice = formatNairaValue(payload.price);
+
+  const customerHtml = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #101418;">
+      <h1>Order Received</h1>
+      <p>Hi ${payload.name}, your order for ${payload.product} has been received.</p>
+      <p>We will contact you on WhatsApp.</p>
+    </div>
+  `;
+
+  const customerText = `Hi ${payload.name}, your order for ${payload.product} has been received. We will contact you on WhatsApp.`;
+
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #101418;">
+      <h1>New Order</h1>
+      <p><strong>Name:</strong> ${payload.name}</p>
+      <p><strong>Email:</strong> ${payload.email}</p>
+      <p><strong>Product:</strong> ${payload.product}</p>
+      <p><strong>Price:</strong> ${formattedPrice}</p>
+    </div>
+  `;
+
+  const adminText = [
+    'New Order',
+    `Name: ${payload.name}`,
+    `Email: ${payload.email}`,
+    `Product: ${payload.product}`,
+    `Price: ${formattedPrice}`,
+  ].join('\n');
+
+  const [customerSent, ownerSent] = await Promise.all([
+    sendEmail({
+      to: payload.email,
+      subject: 'Order Received',
+      html: customerHtml,
+      text: customerText,
+    }),
+    sendEmail({
+      to: ENV.ownerEmail,
+      subject: 'New Order',
+      html: adminHtml,
+      text: adminText,
+    }),
+  ]);
+
+  if (!customerSent || !ownerSent) {
+    throw new Error('Failed to send one or more order notification emails.');
+  }
+
+  return true;
+}

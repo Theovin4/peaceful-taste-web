@@ -10,7 +10,7 @@ import {
   prepareInquiriesWorkbookBuffer,
   prepareOrdersWorkbookBuffer,
 } from "./excel-storage";
-import { sendBrevoOrderEmails } from "./brevo-email";
+import { sendOrderNotificationEmails } from "./email";
 import { z } from "zod";
 
 const orderEmailSchema = z.object({
@@ -104,10 +104,10 @@ export function createVercelApp() {
     }
 
     try {
-      await sendBrevoOrderEmails(parsed.data);
+      await sendOrderNotificationEmails(parsed.data);
       res.status(200).json({ success: true });
     } catch (error) {
-      console.error("[Brevo] Failed to send order emails:", error);
+      console.error("[Email] Failed to send order emails:", error);
       res.status(500).json({
         success: false,
         error: "Failed to send order emails",
