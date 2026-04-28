@@ -14,6 +14,7 @@ export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
   const latestReceipt = useMemo(() => loadLatestReceipt(), []);
   const [orderNumber, setOrderNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'flutterwave'>('bank_transfer');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -24,12 +25,15 @@ export default function PaymentSuccess() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const orderFromQuery = params.get('order');
+    const methodFromQuery = params.get('method');
     if (orderFromQuery) {
       setOrderNumber(orderFromQuery);
-      return;
+    }
+    if (methodFromQuery === 'flutterwave' || methodFromQuery === 'bank_transfer') {
+      setPaymentMethod(methodFromQuery);
     }
 
-    if (latestReceipt?.payload.orderNumber) {
+    if (!orderFromQuery && latestReceipt?.payload.orderNumber) {
       setOrderNumber(latestReceipt.payload.orderNumber);
     }
   }, [latestReceipt]);
@@ -66,6 +70,7 @@ export default function PaymentSuccess() {
         orderNumber,
         receiptName: receiptFile.name,
         receiptDataUrl,
+        paymentMethod,
       });
 
       setUploadSuccess(true);
@@ -202,6 +207,33 @@ export default function PaymentSuccess() {
                 className="mt-2 bg-background"
               />
               <p className="mt-1 text-xs text-muted-foreground">You received this number after creating your order.</p>
+            </div>
+
+            <div>
+              <Label className="font-semibold text-foreground">Payment Method *</Label>
+              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                <label className="flex items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'bank_transfer'}
+                    onChange={() => setPaymentMethod('bank_transfer')}
+                  />
+                  Bank transfer
+                </label>
+                <label className="flex items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'flutterwave'}
+                    onChange={() => setPaymentMethod('flutterwave')}
+                  />
+                  Flutterwave checkout
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                This selection is stored with the order record so your admin dashboard and workbook show the correct payment path.
+              </p>
             </div>
 
             <div>

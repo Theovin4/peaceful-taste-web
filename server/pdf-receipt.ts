@@ -5,6 +5,18 @@ import { PEACEFUL_TASTE_CONTACT, type OrderReceiptPayload } from '@shared/orderR
 
 export interface ReceiptData extends OrderReceiptPayload {}
 
+function getPdfPaymentMethodLabel(paymentMethod?: string) {
+  if (paymentMethod === 'flutterwave') {
+    return 'Flutterwave Checkout';
+  }
+
+  if (paymentMethod === 'bank_transfer') {
+    return 'Bank Transfer';
+  }
+
+  return 'To be confirmed by customer';
+}
+
 function formatPdfAmount(amount: number) {
   return `NGN ${amount.toLocaleString('en-NG')}`;
 }
@@ -84,6 +96,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
   });
 
   let y = height - 182;
+  const paymentMethodLabel = getPdfPaymentMethodLabel(data.paymentMethod);
 
   const drawSectionTitle = (title: string) => {
     page.drawText(title, {
@@ -123,7 +136,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
 
   drawSectionTitle('Receipt Summary');
   drawLabelValue('Order Number', data.orderNumber);
-  drawLabelValue('Payment Method', 'Bank Transfer');
+  drawLabelValue('Payment Method', paymentMethodLabel);
   drawLabelValue('Payment Status', 'Awaiting confirmation');
   drawLabelValue('Transfer Amount', formatPdfAmount(data.totalAmount));
   drawLabelValue('Payment Reference', data.orderNumber);
@@ -265,13 +278,14 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
   });
 
   y -= 30;
-  drawSectionTitle('Bank Transfer Details');
+  drawSectionTitle('Payment Details');
+  drawLabelValue('Preferred Method', paymentMethodLabel);
   drawLabelValue('Bank', PEACEFUL_TASTE_CONTACT.bankName);
   drawLabelValue('Account Name', PEACEFUL_TASTE_CONTACT.accountName);
   drawLabelValue('Account Number', PEACEFUL_TASTE_CONTACT.accountNumber);
   drawLabelValue('Reference', data.orderNumber);
 
-  page.drawText('Please transfer the exact amount and upload your proof of payment for confirmation.', {
+  page.drawText('Please complete payment with Flutterwave or bank transfer and upload your proof for confirmation.', {
     x: 42,
     y,
     size: 9,

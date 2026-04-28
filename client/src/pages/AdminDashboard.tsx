@@ -921,6 +921,13 @@ export default function AdminDashboard() {
                       <div>
                         <p className="font-semibold text-foreground">{order.customerName}</p>
                         <p className="text-xs text-muted-foreground">{order.orderNumber}</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                          {order.paymentMethod === 'flutterwave'
+                            ? 'Flutterwave'
+                            : order.paymentMethod === 'bank_transfer'
+                              ? 'Bank transfer'
+                              : 'Payment method pending'}
+                        </p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-foreground">{formatNaira(order.totalAmount)}</p>

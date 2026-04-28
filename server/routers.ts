@@ -329,6 +329,7 @@ export const appRouter = router({
             tax: input.tax,
             shippingCost: input.shippingCost,
             totalAmount,
+            paymentMethod: 'pending_customer_choice',
           };
 
           const receiptBuffer = await generateOrderReceipt(receiptPayload);
@@ -351,7 +352,7 @@ export const appRouter = router({
             tax: input.tax,
             shippingCost: input.shippingCost,
             totalAmount,
-            paymentMethod: 'bank_transfer',
+            paymentMethod: 'pending_customer_choice',
             status: 'pending',
           });
 
@@ -400,19 +401,31 @@ export const appRouter = router({
         orderNumber: z.string().regex(/^ORD-\d+-[a-z0-9]{5}$/).max(50),
         receiptName: z.string().min(1).max(255),
         receiptDataUrl: z.string().min(32).max(8_000_000),
+        paymentMethod: z.enum(['bank_transfer', 'flutterwave']).default('bank_transfer'),
       }))
       .mutation(async ({ ctx, input }) => {
         try {
           enforceRateLimit(ctx.req, 'upload-receipt', 12, 1000 * 60 * 15);
           const persistedReceipt = await persistReceipt(input.orderNumber, input.receiptName, input.receiptDataUrl);
-          const workbookUpdated = await updateOrderReceiptInExcel(input.orderNumber, persistedReceipt.storedLocation);
+          const workbookUpdated = await updateOrderReceiptInExcel(
+            input.orderNumber,
+            persistedReceipt.storedLocation,
+            'receipt_uploaded',
+            {
+              paymentMethod: input.paymentMethod,
+              notes: `Payment proof uploaded via ${input.paymentMethod === 'flutterwave' ? 'Flutterwave' : 'bank transfer'}.`,
+            }
+          );
 
           await notifyOwner({
             title: `Payment Receipt: ${input.orderNumber}`,
-            content: `Order ${input.orderNumber} receipt uploaded.\nStored at: ${persistedReceipt.storedLocation}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
+            content: `Order ${input.orderNumber} receipt uploaded.\nPayment method: ${input.paymentMethod}\nStored at: ${persistedReceipt.storedLocation}\nWorkbook updated: ${workbookUpdated ? 'yes' : 'no'}`,
           });
 
-          sendOwnerPaymentProofEmail(input.orderNumber, persistedReceipt.storedLocation).catch((error) =>
+          sendOwnerPaymentProofEmail(
+            `${input.orderNumber} (${input.paymentMethod === 'flutterwave' ? 'Flutterwave' : 'Bank Transfer'})`,
+            persistedReceipt.storedLocation
+          ).catch((error) =>
             console.warn('[Email] Failed to send payment proof email:', error)
           );
 

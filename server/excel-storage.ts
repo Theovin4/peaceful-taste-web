@@ -342,7 +342,8 @@ export async function addOrderToExcel(orderData: {
 export async function updateOrderReceiptInExcel(
   orderNumber: string,
   receiptUrl: string,
-  status: string = 'receipt_uploaded'
+  status: string = 'receipt_uploaded',
+  updates?: Partial<Pick<OrderWorkbookRow, 'paymentMethod' | 'notes'>>
 ) {
   let existing: OrderRecord | undefined;
 
@@ -359,6 +360,8 @@ export async function updateOrderReceiptInExcel(
     ...existing,
     receiptUrl,
     status,
+    paymentMethod: updates?.paymentMethod ?? existing.paymentMethod,
+    notes: updates?.notes ?? existing.notes,
   });
   await writeOrdersWorkbookFile();
 

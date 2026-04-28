@@ -33,6 +33,19 @@ export interface OrderReceiptPayload {
   tax: number;
   shippingCost: number;
   totalAmount: number;
+  paymentMethod?: string;
+}
+
+function getReceiptPaymentMethodLabel(paymentMethod?: string) {
+  if (paymentMethod === "flutterwave") {
+    return "Flutterwave Checkout";
+  }
+
+  if (paymentMethod === "bank_transfer") {
+    return "Bank Transfer";
+  }
+
+  return "To be confirmed by customer";
 }
 
 export function formatNairaAmount(amount: number): string {
@@ -44,6 +57,7 @@ export function formatNairaAmount(amount: number): string {
 }
 
 export function buildReceiptText(payload: OrderReceiptPayload): string {
+  const paymentMethodLabel = getReceiptPaymentMethodLabel(payload.paymentMethod);
   const items = payload.items
     .map((item) => `- ${item.name} x${item.quantity} (${formatNairaAmount(item.price)} each)`)
     .join("\n");
@@ -57,7 +71,7 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Customer Phone: ${payload.customerPhone || "N/A"}`,
     `Delivery Location: ${payload.deliveryLocation}`,
     `Full Delivery Address: ${payload.deliveryAddress}`,
-    `Payment Method: Bank Transfer`,
+    `Payment Method: ${paymentMethodLabel}`,
     `Payment Status: Awaiting confirmation`,
     "",
     "Items:",
@@ -68,11 +82,12 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Delivery: ${formatNairaAmount(payload.shippingCost)}`,
     `Total: ${formatNairaAmount(payload.totalAmount)}`,
     "",
-    "Bank Transfer Details:",
-    `Account Name: ${PEACEFUL_TASTE_CONTACT.accountName}`,
+    "Payment Details:",
+    `Preferred Method: ${paymentMethodLabel}`,
+    `Bank Account Name: ${PEACEFUL_TASTE_CONTACT.accountName}`,
     `Bank: ${PEACEFUL_TASTE_CONTACT.bankName}`,
     `Account Number: ${PEACEFUL_TASTE_CONTACT.accountNumber}`,
-    `Transfer Amount: ${formatNairaAmount(payload.totalAmount)}`,
+    `Transfer Amount / Checkout Total: ${formatNairaAmount(payload.totalAmount)}`,
     `Payment Reference: ${payload.orderNumber}`,
     "",
     "Brand Contacts:",

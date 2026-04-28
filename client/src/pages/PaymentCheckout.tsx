@@ -284,7 +284,7 @@ export default function PaymentCheckout() {
                         Pay {formatNaira(orderCreated.totalAmount)} on Flutterwave
                       </Button>
                       <Button
-                        onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)}
+                        onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}&method=flutterwave`)}
                         variant="outline"
                         className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
                       >
@@ -335,7 +335,7 @@ export default function PaymentCheckout() {
                       Contact via WhatsApp
                     </Button>
                     <Button
-                      onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)}
+                      onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}&method=bank_transfer`)}
                       variant="outline"
                       className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
                     >
@@ -377,7 +377,7 @@ export default function PaymentCheckout() {
                   </div>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <Button onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)} className="btn-primary text-white">
+                    <Button onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}&method=bank_transfer`)} className="btn-primary text-white">
                       Upload Receipt
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
