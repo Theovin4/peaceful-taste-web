@@ -139,7 +139,7 @@ export default function PaymentSuccess() {
     <div className="min-h-screen bg-background py-12">
       <PageMeta
         title="Upload Payment Receipt"
-        description="Upload your Peaceful Taste transfer receipt and resend your customer receipt if needed."
+        description="Upload your Peaceful Taste payment proof after bank transfer or Flutterwave checkout, and resend your customer receipt if needed."
         path="/payment-success"
         robots="noindex, nofollow"
       />
@@ -154,7 +154,7 @@ export default function PaymentSuccess() {
         <Card className="glass-panel border-0 p-8">
           <div className="mb-6 rounded-2xl border border-accent/20 bg-accent/10 p-4">
             <p className="text-sm text-muted-foreground">
-              After your bank transfer, upload a screenshot, PDF, or clear photo of the receipt. We will verify it and confirm your order.
+              After your bank transfer or Flutterwave payment, upload a screenshot, PDF, or clear photo of the confirmation. We will verify it and confirm your order.
             </p>
           </div>
 
@@ -222,6 +222,7 @@ export default function PaymentSuccess() {
               <p className="mb-2 text-sm font-semibold text-foreground">What to upload:</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>- Screenshot of successful bank transfer</li>
+                <li>- Flutterwave payment confirmation screenshot or receipt</li>
                 <li>- Payment confirmation from your bank</li>
                 <li>- Transaction receipt showing the amount transferred</li>
               </ul>

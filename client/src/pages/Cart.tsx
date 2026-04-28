@@ -184,7 +184,7 @@ export default function Cart() {
                   <div className="mt-6 border-t border-border pt-6">
                     <div className="mb-3 flex items-center justify-center gap-2 text-accent">
                       <ShieldCheck className="h-4 w-4" />
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em]">Manual bank transfer</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em]">Bank transfer or Flutterwave</p>
                     </div>
                     <div className="flex justify-center gap-2 text-xs">
                       <span className="rounded-full bg-card px-3 py-1 text-muted-foreground">Secure</span>

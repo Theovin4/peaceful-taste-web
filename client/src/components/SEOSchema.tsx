@@ -146,7 +146,7 @@ export function FAQSchema() {
         "name": "How do I place an order?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Browse our products, add items to your cart, proceed to checkout, select your delivery location, and make payment via bank transfer. We'll send you WhatsApp confirmation."
+            "text": "Browse our products, add items to your cart, proceed to checkout, select your delivery location, and pay via bank transfer or Flutterwave. We'll send you WhatsApp confirmation."
         }
       },
       {
@@ -154,7 +154,7 @@ export function FAQSchema() {
         "name": "What payment methods do you accept?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `We accept bank transfers to ${PEACEFUL_TASTE_CONTACT.bankName} (${PEACEFUL_TASTE_CONTACT.accountNumber}). Payment receipt upload is required for order confirmation.`
+            "text": `We accept bank transfers to ${PEACEFUL_TASTE_CONTACT.bankName} (${PEACEFUL_TASTE_CONTACT.accountNumber}) and direct Flutterwave checkout. Payment confirmation upload is required for order confirmation.`
         }
       },
       {

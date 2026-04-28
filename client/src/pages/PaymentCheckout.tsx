@@ -36,6 +36,8 @@ const BANK_ACCOUNT = {
   accountNumber: PEACEFUL_TASTE_CONTACT.accountNumber,
 };
 
+const FLUTTERWAVE_PAYMENT_LINK = 'https://flutterwave.com/pay/mkn9lq08pow6';
+
 export default function PaymentCheckout() {
   const [, setLocation] = useLocation();
   const { items, total, clearCart } = useCart();
@@ -162,6 +164,10 @@ export default function PaymentCheckout() {
     window.open(`https://wa.me/${PEACEFUL_TASTE_CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
+  const handleFlutterwaveCheckout = () => {
+    window.open(FLUTTERWAVE_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+  };
+
   if (items.length === 0 && !orderCreated) {
     return (
       <div className="min-h-screen bg-background">
@@ -194,7 +200,7 @@ export default function PaymentCheckout() {
       <div className="min-h-screen bg-background">
         <PageMeta
           title="Payment Instructions"
-          description="View Peaceful Taste payment instructions, download your receipt, and share your order copy for confirmation."
+          description="Choose bank transfer or Flutterwave checkout, download your Peaceful Taste receipt, and share your order copy for confirmation."
           path="/checkout"
           robots="noindex, nofollow"
         />
@@ -205,7 +211,7 @@ export default function PaymentCheckout() {
               <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
                 Payment Instructions
               </p>
-              <h1 className="text-4xl font-bold text-foreground">Complete your transfer securely</h1>
+              <h1 className="text-4xl font-bold text-foreground">Complete your payment securely</h1>
             </div>
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -256,7 +262,38 @@ export default function PaymentCheckout() {
                 </Card>
 
                 <Card className="glass-panel border-0 p-6">
-                  <h2 className="mb-6 text-2xl font-bold text-foreground">Bank Transfer Details</h2>
+                  <div className="mb-6 flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Payment Options</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        You can pay instantly with Flutterwave or use the bank transfer details below.
+                      </p>
+                    </div>
+                    <Button onClick={handleFlutterwaveCheckout} className="btn-primary text-white">
+                      Pay with Flutterwave
+                    </Button>
+                  </div>
+
+                  <div className="mb-6 rounded-3xl border border-accent/20 bg-accent/10 p-5">
+                    <p className="text-sm font-semibold text-foreground">Direct checkout option</p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Use your Flutterwave payment link if you want a faster direct checkout. After payment, return here to keep your order number, receipt, and confirmation steps together.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Button onClick={handleFlutterwaveCheckout} className="btn-primary text-white">
+                        Pay {formatNaira(orderCreated.totalAmount)} on Flutterwave
+                      </Button>
+                      <Button
+                        onClick={() => setLocation(`/payment-success?order=${encodeURIComponent(orderCreated.orderNumber)}`)}
+                        variant="outline"
+                        className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10"
+                      >
+                        I have paid already
+                      </Button>
+                    </div>
+                  </div>
+
+                  <h3 className="mb-6 text-xl font-bold text-foreground">Bank Transfer Details</h3>
 
                   <div className="space-y-4 rounded-3xl bg-background/60 p-6">
                     {[
@@ -289,7 +326,7 @@ export default function PaymentCheckout() {
                   </div>
 
                   <div className="mt-6 rounded-3xl border border-accent/20 bg-accent/10 p-4 text-sm text-muted-foreground">
-                    Transfer the exact amount and use your order number as the payment reference where possible.
+                    For bank transfer, send the exact amount and use your order number as the payment reference where possible.
                   </div>
 
                   <div className="mt-6 space-y-3">
@@ -316,12 +353,12 @@ export default function PaymentCheckout() {
                   <div className="space-y-4">
                     {[
                       {
-                        title: '1. Transfer the exact amount',
-                        body: `Send ${formatNaira(orderCreated.totalAmount)} to the account details above and use ${orderCreated.orderNumber} as your reference if your bank allows it.`,
+                        title: '1. Choose your payment method',
+                        body: `Pay ${formatNaira(orderCreated.totalAmount)} with Flutterwave using the direct checkout button above, or transfer to the Peaceful Taste bank account and use ${orderCreated.orderNumber} as your reference if your bank allows it.`,
                       },
                       {
-                        title: '2. Save your transfer receipt',
-                        body: 'A screenshot from your banking app or a clear photo of the transfer confirmation works perfectly.',
+                        title: '2. Save your payment confirmation',
+                        body: 'A Flutterwave confirmation page, bank app screenshot, or clear photo/PDF of the transfer receipt works perfectly.',
                       },
                       {
                         title: '3. Send your proof for confirmation',
@@ -410,7 +447,7 @@ export default function PaymentCheckout() {
     <div className="min-h-screen bg-background">
       <PageMeta
         title="Checkout"
-        description="Add delivery details, confirm your Peaceful Taste order, and generate your branded receipt."
+        description="Add delivery details, confirm your Peaceful Taste order, and continue with bank transfer or Flutterwave checkout."
         path="/checkout"
         robots="noindex, nofollow"
       />
@@ -459,6 +496,9 @@ export default function PaymentCheckout() {
                 <div className="mt-6">
                   <p className="mb-2 text-sm font-semibold text-foreground">Total Amount</p>
                   <p className="text-3xl font-bold text-primary">{formatNaira(totalAmount)}</p>
+                  <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                    After order creation, you can pay by bank transfer or use the direct Flutterwave checkout link.
+                  </p>
                 </div>
               </Card>
 
