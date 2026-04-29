@@ -1,4 +1,4 @@
-import { get, list, put } from '@vercel/blob';
+import { del, get, list, put } from '@vercel/blob';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -110,6 +110,18 @@ export async function listPrivateBlobs(prefix: string) {
   }
 
   return blobs;
+}
+
+export async function deletePrivateBlobs(pathnames: string[]) {
+  if (!isBlobUsable() || pathnames.length === 0) return false;
+
+  try {
+    await del(pathnames);
+    return true;
+  } catch (error) {
+    markBlobUnavailable(error);
+    return false;
+  }
 }
 
 export async function syncWorkbookToBlob(localPath: string, type: 'orders' | 'inquiries') {

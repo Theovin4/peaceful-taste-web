@@ -14,8 +14,8 @@ export default function Cart() {
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const bulkDiscount = totalQuantity >= 6 ? Math.round(total * 0.1) : 0;
   const discountedTotal = total - bulkDiscount;
-  const shipping = 500;
-  const tax = Math.round(discountedTotal * 0.1);
+  const shipping = 0;
+  const tax = Math.round(discountedTotal * 0.025);
   const grandTotal = discountedTotal + shipping + tax;
 
   const handleCheckout = () => {
@@ -153,10 +153,10 @@ export default function Cart() {
 
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span className="font-medium text-foreground">{formatNaira(shipping)}</span>
+                      <span className="font-medium text-foreground">Calculated at checkout</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Tax</span>
+                      <span className="text-muted-foreground">Tax (2.5%)</span>
                       <span className="font-medium text-foreground">{formatNaira(tax)}</span>
                     </div>
                   </div>
@@ -165,6 +165,9 @@ export default function Cart() {
                     <span className="font-semibold text-foreground">Total</span>
                     <span className="text-2xl font-bold text-primary">{formatNaira(grandTotal)}</span>
                   </div>
+                  <p className="mb-5 text-xs leading-6 text-muted-foreground">
+                    Final delivery fee is added only after you choose your delivery location during checkout.
+                  </p>
 
                   <Button onClick={handleCheckout} className="btn-primary mb-3 w-full gap-2 text-white">
                     Proceed to Payment <ArrowRight className="h-4 w-4" />

@@ -97,6 +97,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
 
   let y = height - 182;
   const paymentMethodLabel = getPdfPaymentMethodLabel(data.paymentMethod);
+  const paymentStatusLabel = data.paymentStatus || 'Awaiting confirmation';
 
   const drawSectionTitle = (title: string) => {
     page.drawText(title, {
@@ -137,7 +138,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
   drawSectionTitle('Receipt Summary');
   drawLabelValue('Order Number', data.orderNumber);
   drawLabelValue('Payment Method', paymentMethodLabel);
-  drawLabelValue('Payment Status', 'Awaiting confirmation');
+  drawLabelValue('Payment Status', paymentStatusLabel);
   drawLabelValue('Transfer Amount', formatPdfAmount(data.totalAmount));
   drawLabelValue('Payment Reference', data.orderNumber);
 
@@ -241,7 +242,7 @@ export async function generateOrderReceipt(data: ReceiptData): Promise<Buffer> {
 
   const totals = [
     ['Subtotal', formatPdfAmount(data.subtotal)],
-    ['Tax (10%)', formatPdfAmount(data.tax)],
+    ['Tax (2.5%)', formatPdfAmount(data.tax)],
     ['Delivery Fee', formatPdfAmount(data.shippingCost)],
   ];
   totals.forEach(([label, value]) => {

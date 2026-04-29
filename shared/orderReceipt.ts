@@ -34,6 +34,7 @@ export interface OrderReceiptPayload {
   shippingCost: number;
   totalAmount: number;
   paymentMethod?: string;
+  paymentStatus?: string;
 }
 
 function getReceiptPaymentMethodLabel(paymentMethod?: string) {
@@ -58,6 +59,7 @@ export function formatNairaAmount(amount: number): string {
 
 export function buildReceiptText(payload: OrderReceiptPayload): string {
   const paymentMethodLabel = getReceiptPaymentMethodLabel(payload.paymentMethod);
+  const paymentStatus = payload.paymentStatus || "Awaiting confirmation";
   const items = payload.items
     .map((item) => `- ${item.name} x${item.quantity} (${formatNairaAmount(item.price)} each)`)
     .join("\n");
@@ -72,7 +74,7 @@ export function buildReceiptText(payload: OrderReceiptPayload): string {
     `Delivery Location: ${payload.deliveryLocation}`,
     `Full Delivery Address: ${payload.deliveryAddress}`,
     `Payment Method: ${paymentMethodLabel}`,
-    `Payment Status: Awaiting confirmation`,
+    `Payment Status: ${paymentStatus}`,
     "",
     "Items:",
     items,

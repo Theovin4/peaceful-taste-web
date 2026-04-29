@@ -17,6 +17,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Cart = lazy(() => import("./pages/Cart"));
 const PaymentCheckout = lazy(() => import("./pages/PaymentCheckout"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const FlutterwavePaymentStatus = lazy(() => import("./pages/FlutterwavePaymentStatus"));
 const SocialShowcase = lazy(() => import("./pages/SocialShowcase"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -53,6 +54,7 @@ function Router() {
       <Route path={"/cart"} component={Cart} />
       <Route path={"/checkout"} component={PaymentCheckout} />
       <Route path={"/payment-success"} component={PaymentSuccess} />
+      <Route path={"/payment-status"} component={FlutterwavePaymentStatus} />
       <Route path={"/social"} component={SocialShowcase} />
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/privacy-policy"} component={PrivacyPolicy} />
@@ -92,6 +94,7 @@ function App() {
         void import("./pages/Cart");
         void import("./pages/PaymentCheckout");
         void import("./pages/PaymentSuccess");
+        void import("./pages/FlutterwavePaymentStatus");
         void import("./pages/SocialShowcase");
         void import("./pages/PrivacyPolicy");
         void import("./pages/TermsOfService");

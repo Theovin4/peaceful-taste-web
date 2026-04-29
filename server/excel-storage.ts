@@ -4,6 +4,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import {
   blobStorageEnabled,
+  deletePrivateBlobs,
   downloadPrivateBlob,
   listPrivateBlobs,
   uploadPrivateJson,
@@ -366,6 +367,78 @@ export async function updateOrderReceiptInExcel(
   await writeOrdersWorkbookFile();
 
   return true;
+}
+
+export async function updateOrderInExcel(
+  orderNumber: string,
+  updates: Partial<Pick<OrderWorkbookRow, 'status' | 'paymentMethod' | 'notes' | 'receiptUrl'>>
+) {
+  let existing: OrderRecord | undefined;
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const records = await getOrderRecords();
+    existing = records.find((record) => record.orderNumber === orderNumber);
+    if (existing) break;
+    await wait(500);
+  }
+
+  if (!existing) return false;
+
+  await writeOrderRecord({
+    ...existing,
+    status: updates.status ?? existing.status,
+    paymentMethod: updates.paymentMethod ?? existing.paymentMethod,
+    notes: updates.notes ?? existing.notes,
+    receiptUrl: updates.receiptUrl ?? existing.receiptUrl,
+  });
+  await writeOrdersWorkbookFile();
+
+  return true;
+}
+
+export async function deleteOrdersFromExcel(orderNumbers: string[]) {
+  const uniqueOrderNumbers = Array.from(
+    new Set(orderNumbers.map((orderNumber) => String(orderNumber || '').trim()).filter(Boolean))
+  );
+
+  if (uniqueOrderNumbers.length === 0) {
+    return { removedCount: 0, removedOrderNumbers: [] as string[] };
+  }
+
+  const existingOrders = await getOrderRecords();
+  const removalSet = new Set(uniqueOrderNumbers);
+  const removedOrders = existingOrders.filter((order) => removalSet.has(order.orderNumber));
+
+  if (removedOrders.length === 0) {
+    return { removedCount: 0, removedOrderNumbers: [] as string[] };
+  }
+
+  const nextOrders = existingOrders.filter((order) => !removalSet.has(order.orderNumber));
+
+  ensureDataDir();
+
+  for (const order of removedOrders) {
+    const localFile = localOrderRecordFile(order.orderNumber);
+    if (fs.existsSync(localFile)) {
+      fs.unlinkSync(localFile);
+    }
+  }
+
+  if (cloudinaryStorageEnabled()) {
+    await uploadCloudinaryRawJson({
+      publicIdWithExtension: CLOUDINARY_ORDER_RECORDS_PUBLIC_ID,
+      data: nextOrders,
+    });
+  } else if (blobStorageEnabled()) {
+    await deletePrivateBlobs(removedOrders.map((order) => orderRecordPath(order.orderNumber)));
+  }
+
+  await writeOrdersWorkbookFile();
+
+  return {
+    removedCount: removedOrders.length,
+    removedOrderNumbers: removedOrders.map((order) => order.orderNumber),
+  };
 }
 
 export async function getOrdersFromExcel(): Promise<OrderWorkbookRow[]> {

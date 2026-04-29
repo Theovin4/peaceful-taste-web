@@ -7,28 +7,43 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, Loader2, Upload, MessageCircle, Download, Mail, Copy } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { copyTextToClipboard, downloadPdfReceipt, fileToDataUrl, loadLatestReceipt } from '@/lib/orderReceipt';
+import {
+  copyTextToClipboard,
+  downloadPdfReceipt,
+  fileToDataUrl,
+  loadLatestReceipt,
+  saveLatestReceipt,
+} from '@/lib/orderReceipt';
 import PageMeta from '@/components/PageMeta';
 
 export default function PaymentSuccess() {
   const [, setLocation] = useLocation();
   const latestReceipt = useMemo(() => loadLatestReceipt(), []);
   const [orderNumber, setOrderNumber] = useState('');
+  const [checkoutReference, setCheckoutReference] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'flutterwave'>('bank_transfer');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
+  const [createdReceipt, setCreatedReceipt] = useState(latestReceipt);
 
   const uploadReceiptMutation = trpc.orders.uploadReceipt.useMutation();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const orderFromQuery = params.get('order');
+    const checkoutReferenceFromQuery = params.get('checkoutReference');
     const methodFromQuery = params.get('method');
+
     if (orderFromQuery) {
       setOrderNumber(orderFromQuery);
     }
+
+    if (checkoutReferenceFromQuery) {
+      setCheckoutReference(checkoutReferenceFromQuery);
+    }
+
     if (methodFromQuery === 'flutterwave' || methodFromQuery === 'bank_transfer') {
       setPaymentMethod(methodFromQuery);
     }
@@ -52,8 +67,8 @@ export default function PaymentSuccess() {
   const handleUploadReceipt = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!orderNumber.trim()) {
-      toast.error('Please enter your order number');
+    if (!orderNumber.trim() && !checkoutReference.trim()) {
+      toast.error('Please enter your order number or payment reference.');
       return;
     }
 
@@ -66,15 +81,29 @@ export default function PaymentSuccess() {
 
     try {
       const receiptDataUrl = await fileToDataUrl(receiptFile);
-      await uploadReceiptMutation.mutateAsync({
-        orderNumber,
+      const response = await uploadReceiptMutation.mutateAsync({
+        orderNumber: orderNumber.trim() || undefined,
+        checkoutReference: checkoutReference.trim() || undefined,
         receiptName: receiptFile.name,
         receiptDataUrl,
         paymentMethod,
       });
 
+      if (response.receipt) {
+        saveLatestReceipt(response.receipt);
+        setCreatedReceipt(response.receipt);
+      }
+
+      if (response.orderNumber) {
+        setOrderNumber(response.orderNumber);
+      }
+
       setUploadSuccess(true);
-      toast.success('Receipt uploaded successfully. We will verify and process your payment soon.');
+      toast.success(
+        response.orderNumber
+          ? `Payment proof uploaded. Your real order number is ${response.orderNumber}.`
+          : 'Receipt uploaded successfully. We will verify and process your payment soon.'
+      );
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to upload receipt';
       toast.error(errorMsg);
@@ -84,8 +113,8 @@ export default function PaymentSuccess() {
   };
 
   const copyReceiptSummary = async () => {
-    if (!latestReceipt?.receiptText) return;
-    await copyTextToClipboard(latestReceipt.receiptText);
+    if (!createdReceipt?.receiptText) return;
+    await copyTextToClipboard(createdReceipt.receiptText);
     setSummaryCopied(true);
     toast.success('Receipt summary copied.');
     setTimeout(() => setSummaryCopied(false), 1800);
@@ -95,7 +124,7 @@ export default function PaymentSuccess() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background py-12">
         <PageMeta
-          title="Receipt Uploaded"
+          title="Payment Submitted"
           description="Your Peaceful Taste payment proof has been uploaded successfully."
           path="/payment-success"
           robots="noindex, nofollow"
@@ -103,25 +132,31 @@ export default function PaymentSuccess() {
         <div className="container max-w-2xl">
           <Card className="glass-panel border-0 p-8 text-center">
             <CheckCircle className="mx-auto mb-4 h-16 w-16 text-emerald-400" />
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Receipt uploaded</h1>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">
+              {orderNumber ? 'Order created successfully' : 'Receipt uploaded'}
+            </h1>
             <p className="mb-6 text-muted-foreground">
-              Thank you for your payment. We have received your proof and will verify it shortly.
+              {orderNumber
+                ? `Your payment step is complete and your real order number is ${orderNumber}.`
+                : 'Thank you for your payment. We have received your proof and will verify it shortly.'}
             </p>
 
-            <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-              <p className="text-sm text-emerald-300">
-                Your uploaded proof is now saved with the order record. If you need help, contact us via WhatsApp.
-              </p>
-            </div>
+            {orderNumber && (
+              <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <p className="text-sm text-emerald-300">
+                  Order Number: <span className="font-mono font-bold">{orderNumber}</span>
+                </p>
+              </div>
+            )}
 
             <div className="grid gap-3 sm:grid-cols-2">
-              {latestReceipt && (
+              {createdReceipt && (
                 <>
-                  <Button onClick={() => downloadPdfReceipt(latestReceipt.fileName, latestReceipt.pdfBase64)} className="btn-primary text-white">
+                  <Button onClick={() => downloadPdfReceipt(createdReceipt.fileName, createdReceipt.pdfBase64)} className="btn-primary text-white">
                     <Download className="mr-2 h-4 w-4" />
-                    Download Receipt Again
+                    Download Receipt
                   </Button>
-                  <a href={latestReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={createdReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
                     <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Send Copy to WhatsApp
@@ -143,48 +178,48 @@ export default function PaymentSuccess() {
   return (
     <div className="min-h-screen bg-background py-12">
       <PageMeta
-        title="Upload Payment Receipt"
-        description="Upload your Peaceful Taste payment proof after bank transfer or Flutterwave checkout, and resend your customer receipt if needed."
+        title="Upload Payment Proof"
+        description="Upload your Peaceful Taste direct bank transfer proof so we can complete your order."
         path="/payment-success"
         robots="noindex, nofollow"
       />
       <div className="container max-w-3xl">
         <div className="mb-8">
           <p className="mb-3 inline-flex rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-accent">
-            Payment proof
+            Bank Transfer Proof
           </p>
-          <h1 className="text-4xl font-bold text-foreground">Upload your payment receipt</h1>
+          <h1 className="text-4xl font-bold text-foreground">Upload your transfer confirmation</h1>
         </div>
 
         <Card className="glass-panel border-0 p-8">
           <div className="mb-6 rounded-2xl border border-accent/20 bg-accent/10 p-4">
             <p className="text-sm text-muted-foreground">
-              After your bank transfer or Flutterwave payment, upload a screenshot, PDF, or clear photo of the confirmation. We will verify it and confirm your order.
+              After your direct bank transfer, upload a screenshot, PDF, or clear photo of the confirmation. Your real order number will be created after this payment step is submitted.
             </p>
           </div>
 
-          {latestReceipt && (
+          {createdReceipt && (
             <div className="mb-6 rounded-3xl border border-border bg-background/60 p-5">
-              <h2 className="mb-2 text-lg font-semibold text-foreground">Your order receipt is ready</h2>
+              <h2 className="mb-2 text-lg font-semibold text-foreground">Latest receipt</h2>
               <p className="mb-4 text-sm text-muted-foreground">
-                Order <span className="font-mono text-accent">{latestReceipt.payload.orderNumber}</span> already has a downloadable customer receipt and prefilled business copy links.
+                If you already created an order earlier, you can still download that receipt or copy it again here.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
-                <Button onClick={() => downloadPdfReceipt(latestReceipt.fileName, latestReceipt.pdfBase64)} className="btn-primary text-white">
+                <Button onClick={() => downloadPdfReceipt(createdReceipt.fileName, createdReceipt.pdfBase64)} className="btn-primary text-white">
                   <Download className="mr-2 h-4 w-4" />
-                  Download Customer Receipt
+                  Download Receipt
                 </Button>
                 <Button onClick={copyReceiptSummary} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
                   <Copy className="mr-2 h-4 w-4" />
                   {summaryCopied ? 'Receipt Copied' : 'Copy Receipt Summary'}
                 </Button>
-                <a href={latestReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                <a href={createdReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
                   <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Send Copy to WhatsApp
                   </Button>
                 </a>
-                <a href={latestReceipt.businessEmailUrl}>
+                <a href={createdReceipt.businessEmailUrl}>
                   <Button variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
                     <Mail className="mr-2 h-4 w-4" />
                     Send Copy to Email
@@ -196,44 +231,35 @@ export default function PaymentSuccess() {
 
           <form onSubmit={handleUploadReceipt} className="space-y-6">
             <div>
-              <Label htmlFor="orderNumber" className="font-semibold text-foreground">Order Number *</Label>
+              <Label htmlFor="checkoutReference" className="font-semibold text-foreground">
+                Payment Reference *
+              </Label>
+              <Input
+                id="checkoutReference"
+                type="text"
+                value={checkoutReference}
+                onChange={(e) => setCheckoutReference(e.target.value)}
+                placeholder="e.g., CHK-1777467869099-ABC123"
+                required={!orderNumber}
+                className="mt-2 bg-background"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Use the payment reference shown on the bank transfer page if you do not yet have a real order number.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="orderNumber" className="font-semibold text-foreground">
+                Existing Order Number (optional)
+              </Label>
               <Input
                 id="orderNumber"
                 type="text"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 placeholder="e.g., ORD-1234567890-abcde"
-                required
                 className="mt-2 bg-background"
               />
-              <p className="mt-1 text-xs text-muted-foreground">You received this number after creating your order.</p>
-            </div>
-
-            <div>
-              <Label className="font-semibold text-foreground">Payment Method *</Label>
-              <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                <label className="flex items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'bank_transfer'}
-                    onChange={() => setPaymentMethod('bank_transfer')}
-                  />
-                  Bank transfer
-                </label>
-                <label className="flex items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 text-sm text-foreground">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'flutterwave'}
-                    onChange={() => setPaymentMethod('flutterwave')}
-                  />
-                  Flutterwave checkout
-                </label>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                This selection is stored with the order record so your admin dashboard and workbook show the correct payment path.
-              </p>
             </div>
 
             <div>
@@ -254,9 +280,8 @@ export default function PaymentSuccess() {
               <p className="mb-2 text-sm font-semibold text-foreground">What to upload:</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li>- Screenshot of successful bank transfer</li>
-                <li>- Flutterwave payment confirmation screenshot or receipt</li>
-                <li>- Payment confirmation from your bank</li>
-                <li>- Transaction receipt showing the amount transferred</li>
+                <li>- Bank app confirmation page</li>
+                <li>- PDF or image showing the exact transfer amount</li>
               </ul>
             </div>
 
@@ -267,7 +292,7 @@ export default function PaymentSuccess() {
                   Uploading...
                 </>
               ) : (
-                'Upload Receipt'
+                'Upload Transfer Proof'
               )}
             </Button>
 
@@ -275,19 +300,6 @@ export default function PaymentSuccess() {
               Cancel
             </Button>
           </form>
-
-          <div className="mt-8 border-t border-border pt-8">
-            <p className="mb-3 text-sm text-muted-foreground">Need help?</p>
-            <a
-              href="https://wa.me/2349022621323?text=Hi%20I%20need%20help%20with%20my%20payment"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center rounded-2xl bg-emerald-500 px-4 py-3 font-semibold text-white transition-all hover:bg-emerald-400"
-            >
-              <MessageCircle className="mr-2 h-4 w-4" />
-              Contact via WhatsApp
-            </a>
-          </div>
         </Card>
       </div>
     </div>
