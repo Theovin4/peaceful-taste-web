@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, Loader2, Upload, MessageCircle, Download, Mail, Copy } from 'lucide-react';
+import { CheckCircle, Copy, Download, Loader2, Mail, MessageCircle, ReceiptText, ShieldCheck, Sparkles, Upload } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import {
@@ -189,117 +189,166 @@ export default function PaymentSuccess() {
             Bank Transfer Proof
           </p>
           <h1 className="text-4xl font-bold text-foreground">Upload your transfer confirmation</h1>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            After you transfer, upload a clear screenshot, PDF, or photo of the payment confirmation so we can complete the order cleanly.
+          </p>
         </div>
 
-        <Card className="glass-panel border-0 p-8">
-          <div className="mb-6 rounded-2xl border border-accent/20 bg-accent/10 p-4">
-            <p className="text-sm text-muted-foreground">
-              After your direct bank transfer, upload a screenshot, PDF, or clear photo of the confirmation. Your real order number will be created after this payment step is submitted.
-            </p>
+        <Card className="glass-panel border-0 overflow-hidden p-0">
+          <div className="border-b border-border/60 bg-[radial-gradient(circle_at_top,_rgba(180,120,40,0.16),_transparent_52%)] px-8 py-8">
+            <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+              <div className="rounded-3xl border border-accent/20 bg-background/70 p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 text-accent" />
+                  <div>
+                    <p className="font-semibold text-foreground">Your final order number appears after proof upload</p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Once this payment step is submitted successfully, the site creates your real order number and updates the admin dashboard automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-3xl border border-border bg-background/70 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">What we need</p>
+                <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  <p>- exact transfer amount visible</p>
+                  <p>- successful payment confirmation</p>
+                  <p>- payment reference or order number</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {createdReceipt && (
-            <div className="mb-6 rounded-3xl border border-border bg-background/60 p-5">
-              <h2 className="mb-2 text-lg font-semibold text-foreground">Latest receipt</h2>
-              <p className="mb-4 text-sm text-muted-foreground">
-                If you already created an order earlier, you can still download that receipt or copy it again here.
+          <div className="px-8 py-8">
+            <div className="mb-6 rounded-2xl border border-accent/20 bg-accent/10 p-4">
+              <p className="text-sm text-muted-foreground">
+                Upload your proof only once. If you already have a receipt package below, you can still download or share it again from this page.
               </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Button onClick={() => downloadPdfReceipt(createdReceipt.fileName, createdReceipt.pdfBase64)} className="btn-primary text-white">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Receipt
-                </Button>
-                <Button onClick={copyReceiptSummary} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
-                  <Copy className="mr-2 h-4 w-4" />
-                  {summaryCopied ? 'Receipt Copied' : 'Copy Receipt Summary'}
-                </Button>
-                <a href={createdReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Send Copy to WhatsApp
+            </div>
+
+            {createdReceipt && (
+              <div className="mb-6 rounded-3xl border border-border bg-background/60 p-5">
+                <div className="mb-4 flex items-start gap-3">
+                  <ReceiptText className="mt-0.5 h-5 w-5 text-accent" />
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">Latest receipt package</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      You can reuse this receipt summary or send it again while you finish the transfer proof step.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button onClick={() => downloadPdfReceipt(createdReceipt.fileName, createdReceipt.pdfBase64)} className="btn-primary text-white">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Receipt
                   </Button>
-                </a>
-                <a href={createdReceipt.businessEmailUrl}>
-                  <Button variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Send Copy to Email
+                  <Button onClick={copyReceiptSummary} variant="outline" className="border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                    <Copy className="mr-2 h-4 w-4" />
+                    {summaryCopied ? 'Receipt Copied' : 'Copy Receipt Summary'}
                   </Button>
-                </a>
+                  <a href={createdReceipt.businessWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-emerald-500 text-white hover:bg-emerald-400">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Send Copy to WhatsApp
+                    </Button>
+                  </a>
+                  <a href={createdReceipt.businessEmailUrl}>
+                    <Button variant="outline" className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                      <Mail className="mr-2 h-4 w-4" />
+                      Send Copy to Email
+                    </Button>
+                  </a>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <form onSubmit={handleUploadReceipt} className="space-y-6">
-            <div>
-              <Label htmlFor="checkoutReference" className="font-semibold text-foreground">
-                Payment Reference *
-              </Label>
-              <Input
-                id="checkoutReference"
-                type="text"
-                value={checkoutReference}
-                onChange={(e) => setCheckoutReference(e.target.value)}
-                placeholder="e.g., CHK-1777467869099-ABC123"
-                required={!orderNumber}
-                className="mt-2 bg-background"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Use the payment reference shown on the bank transfer page if you do not yet have a real order number.
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="orderNumber" className="font-semibold text-foreground">
-                Existing Order Number (optional)
-              </Label>
-              <Input
-                id="orderNumber"
-                type="text"
-                value={orderNumber}
-                onChange={(e) => setOrderNumber(e.target.value)}
-                placeholder="e.g., ORD-1234567890-abcde"
-                className="mt-2 bg-background"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="receipt" className="font-semibold text-foreground">Payment Receipt *</Label>
-              <div className="mt-2 rounded-3xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-accent">
-                <input id="receipt" type="file" accept="image/*,.pdf" onChange={handleFileChange} required className="hidden" />
-                <label htmlFor="receipt" className="cursor-pointer">
-                  <Upload className="mx-auto mb-3 h-12 w-12 text-accent" />
-                  <p className="mb-1 text-sm font-medium text-foreground">
-                    {receiptFile ? receiptFile.name : 'Click to upload your proof of payment'}
+            <form onSubmit={handleUploadReceipt} className="space-y-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div>
+                  <Label htmlFor="checkoutReference" className="font-semibold text-foreground">
+                    Payment Reference *
+                  </Label>
+                  <Input
+                    id="checkoutReference"
+                    type="text"
+                    value={checkoutReference}
+                    onChange={(e) => setCheckoutReference(e.target.value)}
+                    placeholder="e.g., CHK-1777467869099-ABC123"
+                    required={!orderNumber}
+                    className="mt-2 bg-background"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Use the payment reference shown on the bank transfer page if you do not yet have a real order number.
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF, or PDF up to 5MB</p>
-                </label>
+                </div>
+
+                <div>
+                  <Label htmlFor="orderNumber" className="font-semibold text-foreground">
+                    Existing Order Number (optional)
+                  </Label>
+                  <Input
+                    id="orderNumber"
+                    type="text"
+                    value={orderNumber}
+                    onChange={(e) => setOrderNumber(e.target.value)}
+                    placeholder="e.g., ORD-1234567890-abcde"
+                    className="mt-2 bg-background"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-2xl bg-background/70 p-4">
-              <p className="mb-2 text-sm font-semibold text-foreground">What to upload:</p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>- Screenshot of successful bank transfer</li>
-                <li>- Bank app confirmation page</li>
-                <li>- PDF or image showing the exact transfer amount</li>
-              </ul>
-            </div>
+              <div>
+                <Label htmlFor="receipt" className="font-semibold text-foreground">Payment Receipt *</Label>
+                <div className="mt-2 rounded-3xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-accent">
+                  <input id="receipt" type="file" accept="image/*,.pdf" onChange={handleFileChange} required className="hidden" />
+                  <label htmlFor="receipt" className="cursor-pointer">
+                    <Upload className="mx-auto mb-3 h-12 w-12 text-accent" />
+                    <p className="mb-1 text-sm font-medium text-foreground">
+                      {receiptFile ? receiptFile.name : 'Click to upload your proof of payment'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF, or PDF up to 5MB</p>
+                  </label>
+                </div>
+              </div>
 
-            <Button type="submit" disabled={isLoading || !receiptFile} className="btn-primary w-full text-white">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                'Upload Transfer Proof'
-              )}
-            </Button>
+              <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="rounded-2xl bg-background/70 p-4">
+                  <p className="mb-2 text-sm font-semibold text-foreground">What to upload</p>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    <li>- Screenshot of successful bank transfer</li>
+                    <li>- Bank app confirmation page</li>
+                    <li>- PDF or image showing the exact transfer amount</li>
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-border bg-background/70 p-4">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="mt-0.5 h-5 w-5 text-accent" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Helpful tip</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Clear screenshots with the exact amount and reference usually get confirmed faster.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <Button type="button" variant="outline" onClick={() => setLocation('/shop')} className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
-              Cancel
-            </Button>
-          </form>
+              <Button type="submit" disabled={isLoading || !receiptFile} className="btn-primary w-full text-white">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload Transfer Proof'
+                )}
+              </Button>
+
+              <Button type="button" variant="outline" onClick={() => setLocation('/shop')} className="w-full border-accent/40 bg-card/30 text-accent hover:bg-accent/10">
+                Cancel
+              </Button>
+            </form>
+          </div>
         </Card>
       </div>
     </div>
