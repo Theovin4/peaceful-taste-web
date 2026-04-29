@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -78,6 +78,11 @@ export default function PaymentCheckout() {
       })),
     [items]
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [pendingCheckout]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>

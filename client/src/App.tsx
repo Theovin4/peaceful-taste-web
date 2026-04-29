@@ -71,6 +71,11 @@ function App() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
     const connection = (
       navigator as Navigator & {

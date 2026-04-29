@@ -167,39 +167,13 @@ export default function FlutterwavePaymentStatus() {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: 'Step 1',
-                  title: 'Checkout started',
-                  description: 'Your payment request reached Flutterwave.',
-                  active: true,
-                },
-                {
-                  label: 'Step 2',
-                  title: 'Payment processed',
-                  description: state === 'cancelled' ? 'This payment was cancelled before completion.' : 'Flutterwave completed the payment step.',
-                  active: state !== 'failed',
-                },
-                {
-                  label: 'Step 3',
-                  title: 'Order confirmed',
-                  description: state === 'success' ? 'Your order is now stored on the site and dashboard.' : 'We verify and finalize the order here before showing success.',
-                  active: state === 'success',
-                },
-              ].map((step) => (
-                <div
-                  key={step.label}
-                  className={`rounded-3xl border p-4 ${
-                    step.active ? 'border-accent/20 bg-background/70' : 'border-border/70 bg-background/40'
-                  }`}
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent/80">{step.label}</p>
-                  <p className="mt-2 font-semibold text-foreground">{step.title}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
-                </div>
-              ))}
-            </div>
+            {state === 'success' && (
+              <div className="rounded-3xl border border-emerald-500/20 bg-background/70 p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Payment confirmed and your order has been created successfully.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="px-8 py-8">
